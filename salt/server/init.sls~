@@ -1,0 +1,19 @@
+ntp:
+  pkg:
+    - installed
+  service:
+    - running
+    - watch:
+      - file: /etc/ntp.conf
+    - require:
+      - pkg: ntp
+
+
+/etc/ntp.conf:                            
+  file:                                     
+    - managed                              
+{% if grains['roles'] == 'ntp-master' %}
+    - source: salt://server/ntp-master.conf        
+{% else %}
+    - source: salt://server/ntp.conf
+{% endif %}

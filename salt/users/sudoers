@@ -1,0 +1,2 @@
+fibratel ALL = (root) NOPASSWD:ALL
+%super   ALL = (root) NOPASSWD:ALL
