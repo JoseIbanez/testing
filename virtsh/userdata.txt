@@ -1,0 +1,36 @@
+Content-Type: multipart/mixed; boundary="===============0508478757232576974=="
+MIME-Version: 1.0
+
+--===============0508478757232576974==
+Content-Type: text/x-shellscript; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="boot-script.sh"
+
+#!/bin/sh
+echo "Hello World!"
+echo "This will run as soon as possible in the boot sequence"
+
+cat > /etc/apt/apt.conf.d/88apt-proxy << EOF
+Acquire::http::Proxy "http://192.168.1.30:8000";
+EOF
+
+apt-get update
+apt-get upgrade -y
+apt-get install -y atop
+
+--===============0508478757232576974==
+Content-Type: text/cloud-config; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="cloud-config"
+
+#cloud-config
+password: f1brat3l
+chpasswd: { expire: False }
+ssh_pwauth: True
+ssh_authorized_keys:
+ - ssh-rsa { ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC68doeniVMq8L5kXLsOtZQiHl88vjAbMQNzgH4BYZatjhVsWYD10HyyahImC1Dt6ZLoES9soBR7DeLJwoG2ac95gP5AxnkyqxWoIQGosFx8e6eRMm/CuL+iIV7CfV5J4l1J2Cj93aqrmvC4pdmsGZBQXrbYKcMZ+uMtDhg7bwcRDXnJS14DUzEmLwVIzMyt+kNgF2iBNQ+6ssc7xkcaF3SBW00rBAGxq1qgoTaeTdQddsUF+Ep1oMOgbbm7n99VuBae8dRr+HwfL/2U/0G2hZUpNc6dc5U42vs2doTkBVU4BrzNkQvqbay7JuRv1SrmcWNPyjiqEsq6uwrHzPVSD4Z ibanez@u1 }
+
+
+--===============0508478757232576974==--
