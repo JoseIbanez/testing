@@ -1,0 +1,34 @@
+use strict;
+
+#
+# Place your configuration directives here.  They will override those in
+# earlier files.
+#
+# See /usr/share/doc/amavisd-new/ for documentation and examples of
+# the directives you can use in this file
+#
+
+
+$log_level = 3;
+#!!$syslog_priority = 'info';
+$sa_kill_level_deflt = 16.5;
+$final_spam_destiny = D_DISCARD;
+$pax = 'pax';
+
+# explicitly set $mydomain, $myhostname and @local_domains_maps:
+# see /usr/share/doc/amavisd-new/examples/amavisd.conf-sample.gz
+$mydomain = 'com.com.es';
+$myhostname = 'mta1.com.com.es';
+@local_domains_maps = ( ['.com.com.es'] );
+
+
+
+ 
+#@bypass_virus_checks_maps = (\%bypass_virus_checks, \@bypass_virus_checks_acl, \$bypass_virus_checks_re);
+#@bypass_spam_checks_maps  = (\%bypass_spam_checks, \@bypass_spam_checks_acl, \$bypass_spam_checks_re);
+#@local_domains_acl = qw(.);
+
+
+
+#------------ Do not modify anything below this line -------------
+1;  # ensure a defined return

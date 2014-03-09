@@ -1,0 +1,3 @@
+#postmap /etc/postfix/sender_canonical
+
+ibanez@shiva.fibratel.es 	alarmas@fibratel.com

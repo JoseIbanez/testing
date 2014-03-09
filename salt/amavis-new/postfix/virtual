@@ -1,0 +1,22 @@
+#postmap /etc/postfix/virtual
+
+abuse@fibratel.com		Grupo.Errores@fibratel.com
+postmaster@fibratel.com		Grupo.Errores@fibratel.com
+root@fibratel.com		Grupo.Errores@fibratel.com
+
+# Prueba de Ibanez
+sat@fibratel.com		fibratel.es@gmail.com
+jose.ibañez@fibratel.com	jose.ibanez@fibratel.com
+
+
+
+# Disponibilidad Servicio ATC
+#fibratel@fibratel.com		atcfibratel@gmail.com
+jose.loira@fibratel.com		josemanuel.rodriguez@fibratel.com
+antonio.gonzalez@fibratel.com	ruben.baltasar@fibratel.com
+
+# Dominios virtuales de correo
+@fibratel.es                    @fibratel.com
+@abrha.es			@fibratel.com
+
+

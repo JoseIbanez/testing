@@ -1,0 +1,13 @@
+#postmap /etc/postfix/recipients
+
+abuse@			OK
+postmaster@		OK
+root@			OK
+fibratelcatalunya@	OK
+fibratelandalucia@      OK
+Administrador@		OK
+proveedores@            OK
+peper@			OK
+juanl@			OK
+joseiba@		OK
+

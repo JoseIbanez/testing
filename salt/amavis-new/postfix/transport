@@ -1,0 +1,15 @@
+#postmap /etc/postfix/transport
+
+#joseiba@fibratel.com		smtp:[10.0.0.74]
+alarmas@fibratel.com		smtp:[ex1.grupofibratel.com]
+#coordinacionproyectosbt@fibratel.com smtp:[ex1.grupofibratel.com]
+
+
+#Default
+divenergia.com		smtp:[ex1.grupofibratel.com]
+fibratel.com            smtp:[smtp.fibratel.com]
+grupofibratel.com	smtp:[ex1.grupofibratel.com]
+
+
+ayto-burjassot.es       smtp:[gaspar.fibra]
+#normon.com		smtp:[gaspar.fibra]
