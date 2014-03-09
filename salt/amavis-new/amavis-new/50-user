@@ -8,6 +8,7 @@ use strict;
 # the directives you can use in this file
 #
 
+{% set mta_name = grains['id'] %}
 
 $log_level = 3;
 #!!$syslog_priority = 'info';
@@ -17,9 +18,9 @@ $pax = 'pax';
 
 # explicitly set $mydomain, $myhostname and @local_domains_maps:
 # see /usr/share/doc/amavisd-new/examples/amavisd.conf-sample.gz
-$mydomain = 'com.com.es';
-$myhostname = 'mta1.com.com.es';
-@local_domains_maps = ( ['.com.com.es'] );
+$mydomain = 'fibratel.es';
+$myhostname = '{{ mta_name }}.fibratel.es';
+@local_domains_maps = ( ['.fibratel.es'] );
 
 
 

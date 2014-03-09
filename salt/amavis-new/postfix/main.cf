@@ -1,5 +1,6 @@
 # See /usr/share/postfix/main.cf.dist for a commented, more complete version
 
+{% set mta_name = grains['id'] %}
 
 # Debian specific:  Specifying a file name will cause the first
 # line of that file to be used as the name.  The Debian default
@@ -38,7 +39,7 @@ smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_una
 
 
 # My hostname
-myhostname = mta1.fibratel.es
+myhostname = {{ mta_name }}.fibratel.es
 myorigin   = fibratel.com
 #myorigin  = /etc/mailname
 
@@ -55,7 +56,7 @@ virtual_alias_maps    = hash:/etc/postfix/virtual
 
 
 # Direcciones locales
-mydestination = mta1.fibratel.es, localhost.fibratel.es, localhost, mta1.fibra, com.com.es
+mydestination = {{ mta_name }}.fibratel.es, localhost.fibratel.es, localhost, com.com.es
 relay_domains = fibratel.com, fibratel.es
 recipient_delimiter = +
 
