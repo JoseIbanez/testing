@@ -1,11 +1,30 @@
-switf:
+ubuntu-cloud-keyring:
+  pkg.installed
+
+ubuntu-cloud:
+  pkgrepo.managed:
+    - humanname: Ubuntu Cloud Havana
+    - name: deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
+    - file: /etc/apt/sources.list.d/cloudarchive-havana.list
+    - keyserver: ubuntu-cloud.archive.canonical.com
+    - required:
+      - pkg: ubuntu-cloud-keyring
+    - require_in:
+      - pkg: swift
+
+swift:
   pkg.installed:
     - pkgs:
       - swift
       - swift-account 
       - swift-container 
       - swift-object 
-      - xfsprogs
+
+
+xfsprogs:
+  pkg.installed
+
+
 
 rsync:
   service:
@@ -25,6 +44,21 @@ rsync:
     - source: salt://swift/rsyncd-default
 
 
+/home/fibratel/.ssh/swf_id_rsa:
+  file:
+    - managed
+    - source: salt://swift/swf_id_rsa
+    - user: fibratel
+    - group: fibratel
+    - mode: 600
+
+/home/fibratel/swift/ring.sh:
+  file:
+    - managed
+    - source: salt://swift/ring.sh
+    - user: fibratel
+    - group: fibratel
+    - mode: 755
 
 
 /etc/swift/swift.conf:
@@ -70,9 +104,20 @@ rsync:
 
 
 
-/srv/node/vdb1:
+/srv/node/sdb1:
   mount.mounted:
-    - device: /dev/vdb1
+    - device: /dev/sdb1
+    - fstype: xfs
+    - mkmnt: True
+    - opts:
+      - noatime
+      - nodiratime
+      - nobarrier
+      - logbufs=8
+
+/srv/node/sdc1:
+  mount.mounted:
+    - device: /dev/sdc1
     - fstype: xfs
     - mkmnt: True
     - opts:

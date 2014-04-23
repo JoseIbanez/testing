@@ -18,7 +18,7 @@ base:
     - match: compound
     - dns-priv
 
-  g_mta:
-    - match: nodegroup
-    - mta
+  'roles:mta':
+    - match: grain
+    - amavis-new
  

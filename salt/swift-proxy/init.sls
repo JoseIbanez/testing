@@ -1,3 +1,22 @@
+ubuntu-cloud-keyring:
+  pkg.installed
+
+ubuntu-cloud:
+  pkgrepo.managed:
+    - humanname: Ubuntu Cloud Havana
+    - name: deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
+    - file: /etc/apt/sources.list.d/cloudarchive-havana.list
+    - keyserver: ubuntu-cloud.archive.canonical.com
+    - required:
+      - pkg: ubuntu-cloud-keyring
+    - require_in:
+      - pkg: swift
+      - pkg: swift-proxy
+
+swift:
+  pkg:
+    - installed  
+
 swift-proxy:
   pkg:
     - installed
