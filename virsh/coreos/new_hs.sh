@@ -4,7 +4,7 @@
 name="$1"
 private_ipv4="$2"
 public_ipv4="$2"
-image=/mnt/iso/img/coreos-beta.img
+image=/mnt/iso/img/coreos-alpha.img
 
 
 mkdir    /mnt/vm/$name
