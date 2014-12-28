@@ -1,0 +1,43 @@
+#cloud-config
+hostname: hs00
+ssh_authorized_keys:
+ - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDGdWL+IhJcU38Mek+8SP6vKn4mGExgunYGqsj2dL7SwnkE6+UHnJh56/hzLukLdiTaq7E0YseBMzpL/lJN5des26LaXmxqkOPTJCjPB2XmkRf0MXR3Ze15PR1WqJDeaTZFy8lD1yzifsekcAVN9uhM6hqqQOTbwCELaMKfN/r93XGbpGkYbSK28t1KsfhSD2BRYfledgRb/0mVLeFR+alt+I/87A5DnWpo9sjULL89sRVhBHdmDRzhVmXFIdD7dd4dvXw9w0MGAyibH79kFRISHmhgbKC+CYTApUwIU1ycVLJQiu+j/hfCxeOPGATaKeVkSKA9qglXgNpOSHB1JZiv fibratel@kvm-1 
+
+users:
+  - name: fibratel
+    groups:
+      - sudo
+      - docker
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDGdWL+IhJcU38Mek+8SP6vKn4mGExgunYGqsj2dL7SwnkE6+UHnJh56/hzLukLdiTaq7E0YseBMzpL/lJN5des26LaXmxqkOPTJCjPB2XmkRf0MXR3Ze15PR1WqJDeaTZFy8lD1yzifsekcAVN9uhM6hqqQOTbwCELaMKfN/r93XGbpGkYbSK28t1KsfhSD2BRYfledgRb/0mVLeFR+alt+I/87A5DnWpo9sjULL89sRVhBHdmDRzhVmXFIdD7dd4dvXw9w0MGAyibH79kFRISHmhgbKC+CYTApUwIU1ycVLJQiu+j/hfCxeOPGATaKeVkSKA9qglXgNpOSHB1JZiv fibratel@kvm-1 
+
+
+coreos:
+  etcd:
+      name: hs00
+      # generate a new token for each unique cluster from https://discovery.etcd.io/new
+      # discovery: https://discovery.etcd.io/<token>
+      discovery: https://discovery.etcd.io/b4c971704c514c77fb01224eb4308811
+      # multi-region and multi-cloud deployments need to use $public_ipv4
+      addr: $public_ipv4:4001
+      peer-addr: $private_ipv4:7001
+  fleet:
+      public-ip: $public_ipv4
+      metadata: region=us-west
+  units:
+    - name: etcd.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name: 00-eth0.network
+      runtime: true
+      content: |
+        [Match]
+        Name=eth0
+          
+        [Network]
+        DNS=8.8.8.8
+        Address=$private_ipv4/24
+        Gateway=10.0.0.246
+
+
