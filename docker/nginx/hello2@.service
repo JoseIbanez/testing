@@ -1,0 +1,8 @@
+[Unit]
+Description=Hello World %i
+
+[Service]
+ExecStart=/bin/bash -c "while true; do echo \"Hello, world %i\"; sleep 1; done"
+
+[X-Fleet]
+Conflicts=hello2@*.service
