@@ -25,14 +25,14 @@ EnvironmentFile=/etc/environment
 #ExecStartPre=-/usr/bin/docker kill apache.%i
 #ExecStartPre=-/usr/bin/docker rm apache.%i
 #ExecStartPre=/usr/bin/docker pull user_name/apache
-#ExecStart=/usr/bin/docker run --name apache.%i -p 8001:80 user_name/apache /usr/sbin/apache2ctl -D FOREGROUND
-ExecStartPre=-/bin/sh -c "etcdctl set /services/apache/%i-${COREOS_PRIVATE_IPV4} ${COREOS_PRIVATE_IPV4}:8001"
+#ExecStart=/usr/bin/docker run --name apache.%i -p 8002:80 user_name/apache /usr/sbin/apache2ctl -D FOREGROUND
+ExecStartPre=-/bin/sh -c "etcdctl set /services/apache/b-${COREOS_PRIVATE_IPV4} ${COREOS_PRIVATE_IPV4}:8002"
 ExecStart=/bin/bash -c "while true; do echo \"Hello, world ${COREOS_PRIVATE_IPV4} \"; sleep 1; done"
 
 
 # Stop
 #ExecStop=/usr/bin/docker stop apache.%i
-ExecStop=/usr/bin/etcdctl rm /services/apache/%i-${COREOS_PRIVATE_IPV4}
+ExecStop=/usr/bin/etcdctl rm /services/apache/b-${COREOS_PRIVATE_IPV4}
 
 
 [X-Fleet]

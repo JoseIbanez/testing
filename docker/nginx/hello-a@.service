@@ -5,4 +5,4 @@ Description=Hello World %i
 ExecStart=/bin/bash -c "while true; do echo \"Hello, world %i\"; sleep 1; done"
 
 [X-Fleet]
-Conflicts=hello2@*.service
+Conflicts=hello-a@*.service
