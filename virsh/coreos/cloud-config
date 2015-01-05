@@ -17,8 +17,7 @@ coreos:
       name: hs00
       # generate a new token for each unique cluster from https://discovery.etcd.io/new
       # discovery: https://discovery.etcd.io/<token>
-      # discovery: https://discovery.etcd.io/b4c971704c514c77fb01224eb4308811
-      discovery: https://discovery.etcd.io/80983c1ec76bb0e5843970bf5d143455
+      discovery: https://discovery.etcd.io/cda51fbaf3a3c2ec243690af8d834e53
       # multi-region and multi-cloud deployments need to use $public_ipv4
       addr: $public_ipv4:4001
       peer-addr: $private_ipv4:7001
@@ -42,4 +41,10 @@ coreos:
         Address=$private_ipv4/24
         Gateway=10.0.0.246
 
-
+write_files:
+  - path: /etc/environment
+    permissions: 0644
+    owner: root
+    content: |
+      COREOS_PUBLIC_IPV4=$public_ipv4
+      COREOS_PRIVATE_IPV4=$private_ipv4
