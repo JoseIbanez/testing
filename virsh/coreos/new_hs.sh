@@ -6,6 +6,7 @@ name="$1"
 private_ipv4="$2"
 public_ipv4="$2"
 image=/mnt/iso/img/coreos-beta.img
+discovery=`cat ./etcd.token`
 
 
 mkdir    /mnt/vm/$name
@@ -22,6 +23,8 @@ cp cloud-config /tmp/cloud-config_$name
 sed -i "s/hs00/$name/"                    /tmp/cloud-config_$name
 sed -i "s/\$public_ipv4/$public_ipv4/"    /tmp/cloud-config_$name
 sed -i "s/\$private_ipv4/$private_ipv4/"  /tmp/cloud-config_$name
+sed -i "s@\$discovery@$discovery@"        /tmp/cloud-config_$name
+
 
 #Ojo con permissos de apparmor
 cp /tmp/cloud-config_$name /mnt/vm/$name/configdrive/openstack/latest/user_data
