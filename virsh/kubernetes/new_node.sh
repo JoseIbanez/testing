@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 #Usage: $0 <name> <ip address>
 
 hostname="$1"
