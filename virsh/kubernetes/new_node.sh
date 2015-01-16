@@ -10,7 +10,7 @@ cores=2
 private_ipv4="null"
 public_ipv4="null"
 discovery="null"
-etcd_srv="http://192.168.1.51:4001"
+
 
 
 

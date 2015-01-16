@@ -40,7 +40,7 @@ coreos:
         DHCP=none
         DNS=8.8.8.8
         Address=$private_ipv4/24
-        Gateway=192.168.1.1
+        Gateway=$gateway
     - name: setup-network-environment.service
       command: start
       content: |

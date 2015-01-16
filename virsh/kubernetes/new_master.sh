@@ -26,6 +26,7 @@ cp cloud-config_master $file_cc
 sed -i "s/\$hostname/$hostname/"          $file_cc
 sed -i "s/\$public_ipv4/$public_ipv4/"    $file_cc
 sed -i "s/\$private_ipv4/$private_ipv4/"  $file_cc
+sed -i "s/\$gateway/$gateway/"            $file_cc
 sed -i "s@\$discovery@$discovery@"        $file_cc
 
 #Ojo con permissos de apparmor
