@@ -11,9 +11,10 @@ apt-get upgrade -y
 apt-get install -y atop
 
 #Hostname
-echo $hostname | sudo tee /etc/hostname 
+hostname=`hostname`
+#echo $hostname | sudo tee /etc/hostname 
 grep $hostname /etc/hosts || echo "127.0.0.1   $hostname" | sudo tee -a /etc/hosts
-sudo hostname -F /etc/hostname
+#sudo hostname -F /etc/hostname
 
 #Salt
 #wget -O - http://bootstrap.saltstack.org | sudo sh
