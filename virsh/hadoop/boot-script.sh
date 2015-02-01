@@ -16,7 +16,8 @@ grep $hostname /etc/hosts || echo "127.0.0.1   $hostname" | sudo tee -a /etc/hos
 sudo hostname -F /etc/hostname
 
 #Salt
-wget -O - http://bootstrap.saltstack.org | sudo sh
+#wget -O - http://bootstrap.saltstack.org | sudo sh
+sudo apt-get install -y salt-minion
 sudo sed  's/^#master: salt/master: 10.19.30.150/g' -i /etc/salt/minion
 sudo service salt-minion restart
 
