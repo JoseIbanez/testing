@@ -9,8 +9,8 @@ define host {
 	address				{{ ip }}
 	hostgroups			srv,{{ hostgroups }}
 	#contacts			nagiosadmin
-	icon_image			base/ubuntu.png
-	statusmap_image			base/ubuntu.png
+	icon_image			logos/cisco.png
+	statusmap_image			logos/cisco.png
 	}
 
 
