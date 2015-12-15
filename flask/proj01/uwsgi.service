@@ -3,13 +3,14 @@ Description=uWSGI instance to serve myapp
 After=syslog.target
 
 [Service]
-ExecStart=/root/uwsgi/uwsgi --ini /home/ubuntu/proj01/proj01.ini
-RuntimeDirectory=uwsgi # Requires systemd version 211 or newer
-Restart=always
-KillSignal=SIGQUIT
-Type=notify
-StandardError=syslog
-NotifyAccess=all
+WorkingDirectory=/home/ubuntu/testing/flask/proj01/
+ExecStart=/home/ubuntu/.local/bin/uwsgi --ini /home/ubuntu/testing/flask/proj01/proj01.ini
+RuntimeDirectory=uwsgi
+Restart=no
+#KillSignal=SIGQUIT
+#Type=notify
+#StandardError=syslog
+#NotifyAccess=all
 
 [Install]
 WantedBy=multi-user.target
