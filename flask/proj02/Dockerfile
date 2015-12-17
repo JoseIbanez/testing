@@ -9,7 +9,8 @@ RUN mkdir -p /home/ubuntu
 WORKDIR /home/ubuntu
 RUN git clone https://github.com/JoseIbanez/testing.git
 
-WORKDIR cd /home/ubuntu/testing/flask/proj02
+WORKDIR /home/ubuntu/testing/flask/proj02
+ADD run.sh .
 
-EXPOSE 5000 8000
-ENTRYPOINT ["sh"]
+EXPOSE 8000
+ENTRYPOINT ["./run.sh"]
