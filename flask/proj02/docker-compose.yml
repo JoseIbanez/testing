@@ -1,0 +1,16 @@
+web01:
+  build: .
+  ports:
+   - "8001:8000"
+web02:
+  build: .
+  ports:
+   - "8002:8000"
+web03:
+  build: .
+  ports:
+   - "8003:8000"
+bb:
+  image: busybox
+  command: top
+
