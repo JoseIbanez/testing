@@ -17,80 +17,46 @@
   <h1>My First Bootstrap Page</h1>
   <p>This part is inside a .container class.</p>
   <p>The .container class provides a responsive fixed width container.</p>
-  <button onclick="myFunction()">Click me</button>
-
-</div>
-
-<div class="container" id="myfirstchart">
+  <button onclick="getData()">Click me: myFunction</button>
 </div>
 
 
-<div class="container" id="secondchart">
-</div>
-
+<div class="container" id="chart01"></div>
+<div class="container" id="chart02"></div>
 
 <script>
-new Morris.Line({
-  // ID of the element in which to draw the chart.
-  element: 'myfirstchart',
-  // Chart data records -- each entry in this array corresponds to a point on
-  // the chart.
-  data: [
-    { year: '2008', value: 15 },
-    { year: '2009', value: 10 },
-    { year: '2010', value: 5 },
-    { year: '2011', value: 5 },
-    { year: '2012', value: 29 }
-  ],
-  // The name of the data record attribute that contains x-values.
-  xkey: 'year',
-  // A list of names of data record attributes that contain y-values.
-  ykeys: ['value'],
-  // Labels for the ykeys -- will be displayed when you hover over the
-  // chart.
-  labels: ['Value']
-});
-</script>
 
-<script>
-  var datos = [
-    { year: '2008', value: 0 },
-    { year: '2009', value: 0 },
-    { year: '2010', value: 0 },
-    { year: '2011', value: 0 },
-    { year: '2012', value: 0 }
-  ]
-
-  var graph = Morris.Line({
-    // ID of the element in which to draw the chart.
-    element: 'secondchart',
-    // Chart data records -- each entry in this array corresponds to a point on
-    // the chart.
-    data: datos,
-    // The name of the data record attribute that contains x-values.
-    xkey: 'year',
-    // A list of names of data record attributes that contain y-values.
-    ykeys: ['value'],
-    // Labels for the ykeys -- will be displayed when you hover over the
-    // chart.
-    labels: ['Value']
-  });
-
-  function myFunction() {
-    var datos = [
-      { year: '2008', value: 15 },
-      { year: '2009', value: 10 },
-      { year: '2010', value: 5 },
-      { year: '2011', value: 5 },
-      { year: '2012', value: 29 }
-    ]
-
-    graph.setData(datos);
+  // Get Data Json File/Data
+  function getData() {
+    $.getJSON( "test01.json", myChart01);
+    $.getJSON( "test02.json", myChart02);
 
   }
+
+  // Update Graph-01
+  function myChart01(data) {
+    var g= Morris.Line({
+      element: 'chart01',
+      data: data,
+      xkey: 'year',
+      ykeys: ['value'],
+      labels: ['Value']
+    });
+  }
+
+  // Update Graph-02
+  function myChart02(data) {
+    var g = Morris.Line({
+      element: 'chart02',
+      data: data,
+      xkey: 'year',
+      ykeys: ['value'],
+      labels: ['Value']
+    });
+  }
+
+
 </script>
-
-
 
 </body>
 </html>
