@@ -4,6 +4,10 @@ RUN apt-get install -y python-pip python-dev
 RUN apt-get install -y gunicorn
 RUN pip install flask
 RUN apt-get install -y git nano
+RUN apt-get install libmysqlclient-dev
+RUN sudo pip install flask-mysql
+
+
 
 RUN mkdir -p /home/ubuntu
 WORKDIR /home/ubuntu
