@@ -22,9 +22,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       m2.vm.network "private_network", ip: "172.20.20.12"
   end
 
+  config.vm.define "m3" do |m3|
+      m3.vm.provision "shell", path: "./deploy-01.sh"
+      m3.vm.hostname = "m3"
+      m3.vm.network "private_network", ip: "172.20.20.13"
+  end
+
+
 
   config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--memory", "256"]
+    vb.customize ["modifyvm", :id, "--memory", "1024"]
+    vb.customize ["modifyvm", :id, "--cpus", "2"]
     vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
   end
 

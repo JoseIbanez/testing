@@ -1,5 +1,17 @@
 apt-get install joe
 
+add-apt-repository "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse"
+
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+apt-get update -y
+sudo apt-get install -y mongodb-org
+
+cat > /etc/default/locale << EOF
+LC_ALL=en_US.UTF-8
+LANG=en_US.UTF-8
+EOF
+
+
 #==================================================
 echo "Installing and Configuring Consul"
 cp /vagrant/bin/consul /usr/local/bin/
