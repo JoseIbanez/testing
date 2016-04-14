@@ -70,7 +70,7 @@ router bgp 19250
  router bgp 19250
   bgp log-neighbor-changes
   neighbor 19.250.0.133 remote-as 19250
-  !        
+  !
   address-family ipv4
    network 19.250.0.0
    neighbor 19.250.0.133 activate
@@ -101,3 +101,102 @@ router bgp 19250
      network 19.250.0.0
      neighbor 19.250.0.133 activate
      neighbor 19.250.0.133 soft-reconfiguration inbound
+
+
+     neighbor 19.250.0.138 activate
+     neighbor 19.250.0.138 route-reflector-client
+     neighbor 19.250.0.138 soft-reconfiguration inbound
+
+
+
+
+
+---------------------------------------------------
+28022
+
+en
+conf t
+
+hostname r11
+
+
+int lo 0
+ ip address 28.22.0.1 255.255.255.255
+
+int lo 0
+ ip address 28.22.0.2 255.255.255.255
+
+ int lo 0
+  ip address 28.22.0.3 255.255.255.255
+
+int lo 0
+ ip address 28.22.0.4 255.255.255.255
+
+
+
+  router ospf 110
+   router-id 28.22.0.4
+   network 28.22.0.0 0.0.255.255 area 0
+
+
+
+
+int e0/0
+ip address 28.22.0.129 255.255.255.252
+no shut
+
+
+int e0/1
+ip address 28.22.0.130 255.255.255.252
+no shut
+
+
+-----
+int e0/0
+ip address 28.22.0.133 255.255.255.252
+no shut
+
+int e0/1
+ip address 28.22.0.134 255.255.255.252
+no shut
+
+
+-----
+int e0/0
+ip address 28.22.0.137 255.255.255.252
+no shut
+
+int e0/1
+ip address 28.22.0.138 255.255.255.252
+no shut
+
+
+------
+
+int e0/0
+ip address 28.22.0.141 255.255.255.252
+no shut
+
+int e0/1
+ip address 28.22.0.142 255.255.255.252
+no shut
+
+
+no router bgp
+router bgp 28022
+ bgp router-id 28.22.0.4
+ bgp log-neighbor-changes
+ neighbor 19.250.0.253 remote-as 19250
+ !
+ address-family ipv4
+  neighbor 19.250.0.253 activate
+  neighbor 19.250.0.253 soft-reconfiguration inbound
+
+
+
+  router bgp 19250
+   neighbor 19.250.0.254 remote-as 28022
+   !
+   address-family ipv4
+    neighbor 19.250.0.254 activate
+    neighbor 19.250.0.254 soft-reconfiguration inbound
