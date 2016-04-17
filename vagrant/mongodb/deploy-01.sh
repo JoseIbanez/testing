@@ -11,3 +11,8 @@ apt-get update -y
 echo "Installing Mongodb"
 sudo apt-get install -y mongodb-org
 
+echo "Post configuration"
+cp /vagrant/config/mongod.conf /etc/
+
+echo "Restarting"
+sudo service mongod restart
