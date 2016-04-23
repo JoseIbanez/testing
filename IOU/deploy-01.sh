@@ -1,5 +1,5 @@
 apt-get install joe
-
+IOU="~/IOU"
 
 #==================================================
 echo "Configure Additional Repo"
@@ -16,7 +16,7 @@ sudo apt-get install -y libssl1.0.0:i386
 echo "Post configuration"
 sudo ln -s /lib/i386-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so.4
 
-aws s3 sync s3://fibratel.es/utils/xxx $IOU/
+aws s3 sync s3://fibratel.es/utils/Cisco-IOU-L2-L3-Collection-v4 $IOU/
 
 
 echo "Generate license file"
