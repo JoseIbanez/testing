@@ -24,7 +24,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provider :aws do |aws, override|
     aws.ami = "ami-87564feb"
-    aws.aws_dir=ENV['HOME']+"/.aws/"
+    aws.instance_type = "m4.large" 
     override.ssh.username = "ubuntu"
     override.ssh.private_key_path = "~/.ssh/kumo.pem"
   end
