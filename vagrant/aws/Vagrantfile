@@ -22,7 +22,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
 
-
+  config.vm.provider :aws do |aws, override|
+    aws.ami = "ami-87564feb"
+    aws.aws_dir=ENV['HOME']+"/.aws/"
+    override.ssh.username = "ubuntu"
+    override.ssh.private_key_path = "~/.ssh/kumo.pem"
+  end
 
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", "2048"]
