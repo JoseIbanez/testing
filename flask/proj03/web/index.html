@@ -28,7 +28,7 @@
 
   // Get Data Json File/Data
   function getData() {
-    $.getJSON( "test01.json", myChart01);
+    $.getJSON( "test03.json", myChart01);
     $.getJSON( "test02.json", myChart02);
 
   }
@@ -38,9 +38,9 @@
     var g= Morris.Line({
       element: 'chart01',
       data: data,
-      xkey: 'year',
-      ykeys: ['value'],
-      labels: ['Value']
+      xkey: 'date',
+      ykeys: ['cube1','cube2','sbc'],
+      labels: ['Cube1','Cube2','sbc']
     });
   }
 
@@ -49,9 +49,9 @@
     var g = Morris.Line({
       element: 'chart02',
       data: data,
-      xkey: 'year',
-      ykeys: ['value'],
-      labels: ['Value']
+      xkey: 'date',
+      ykeys: ['total','dc1','dc2'],
+      labels: ['Total','dc1','dc2']
     });
   }
 

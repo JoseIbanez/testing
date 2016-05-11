@@ -15,10 +15,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       lxc01.vm.network "private_network", ip: "172.20.20.11"
   end
 
+  config.vm.define "lxc02" do |lxc02|
+      lxc02.vm.provision "shell", path: "./deploy-01.sh"
+      lxc02.vm.hostname = "lxc02"
+      lxc02.vm.network "private_network", ip: "172.20.20.12"
+  end
+
+
+
 
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", "2048"]
-    vb.customize ["modifyvm", :id, "--cpus", "4"]
+    vb.customize ["modifyvm", :id, "--cpus", "2"]
     vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
   end
 
