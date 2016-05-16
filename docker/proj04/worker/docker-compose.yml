@@ -1,2 +1,4 @@
-web:
-  build: .
+version: '2'
+services:
+  web:
+    build: .
