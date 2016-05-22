@@ -12,11 +12,11 @@ docker-machine create \
 
 
 docker $(docker-machine config kvstore) \
-  run -d --net=host progrium/consul -server -bootstrap-expect 1
+  run -d -p 8500:8500 progrium/consul -server -bootstrap-expect 1
 
 ##Error: Private IP!!
 #kvip=$(docker-machine ip kvstore)
-kvip=172.31.27.29
+kvip=172.31.28.199
 echo $kvip
 
 curl http://${kvip}:8500/v1/catalog/nodes
@@ -33,7 +33,7 @@ docker-machine create \
   --amazonec2-region eu-central-1 \
   --amazonec2-instance-type m3.large \
   --engine-opt "cluster-store consul://${kvip}:8500" \
-  --engine-opt "cluster-advertise eth1:2376" \
+  --engine-opt "cluster-advertise eth0:2376" \
   --swarm \
   --swarm-master \
   --swarm-discovery consul://${kvip}:8500 \
@@ -53,7 +53,7 @@ docker-machine create \
   --amazonec2-region eu-central-1 \
   --amazonec2-instance-type m3.large \
   --engine-opt "cluster-store consul://${kvip}:8500" \
-  --engine-opt "cluster-advertise eth1:2376" \
+  --engine-opt "cluster-advertise eth0:2376" \
   --swarm \
   --swarm-discovery consul://${kvip}:8500 \
   swarm-agent-01 &
