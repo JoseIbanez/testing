@@ -19,5 +19,5 @@ ADD * ./
 
 
 EXPOSE 8000
-ENTRYPOINT ["./p06.py"]
+#ENTRYPOINT ["./p06.py"]
 #CMD ["/home/ubuntu/worker/p06.py"]
