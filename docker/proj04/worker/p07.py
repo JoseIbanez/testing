@@ -44,7 +44,7 @@ def vote():
     return json.dumps(oList)
 
 
-@app.route('/v1/query')
+@app.route('/v1/listWorkers')
 def query():
     oList=[]
     for w in r_server.smembers("workers"):
