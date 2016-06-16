@@ -6,6 +6,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "m1" do |m1|
       m1.vm.hostname = "m1"
+      m1.vm.provision "shell", path: "./deploy-01.sh"
   end
 
   config.vm.define "m2" do |m2|
