@@ -16,7 +16,8 @@ docker $(docker-machine config kvstore) \
 
 ##Error: Private IP!!
 #kvip=$(docker-machine ip kvstore)
-kvip=172.31.28.199
+export kvip=`docker-machine inspect kvstore | jq -r '.Driver.PrivateIPAddress'`
+#export kvip=172.31.21.206
 echo $kvip
 
 curl http://${kvip}:8500/v1/catalog/nodes
@@ -43,6 +44,14 @@ docker-machine create \
 eval $(docker-machine env --swarm swarm-master)
 docker info
 docker ps -a
+
+docker network create -d overlay \
+  --subnet=172.16.10.0/24 \
+  --gateway=172.16.10.1 \
+  my-net-01
+
+docker network ls
+
 
 
 docker-machine create \

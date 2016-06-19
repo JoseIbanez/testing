@@ -4,12 +4,8 @@ import redis
 import time
 from uuid import getnode as get_mac
 
-with open("redis.lst","r") as f:
-  content=f.read().splitlines()
-f.close()
-
 mac=hex(get_mac())
-r_server = redis.Redis(content[0])
+r_server = redis.Redis("redis")
 r_server.sadd("workers","worker:"+mac)
 
 while True:
