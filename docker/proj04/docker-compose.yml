@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  worker:
+    image: ibanez/worker:1.06
+
+  redis:
+    image: redis:alpine
+
+
+networks:
+  default:
+    external:
+      name: my-net-01

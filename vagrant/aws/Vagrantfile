@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "dummy"
+
+  config.vm.define "m1" do |m1|
+      m1.vm.hostname = "m1"
+      m1.vm.provision "shell", path: "./deploy-01.sh"
+  end
+
+  config.vm.define "m2" do |m2|
+      m2.vm.hostname = "m2"
+  end
+
+  config.vm.define "m3" do |m3|
+      m3.vm.hostname = "m3"
+  end
+
+  config.vm.provider :aws do |aws, override|
+    aws.access_key_id = ENV['AWS_ACCESS_KEY_ID']
+    aws.secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
+
+    override.ssh.username = "ubuntu"
+    aws.keypair_name = "kumo"
+    override.ssh.private_key_path = "~/.ssh/kumo.pem"
+    #aws.ami = "ami-bc5b48d0" // ec2 Linux
+    aws.ami = "ami-87564feb"
+    aws.instance_type = "t2.micro" 
+    aws.region ="eu-central-1"
+    aws.security_groups = ["docker-machine"]
+  end
+
+end
