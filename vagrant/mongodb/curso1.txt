@@ -1,0 +1,59 @@
+# 
+# cat ../Documents/curso1.txt | curl -F 'f:1=<-' ix.io
+#
+
+
+db.curso.insert({"nombre":"jose"})
+
+show dbs
+show collections
+db
+
+
+db.curso.find()
+
+db.curso.insert({"_id":"1","nombre":"jose"})
+
+
+db.test.insertOne({"_id":"1", "x":2, "y":"b" })
+db.test.insert({"_id":"2", "x":2, "y":"a" })
+db.test.insert({"_id":"3", "x":1, "y":"b" })
+db.test.insert({"_id":"4", "x":3, "y":null })
+db.test.insert({"_id":"5", "x":3})
+
+
+db.test.find()
+
+db.test.find().sort({y:-1,x:1})
+
+db.test.find().sort({y:-1,x:1}).limit(1)
+
+db.test.find({"x": {$gt: 2}})
+
+db.test.find({ $or: [ {"x":3}, {"y":"b"} ]}).sort({"x":1})
+
+db.test.find({ $and: [ { "x":{$gt:1}}, {"y":"a"} ]})
+
+db.test.find({ $and: [ { "y":{$exists: true}}, {"y":null} ]})
+
+
+
+for (var i = 0; i<1000000 ; i++) {
+db.tester.insert({"foo":"bar","baz":i, "z":10-i})
+}
+
+
+bulk=db.tester2.initializeUnorderedBulkOp();
+for (var i = 0; i<1000000 ; i++) {
+  bulk.insert({"foo":"bar","baz":i, "z":10-i})
+}
+bulk.execute();
+
+
+
+cursor=db.tester.find()
+cursor.next()
+
+
+
+
