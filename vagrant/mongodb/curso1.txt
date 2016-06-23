@@ -55,5 +55,112 @@ cursor=db.tester.find()
 cursor.next()
 
 
+------------------------------------------------------
+
+db.posts.insert(
+	{
+	"title": "A Blog post",
+	"content" : "...",
+	"author" : {
+		"name": "joe",
+		"email": "joe@example.com"
+		}
+	}
+)
+
+
+db.posts.update(
+	{"author.name":"joe"},
+	{"$set":
+		{"author.name":"jose"}
+	})
+
+
+---------------------------------------------------
+
+
+db.friends.insert(
+	{
+	"_id": "Mike",
+	"interests": [ "chess","botany" ]
+	}
+)
+
+db.friends.update(
+	{"_id":"Mike"},
+	{"$addToSet": {"interests": "skydiving"}}
+	)
+
+db.friends.update(
+	{"_id":"Mike"},
+	{$pull: {interests: "chess"}}
+	)
+
+db.friends.update(
+	{"_id":"Mike"},
+	{"$addToSet": {"interests": "skiing"}}
+	)
+
+db.friends.update(
+	{"_id":"Mike"},
+	{"$addToSet": {"interests":
+			{$each: ["a1","a2"] }
+		}}
+	)
+
+
+
+---------------------------------------------------
+for (var i = 0; i<1000000 ; i++) {
+db.tester.insert({"foo":"bar","baz":i, "z":10-i})
+}
+
+
+var timeRemoves = function() {
+	var start = (new Date()).getTime();
+
+	db.tester.remove( {} );
+	db.tester.findOne();
+
+	var timeDiff= (new Date()).getTime() - start;
+	print("Remove tooks "+timeDiff+"ms");
+}
+
+timeRemoves()
+
+
+
+var timeRemoves = function() {
+	var start = (new Date()).getTime();
+
+	db.tester.drop();
+	db.tester.findOne();
+
+	var timeDiff= (new Date()).getTime() - start;
+	print("Remove tooks "+timeDiff+"ms");
+}
+
+timeRemoves()
+
+
+--------------------------------------------------------------
+
+db.guys.insert(
+	{
+	Height : 183,
+	Likes : ["surf", "yoga"],
+	Name : {
+		"First": "Jose",
+		"Last":  "Ibañez Vela"
+		},
+	Twitter: "@JoseIbanez"
+	}
+)
+
+
+db.guys.find()
+
+
+$ mongoexport --db test --collection guys --type=csv --fields _id,Name --out ./yo.csv
 
 
