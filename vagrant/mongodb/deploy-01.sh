@@ -1,5 +1,4 @@
-apt-get install joe
-
+echo "Configure OS"
 cp /vagrant/config/locale /etc/default/locale
 
 #==================================================

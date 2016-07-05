@@ -111,7 +111,7 @@ db.friends.update(
 
 
 ---------------------------------------------------
-for (var i = 0; i<1000000 ; i++) {
+for (var i = 0; i<100000 ; i++) {
 db.tester.insert({"foo":"bar","baz":i, "z":10-i})
 }
 
@@ -162,5 +162,163 @@ db.guys.find()
 
 
 $ mongoexport --db test --collection guys --type=csv --fields _id,Name --out ./yo.csv
+
+--------------------------------
+
+cat > mongoimport.seed.json << EOF
+{_id: 1, SKU:"A10", Price: 70.00 }
+{_id: 2, SKU:"B10", Price: 60.00 }
+{_id: 3, SKU:"C10", Price: 30.00 }
+{_id: 4, SKU:"X10", Price: 90.00 }
+EOF
+
+cat > mongoimport.newPrice.json << EOF
+{_id: 1, SKU:"A10", Price: 75.00 }
+{_id: 9, SKU:"Q90", Price: 10.00 }
+EOF
+
+mongoimport --db curso --collection seed --file mongoimport.seed.json 
+mongoimport --db curso --collection seed --file mongoimport.newPrice.json 
+
+mongoimport --db curso --collection seed --upsert --file mongoimport.newPrice.json 
+
+
+
+cat > mongoimport.newPrice2.json << EOF
+{SKU:"A10", Price: 77.00 }
+{SKU:"Q90", Price: 11.00 }
+EOF
+
+
+mongoimport --db curso --collection seed --upsert  --upsertFields SKU --file mongoimport.newPrice.json
+
+----------------------------------------------------
+
+
+db.seed.getIndexes()
+db.seed.totalIndexSize()
+db.collection.esureIndex({keys}, {"name" :  "my index"})
+db.collecion.dropIndex("name")
+
+
+db.peeps.insert({name : {first: "jose", last: "ibanez" }, height: 1.80 })
+db.peeps.insert({name : {first: "joe" , last: "perez" },  height: 1.10 })
+db.peeps.insert({name : {first: "emi" , last: "lopez" },  height: 1.50 })
+db.peeps.insert({name : {first: "carl", last: "lopez" },  height: 1.60 })
+
+db.peeps.ensureIndex({height:1}, {"name" :  "height"})
+db.peeps.ensureIndex({"name.first":1}, {"name": "name"})
+
+db.peeps.getIndexes()
+db.peeps.dropIndex("height")
+
+
+---
+
+db.guys.createIndex( {"Twitter": 1}, { unique: true})
+db.guys.insert({
+   Height: 182,
+   Likes: ["fight","dance"],
+   Name: {First:"Leonidas", Last:"I"}
+})
+
+db.guys.insert({
+   Height: 186,
+   Likes: ["fight","swordplay"],
+   Name: {First:"Aristodemo"}
+})
+
+db.guys.drop()
+db.guys.createIndex( {"Twitter": 1}, { unique: true, sparse:true})
+
+
+-----------------------
+
+mongod --port 27017 --replSet rs0 --dbpath /home/mongo/db1 --smallfiles --oplogSize 50 --logpath /home/mongo/db1/mongo.log --fork
+
+mongod --port 27018 --replSet rs0 --dbpath /home/mongo/db2 --smallfiles --oplogSize 50 --logpath /home/mongo/db2/mongo.log --fork
+
+mongod --port 27019 --replSet rs0 --dbpath /home/mongo/db3 --smallfiles --oplogSize 50 --logpath /home/mongo/db3/mongo.log --fork
+
+
+mongo --host rs01/host1:port,host2:port
+
+db.peeps.find()
+db.peeps.insert({name : {first: "arya" , last: "perez" },  height: 1.10 })
+db.peeps.insert({name : {first: "balder" , last: "lopez" },  height: 1.50 })
+db.peeps.insert({name : {first: "homer", last: "martin" },  height: 1.60 })
+db.peeps.insert({name : {first: "jose", last: "ibanez" }, height: 1.80 })
+db.peeps.insert({name : {first: "joe" , last: "perez" },  height: 1.10 })
+db.peeps.insert({name : {first: "emi" , last: "lopez" },  height: 1.50 })
+db.peeps.insert({name : {first: "carl", last: "lopez" },  height: 1.60 })
+db.peeps.find()
+
+
+------------------------
+
+
+mongod --port 30001 --replSet rs0 --dbpath /mnt/mongo/db1 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db1/mongo.log --fork
+
+mongod --port 30002 --replSet rs0 --dbpath /mnt/mongo/db2 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db2/mongo.log --fork
+
+mongod --port 30003 --replSet rs0 --dbpath /mnt/mongo/db3 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db3/mongo.log --fork
+
+mongod --port 30004 --replSet rs0 --dbpath /mnt/mongo/db4 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db4/mongo.log --fork
+
+mongod --port 30005 --replSet rs0 --dbpath /mnt/mongo/db5 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db5/mongo.log --fork
+
+mongod --port 30006 --replSet rs0 --dbpath /mnt/mongo/db6 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db6/mongo.log --fork
+
+mongod --port 30007 --replSet rs0 --dbpath /mnt/mongo/db7 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db7/mongo.log --fork
+
+mongod --port 30008 --replSet rs0 --dbpath /mnt/mongo/db8 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db8/mongo.log --fork
+
+
+rs.initiate( {
+    _id: "rs0",
+    members: [
+      {
+       _id: 0,
+       host: "localhost:30001",
+       arbiterOnly: false
+      },
+      {
+       _id: 1,
+       host: "localhost:30002",
+       arbiterOnly: false
+      },
+      {
+       _id: 2,
+       host: "localhost:30003",
+       arbiterOnly: true
+      }
+     ]})
+
+rs.printReplicationInfo()
+
+rs.remove("localhost:30003")
+rs.add("localhost:30003")
+rs.addArb("localhost:30007")
+
+
+for (var i = 0; i<100000 ; i++) {
+db.tester.insert({"foo":"bar","baz":i, "z":10-i})
+}
+
+rs.printReplicationInfo()
+rs.syncFrom("localhost:30008")
+
+db.getMongo()
+
+
+cfg=rs.conf()
+cfg.members[1].priority=3
+cfg.members[3].priority=2
+rs.reconfig(cfg)
+
+rs.slaveOk()
+
+
+
 
 
