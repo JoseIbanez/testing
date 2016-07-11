@@ -12,11 +12,16 @@ sudo apt-get install -y lxd
 
 
 echo "Post configuration"
-#sudo lxd init --auto
-cp -a /vagrant/scripts ./
+sudo lxd init --auto
 
 
 echo "Restarting"
 #sudo service mongod restart
 #https://insights.ubuntu.com/2016/04/07/lxd-networking-lxdbr0-explained/
+cp ./config/lxd-bridge /etc/default/lxd-bridge
 sudo service lxd-bridge stop && sudo service lxd restart
+
+
+umount /mnt
+mount /dev/xvdb /var/lib/lxd/containers/
+ls -l /var/lib/lxd/

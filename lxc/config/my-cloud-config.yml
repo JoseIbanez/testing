@@ -1,6 +1,8 @@
-cat my-cloud-config.yml
-bootcmd:
- - echo 10.206.5.1 puppet puppet.loc >> /etc/hosts
+#cloud-config
 
 packages:
  - puppet
+
+bootcmd:
+ - grep puppet /etc/hosts || echo 10.202.5.1 puppet >> /etc/hosts
+ - puppet agent --enable
