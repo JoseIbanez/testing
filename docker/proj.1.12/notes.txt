@@ -1,0 +1,32 @@
+#!/bin/sh
+#######
+
+docker-machine create \
+  --driver amazonec2 \
+  --engine-install-url https://test.docker.com \
+  --amazonec2-vpc-id vpc-608b6f09 \
+  --amazonec2-request-spot-instance \
+  --amazonec2-spot-price 0.10 \
+  --amazonec2-region eu-central-1 \
+  --amazonec2-instance-type m3.large \
+  dck-03 &
+
+
+
+#####
+
+docker swarm join --secret 4wh0m5k61ba8ejezjrccnc3pf \
+--ca-hash sha256:c0f32ae550e08d4d32b741b3398574dfb5ed217bbda8611828e725b591e74d13 \
+172.31.30.14:2377
+
+docker swarm join 172.31.30.14:2377
+
+########
+
+docker service create --replicas 1 --name helloworld alpine ping docker.com
+
+
+docker service inspect --pretty helloworld
+docker service tasks helloworld
+
+docker service scale helloworld=5
