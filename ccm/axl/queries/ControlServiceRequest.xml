@@ -1,0 +1,16 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:soap="http://schemas.cisco.com/ast/soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:soapDoControlServices>
+         <soap:ControlServiceRequest>
+            <soap:NodeName>ciscart23</soap:NodeName>
+            <soap:ControlType>Restart</soap:ControlType>
+            <soap:ServiceList>
+               <!--Zero or more repetitions:-->
+               <soap:item>Cisco Tftp</soap:item>
+            </soap:ServiceList>
+         </soap:ControlServiceRequest>
+      </soap:soapDoControlServices>
+   </soapenv:Body>
+</soapenv:Envelope>

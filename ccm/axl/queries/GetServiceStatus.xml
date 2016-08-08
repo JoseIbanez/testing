@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://schemas.cisco.com/ast/soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:soapGetServiceStatus>
+          <soap:ServiceStatus></soap:ServiceStatus>
+      </soap:soapGetServiceStatus>
+   </soapenv:Body>
+</soapenv:Envelope>

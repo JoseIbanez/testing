@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://schemas.cisco.com/ast/soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:soapGetServiceStatus>
+          <soap:GetServiceStatusList>
+           <item>Cisco Tftp</item> 
+          </soap:GetServiceStatusList>
+      </soap:soapGetServiceStatus>
+   </soapenv:Body>
+</soapenv:Envelope>
