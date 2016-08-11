@@ -7,5 +7,5 @@ answer="./answers/serviceStatus"
 curl -k -n  \
 	-H "Content-type: text/xml;" \
 	-d @"./queries/$query" \
-	https://$node:8443/controlcenterservice2/services/ControlCenterServices \
-	 > "$answer.$node.xml" 2>/dev/null
+	https://$node:8443/controlcenterservice2/services/ControlCenterServices 
+	 > "$answer.$node.xml" 

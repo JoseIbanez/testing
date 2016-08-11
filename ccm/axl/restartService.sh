@@ -1,6 +1,6 @@
 #!/bin/bash
 
-query="ControlServiceRequest.xml"
+query="ControlServiceRequest"
 answer="./answers/ServiceRestart"
 log="./log/axl.log"
 
@@ -9,25 +9,29 @@ function sendQuery {
 
   node=$1
   service=$2
+  tmpQuery="/tmp/$query-$node.xml"
+  tmpAnswer="$answer-$node.xml"
 
   printf "\n\nStart node:$1, service:$2.\n" >> $log
   date >> $log
 
-  printf "Start node:$1, service:$2.\n"
+  printf ">> node:$1, service:$2, answerFile:$tmpAnswer.\n"
   date
 
-  cp ./queries/$query /tmp/
-  sed -i "s/{{service}}/$service/g" /tmp/$query
+  cp ./queries/$query.xml $tmpQuery
+  sed -i "s/{{service}}/$service/g" $tmpQuery
 
-  cat /tmp/$query >> $log
+  cat $tmpQuery >> $log
 
+  #rm $tmpAnswer
   curl -k -n  \
 	-H "Content-type: text/xml;" \
-	-d @/tmp/$query https://$node:8443/controlcenterservice2/services/ControlCenterServices \
-	 > "$answer.$node.xml" 2>>$log
+	-d @$tmpQuery https://$node:8443/controlcenterservice2/services/ControlCenterServices \
+	 > ${tmpAnswer} 2>>$log
 
-
-  xmllint --format "$answer.$node.xml" >>$log
+  #rm $tmpQuery
+  cat $tmpAnswer >> $log
+  xmllint --format $tmpAnswer >>$log
 
 }
 
