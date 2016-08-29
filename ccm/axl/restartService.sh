@@ -3,6 +3,7 @@
 query="ControlServiceRequest"
 answer="./answers/ServiceRestart"
 log="./log/axl.log"
+options="--interface eth2"
 
 
 function sendQuery {
@@ -24,7 +25,7 @@ function sendQuery {
   cat $tmpQuery >> $log
 
   #rm $tmpAnswer
-  curl -k -n  \
+  curl -k -n $options  \
 	-H "Content-type: text/xml;" \
 	-d @$tmpQuery https://$node:8443/controlcenterservice2/services/ControlCenterServices \
 	 > ${tmpAnswer} 2>>$log

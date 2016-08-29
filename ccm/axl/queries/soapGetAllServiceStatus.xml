@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <soapenv:Body>
+     <ns1:GetServiceStatus soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://schemas.cisco.com/ast/soap/">
+       <GetServiceStatusList xsi:type="soapenc:Array" soapenc:arrayType="xsd:string[1]" xmlns:ns2="http://cisco.com/ccm/serviceability/soap/ControlCenterServices/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
+         <item>System SSH</item>
+         <item>Cluster Manager</item>
+         <item>Cisco SCSI Watchdog</item>
+         <item>Service Manager</item>
+         <item>A Cisco DB</item>
+         <item>A Cisco DB Replicator</item>
+         <item>Cisco AMC Service</item>
+         <item>Cisco AXL Web Service</item>
+         <item>Cisco Audit Event Service</item>
+         <item>Cisco CAR DB</item>
+         <item>Cisco CAR Scheduler</item>
+         <item>Cisco CDP</item>
+         <item>Cisco CDP Agent</item>
+         <item>Cisco CDR Agent</item>
+         <item>Cisco CDR Repository Manager</item>
+         <item>Cisco CallManager Admin</item>
+         <item>Cisco CallManager Cisco IP Phone Services</item>
+         <item>Cisco CallManager Personal Directory</item>
+         <item>Cisco CallManager SNMP Service</item>
+         <item>Cisco CallManager Serviceability</item>
+         <item>Cisco CallManager Serviceability RTMT</item>
+         <item>Cisco Certificate Change Notification</item>
+         <item>Cisco Certificate Expiry Monitor</item>
+         <item>Cisco Change Credential Application</item>
+         <item>Cisco DRF Local</item>
+         <item>Cisco DRF Master</item>
+         <item>Cisco Database Layer Monitor</item>
+         <item>Cisco E911</item>
+         <item>Cisco ELM Client Service</item>
+         <item>Cisco Extension Mobility Application</item>
+         <item>Cisco IP Voice Media Streaming App</item>
+         <item>Cisco License Manager</item>
+         <item>Cisco Log Partition Monitoring Tool</item>
+         <item>Cisco Prime LM Admin</item>
+         <item>Cisco Prime LM DB</item>
+         <item>Cisco Prime LM Server</item>
+         <item>Cisco RIS Data Collector</item>
+         <item>Cisco RTMT Reporter Servlet</item>
+         <item>Cisco SOAP - CallRecord Service</item>
+         <item>Cisco Serviceability Reporter</item>
+         <item>Cisco Syslog Agent</item>
+         <item>Cisco Tftp</item>
+         <item>Cisco Tomcat</item>
+         <item>Cisco Tomcat Stats Servlet</item>
+         <item>Cisco Trace Collection Service</item>
+         <item>Cisco Trace Collection Servlet</item>
+         <item>Cisco Trust Verification Service</item>
+         <item>Cisco User Data Services</item>
+         <item>Host Resources Agent</item>
+         <item>MIB2 Agent</item>
+         <item>Platform Administrative Web Service</item>
+         <item>SNMP Master Agent</item>
+         <item>SOAP - Diagnostic Portal Database Service</item>
+         <item>SOAP -Log Collection APIs</item>
+         <item>SOAP -Performance Monitoring APIs</item>
+         <item>SOAP -Real-Time Service APIs</item>
+         <item>System Application Agent</item>
+         <item>Cisco Bulk Provisioning Service</item>
+         <item>Cisco CAR Web Service</item>
+         <item>Cisco CTIManager</item>
+         <item>Cisco CTL Provider</item>
+         <item>Cisco CallManager</item>
+         <item>Cisco Certificate Authority Proxy Function</item>
+         <item>Cisco DHCP Monitor Service</item>
+         <item>Cisco Dialed Number Analyzer</item>
+         <item>Cisco Dialed Number Analyzer Server</item>
+         <item>Cisco DirSync</item>
+         <item>Cisco Directory Number Alias Lookup</item>
+         <item>Cisco Directory Number Alias Sync</item>
+         <item>Cisco Extended Functions</item>
+         <item>Cisco Extension Mobility</item>
+         <item>Cisco IP Manager Assistant</item>
+         <item>Cisco Intercluster Lookup Service</item>
+         <item>Cisco Location Bandwidth Manager</item>
+         <item>Cisco Prime LM Resource API</item>
+         <item>Cisco Prime LM Resource Legacy API</item>
+         <item>Cisco SOAP - CDRonDemand Service</item>
+         <item>Cisco TAPS Service</item>
+         <item>Cisco UXL Web Service</item>
+         <item>Cisco Unified Mobile Voice Access Service</item>
+         <item>Cisco WebDialer Web Service</item>
+         <item>Self Provisioning IVR</item>
+       </GetServiceStatusList>
+     </ns1:GetServiceStatus>
+   </soapenv:Body>
+ </soapenv:Envelope>

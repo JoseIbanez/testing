@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <soapenv:Body>
+     <ns1:GetServiceStatus soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://schemas.cisco.com/ast/soap/">
+       <GetServiceStatusList xsi:type="soapenc:Array" soapenc:arrayType="xsd:string[1]" xmlns:ns2="http://cisco.com/ccm/serviceability/soap/ControlCenterServices/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
+         <item>{{service}}</item>
+       </GetServiceStatusList>
+     </ns1:GetServiceStatus>
+   </soapenv:Body>
+ </soapenv:Envelope>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://www.cisco.com/AXL/API/9.1">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ns:getSipTrunk>
+         <name>VMR-CL5-AGGR-Leganes-TRK</name>
+         <returnedTags>
+          <name/>
+          <description/>
+	  <sipNormalizationScriptName/>
+         </returnedTags>
+      </ns:getSipTrunk>
+   </soapenv:Body>
+</soapenv:Envelope>

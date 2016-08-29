@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://schemas.cisco.com/ast/soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:soapDoControlServices>
+         <soap:ControlServiceRequest>
+            <soap:NodeName>{{node}}</soap:NodeName>
+            <soap:ControlType>Restart</soap:ControlType>
+            <soap:ServiceList>
+               <soap:item>{{service}}</soap:item>
+            </soap:ServiceList>
+         </soap:ControlServiceRequest>
+      </soap:soapDoControlServices>
+   </soapenv:Body>
+ </soapenv:Envelope>
