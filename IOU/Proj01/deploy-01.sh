@@ -17,10 +17,14 @@ echo "Post configuration"
 ln -s /lib/i386-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so.4
 
 
+mkdir -p $IOU
 aws --region eu-west-1  s3 sync s3://fibratel.es/utils/Cisco-IOU-L2-L3-Collection-v4 $IOU
 
 echo "Generate license file"
 chmod +x $IOU/scripts/keygen.py
+chmod +x $IOU/scripts/wrapper.bin
+chmod +x $IOU/bin/*
+
 $IOU/scripts/keygen.py | grep -e 'lic' -e '=' > ~/.iourc
 
 
