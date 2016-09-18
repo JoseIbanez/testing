@@ -1,0 +1,10 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: holatu
+Upstream-Contact: Jose Ibanez Vela, <ibanez.j@gmail.com>
+
+Files: *
+Copyright: 2016, Jose Ibanez Vela, <ibanez.j@gmail.com>
+License: GPL-3
+ Full text of licence.
+ .
+ Unless there is a it can be found in /usr/share/common-licenses
