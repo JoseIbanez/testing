@@ -11,7 +11,13 @@ apt-get -y update
 
 echo "Installing deps"
 apt-get install -y \
-        git nano curl
+        python-pip python-dev \
+        gunicorn \
+        libmysqlclient-dev
+
+pip install flask flask-mysql
+
+
 
 
 echo "Post configuration"

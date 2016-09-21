@@ -1,9 +1,12 @@
 from flask import Flask, json, request, send_from_directory
+from flask import render_template
 import collections
 from flask.ext.mysql import MySQL
 
 mysql = MySQL()
-app = Flask(__name__,static_url_path='')
+#app = Flask(__name__,static_url_path='')
+app = Flask(__name__)
+
 cuenta=0
 
 # MySQL configurations
@@ -14,17 +17,29 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
 #Static Files
+@app.route('/data/<path:path>')
+def send_data(path):
+    return send_from_directory('data', path)
+
+@app.route('/dist/<path:path>')
+def send_dist(path):
+    return send_from_directory('dist', path)
+
 @app.route('/js/<path:path>')
 def send_js(path):
     return send_from_directory('js', path)
 
-@app.route('/static/<path:path>')
-def send_js(path):
-    return send_from_directory('static', path)
+@app.route('/pages/<path:path>')
+def send_pages(path):
+    return send_from_directory('pages', path)
+
+@app.route('/vendor/<path:path>')
+def send_vendor(path):
+    return send_from_directory('vendor', path)
 
 @app.route('/')
-def root():
-    return app.send_static_file('./static/index.html')
+def send_index():
+    return render_template('index.html')
 
 
 # Dev paths
