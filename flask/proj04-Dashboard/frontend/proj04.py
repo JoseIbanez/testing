@@ -49,7 +49,36 @@ def send_index():
 @app.route('/perfmon/')
 @app.route('/perfmon/<cust>')
 def perfmon(cust=None):
-    return render_template('perfmon.nj2', cust=cust)
+
+        kpi="RegisteredPhones"
+        domain="/UK%"
+
+        # All Good, let's call MySQL
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                Select id,domain,value
+                From kpi
+                where cust=%s and kpi=%s and domain like %s
+                order by domain
+                """,
+                (cust,kpi,domain))
+
+        rows = cursor.fetchall()
+
+
+        d = collections.OrderedDict()
+        oList=[]
+        for row in rows:
+                d = collections.OrderedDict()
+                d['id']=row[0]
+                d['domain']=row[1]
+                d['value']=row[2]
+                oList.append(d)
+
+
+        return render_template('perfmon.nj2', cust=cust, domains=oList)
 
 # Dev paths
 
@@ -123,6 +152,64 @@ def getKpi():
     finally:
         cursor.close()
         conn.close()
+
+
+
+@app.route('/list',methods=['POST','GET'])
+def getList():
+    try:
+
+        app.logger.info('Info')
+
+        cust="Cust16"
+        kpi="RegisteredPhones"
+        domain="/UK%"
+        cust   = request.values.get('cust')
+        kpi    = request.values.get('kpi')
+        domain = request.values.get('domain')+'%'
+
+        app.logger.info('Info: cust'+cust+', kpi:'+kpi+', domain:'+domain)
+
+
+        if not (cust and kpi and domain):
+            return json.dumps({'html':'<span>Enter the required fields</span>'})
+
+
+        # All Good, let's call MySQL
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                Select id,date,value,domain
+                From kpi
+                where cust=%s and kpi=%s and domain like %s
+                """,
+                (cust,kpi,domain))
+
+        rows = cursor.fetchall()
+
+
+        oList=[]
+        for row in rows:
+                d = collections.OrderedDict()
+                d['id']=row[0]
+                d['date']=row[1].strftime("%Y-%m-%d %H:%M")
+                d['value']=row[2]
+                d['domain']=row[3]
+                oList.append(d)
+
+
+        return json.dumps(oList)
+        #return json.dumps(d)
+
+
+    except Exception as e:
+        return json.dumps({'error':str(e)})
+
+#    finally:
+#        cursor.close()
+
+
 
 
 #Main
