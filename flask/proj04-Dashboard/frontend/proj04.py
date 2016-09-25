@@ -3,6 +3,9 @@ from flask import render_template
 import collections
 from flask.ext.mysql import MySQL
 
+import logging
+from logging.handlers import RotatingFileHandler
+
 mysql = MySQL()
 #app = Flask(__name__,static_url_path='')
 app = Flask(__name__)
@@ -41,33 +44,49 @@ def send_vendor(path):
 def send_index():
     return render_template('index.html')
 
+# Render templates
+
+@app.route('/perfmon/')
+@app.route('/perfmon/<cust>')
+def perfmon(cust=None):
+    return render_template('perfmon.nj2', cust=cust)
 
 # Dev paths
 
-@app.route("/q2")
+@app.route("/q1")
 def hello():
     global cuenta
     cuenta=cuenta+1
     return "<h1 style='color:blue'>Hello There! v.012 c:"+str(cuenta)+"</h1>"
 
 
+@app.route("/q2")
+def kpi2():
+    global cuenta
+    cuenta=cuenta+1
+    data={"kpi1":cuenta, 
+	  "kpi2":2000}
+    return json.dumps(data) 
+
+# KPI
+
 @app.route('/kpi',methods=['POST','GET'])
-def signUp():
+def getKpi():
     try:
-        #_name = request.form['inputName']
-        #_email = request.form['inputEmail']
-        #_password = request.form['inputPassword']
 
-        # validate the received values
-        #if _name and _email and _password:
-        #    return json.dumps({'html':'<span>Enter the required fields</span>'})
+        app.logger.info('Info')
+
+        cust="Cust16"
+        kpi="RegisteredPhones"
+        domain="A"
+        cust   = request.values.get('cust')
+        kpi    = request.values.get('kpi')
+        domain = request.values.get('domain')
+
+        app.logger.info('Info: cust'+cust+', kpi:'+kpi+', domain:'+domain)
 
 
-        cust   = request.form['cust']
-        kpi    = request.form['kpi']
-        domain = request.form['domain']
-
-        if cust and kpi and domain:
+        if not (cust and kpi and domain):
             return json.dumps({'html':'<span>Enter the required fields</span>'})
 
 
@@ -78,19 +97,21 @@ def signUp():
         cursor.execute("""
                 Select date,value
                 From kpi
-                where cust=% and kpi=% and domain=%
+                where cust=%s and kpi=%s and domain=%s
                 """,
-		cust,kpi,domain)
+		(cust,kpi,domain))
 
         rows = cursor.fetchall()
 
 
+        d = collections.OrderedDict()
         oList=[]
         for row in rows:
                 d = collections.OrderedDict()
                 d['date']=row[0].strftime("%Y-%m-%d %H:%M")
                 d['value']=row[1]
                 oList.append(d)
+
 
         #return json.dumps(oList)
         return json.dumps(d)
@@ -100,10 +121,15 @@ def signUp():
         return json.dumps({'error':str(e)})
 
     finally:
-        cursor.close() 
+        cursor.close()
         conn.close()
 
 
+#Main
+
 if __name__ == "__main__":
+    handler = RotatingFileHandler('foo.log', maxBytes=10000, backupCount=1)
+    handler.setLevel(logging.DEBUG)
+    app.logger.addHandler(handler)
     app.debug=True
     app.run(host='0.0.0.0')
