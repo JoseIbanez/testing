@@ -10,6 +10,8 @@ echo "Installing deps"
 apt-get install -y \
   lib32z1 lib32ncurses5 lib32bz2-1.0 \
   libssl1.0.0:i386 \
+  libnet-pcap-perl libpcap0.8 \
+  uml-utilities bridge-utils \
   joe awscli
 
 
@@ -28,8 +30,11 @@ chmod +x $IOU/bin/*
 
 $IOU/scripts/keygen.py | grep -e 'lic' -e '=' > ~/.iourc
 
-
-
-
-
 echo "Restarting"
+tunctl -t tap0
+
+ifconfig virbr0 192.168.1.50 up
+ifconfig tap0 up
+
+brctl addif virbr0 tap0
+

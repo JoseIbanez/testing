@@ -2,5 +2,5 @@
 
 IOU="/home/ubuntu/IOU"
 
-sudo $IOU/scripts/iou2net.pl -i eth2 -p 50 &
+sudo $IOU/scripts/iou2net.pl -t tap0 -p 50 &
 
