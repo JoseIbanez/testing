@@ -64,9 +64,9 @@ def perfmon(cust=None):
                 order by domain
                 """,
                 (cust,kpi,domain))
+        #"""
 
         rows = cursor.fetchall()
-
 
         d = collections.OrderedDict()
         oList=[]
@@ -88,7 +88,6 @@ def hello():
     cuenta=cuenta+1
     return "<h1 style='color:blue'>Hello There! v.012 c:"+str(cuenta)+"</h1>"
 
-
 @app.route("/q2")
 def kpi2():
     global cuenta
@@ -97,8 +96,13 @@ def kpi2():
 	  "kpi2":2000}
     return json.dumps(data) 
 
+#############3
 # KPI
+#
 
+#
+# Single value
+#
 @app.route('/kpi',methods=['POST','GET'])
 def getKpi():
     try:
@@ -107,7 +111,7 @@ def getKpi():
 
         cust="Cust16"
         kpi="RegisteredPhones"
-        domain="A"
+        domain="/"
         cust   = request.values.get('cust')
         kpi    = request.values.get('kpi')
         domain = request.values.get('domain')
@@ -129,9 +133,8 @@ def getKpi():
                 where cust=%s and kpi=%s and domain=%s
                 """,
 		(cust,kpi,domain))
-
+        #"""
         rows = cursor.fetchall()
-
 
         d = collections.OrderedDict()
         oList=[]
@@ -153,8 +156,9 @@ def getKpi():
         cursor.close()
         conn.close()
 
-
-
+#
+#like format
+#
 @app.route('/list',methods=['POST','GET'])
 def getList():
     try:
@@ -163,7 +167,7 @@ def getList():
 
         cust="Cust16"
         kpi="RegisteredPhones"
-        domain="/UK%"
+        domain="/"
         cust   = request.values.get('cust')
         kpi    = request.values.get('kpi')
         domain = request.values.get('domain')+'%'
@@ -185,7 +189,7 @@ def getList():
                 where cust=%s and kpi=%s and domain like %s
                 """,
                 (cust,kpi,domain))
-
+        #"""
         rows = cursor.fetchall()
 
 
@@ -206,8 +210,70 @@ def getList():
     except Exception as e:
         return json.dumps({'error':str(e)})
 
-#    finally:
-#        cursor.close()
+    finally:
+        cursor.close()
+
+#
+#Log format
+#
+@app.route('/log',methods=['POST','GET'])
+def getLog():
+    try:
+
+        app.logger.info('Info')
+
+        cust="Cust16"
+        kpi="RegisteredPhones"
+        domain="/"
+        cust   = request.values.get('cust')
+        kpi    = request.values.get('kpi')
+        domain = request.values.get('domain')
+
+        app.logger.info('Info: cust'+cust+', kpi:'+kpi+', domain:'+domain)
+
+
+        if not (cust and kpi and domain):
+            return json.dumps({'html':'<span>Enter the required fields</span>'})
+
+
+        # All Good, let's call MySQL
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                Select * from (
+                  select date,value 
+                  from log 
+                  where cust=%s and kpi=%s and domain=%s
+                  order by date desc 
+                  limit 5
+                ) sub 
+                order by date;
+                """,
+                (cust,kpi,domain))
+        #"""
+        rows = cursor.fetchall()
+
+        d = collections.OrderedDict()
+        oList=[]
+        for row in rows:
+                d = collections.OrderedDict()
+                d['date']=row[0].strftime("%Y-%m-%d %H:%M")
+                d['value']=row[1]
+                oList.append(d)
+
+        return json.dumps(oList)
+
+
+    except Exception as e:
+        return json.dumps({'error':str(e)})
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
 
 
 
