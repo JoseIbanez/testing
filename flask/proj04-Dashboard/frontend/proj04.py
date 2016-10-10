@@ -140,7 +140,7 @@ def getKpi():
         oList=[]
         for row in rows:
                 d = collections.OrderedDict()
-                d['date']=row[0].strftime("%Y-%m-%d %H:%M")
+                d['date']=row[0].strftime("%Y-%m-%d %H:%M:%SZ")
                 d['value']=row[1]
                 oList.append(d)
 
@@ -258,7 +258,7 @@ def getLog():
         oList=[]
         for row in rows:
                 d = collections.OrderedDict()
-                d['date']=row[0].strftime("%Y-%m-%d %H:%M")
+                d['date']=row[0].strftime("%Y-%m-%d %H:%M:%SZ")
                 d['value']=row[1]
                 oList.append(d)
 

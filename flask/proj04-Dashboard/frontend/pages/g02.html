@@ -60,6 +60,7 @@ My counter:
 
 <script>
   var i = 0;
+  var old_date='2000-01-01';
 
   var g_data= [
     { date: '2016-07', value: 0 },
@@ -68,7 +69,7 @@ My counter:
 
 
   onload=function() { full_query() };
-  setInterval(function() { counter() }, 10000);
+  setInterval(function() { counter() }, 2000);
 
 
 
@@ -93,18 +94,7 @@ My counter:
 
   function counter() {
     $( "#counter" ).text( i++ );
-
-    old_value=old_value+Math.floor(Math.random() * 7) -3 ;
-    hoy=new Date();
-
-    g_data.push({
-      date: hoy.toISOString(),
-      value: old_value
-    });
-    if (g_data.length>30) {
-      g_data.shift();
-    }
-    my_mg.setData(g_data);
+    inc_query();
   }
 
 
@@ -122,6 +112,35 @@ My counter:
         }
     });
   }
+
+
+
+  function inc_query() {
+    $.ajax({
+      url: "/kpi?cust=Cust16&kpi=RegisteredPhones&domain=%2F",
+      success: function updatePage(result) {
+        console.log(result);
+        ans=JSON.parse(result);
+
+
+        if (ans['date']>old_date) {
+           old_date=ans['date'];
+           console.log("data add to graph "+ans['date']+", "+ans['value']);
+
+           g_data.push(ans);
+
+           if (g_data.length>30) {
+            g_data.shift();
+           }
+
+           my_mg.setData(g_data);
+        }
+
+
+      }
+    });
+  }
+
 
 
 
