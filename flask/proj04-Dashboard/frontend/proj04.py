@@ -2,6 +2,7 @@ from flask import Flask, json, request, send_from_directory
 from flask import render_template
 import collections
 from flask.ext.mysql import MySQL
+#from flask.mysql import MySQL
 
 import logging
 from logging.handlers import RotatingFileHandler
