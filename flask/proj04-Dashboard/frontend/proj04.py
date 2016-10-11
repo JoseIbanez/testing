@@ -247,7 +247,7 @@ def getLog():
                   from log 
                   where cust=%s and kpi=%s and domain=%s
                   order by date desc 
-                  limit 5
+                  limit 60
                 ) sub 
                 order by date;
                 """,
