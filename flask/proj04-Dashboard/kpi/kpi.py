@@ -3,7 +3,7 @@ from flask import render_template
 import collections
 from flask.ext.mysql import MySQL
 #from flask.mysql import MySQL
-
+import os
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -14,21 +14,21 @@ app = Flask(__name__)
 cuenta=0
 
 # MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'VFhcs123!'
-app.config['MYSQL_DATABASE_DB'] = 'fruit'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_USER'] = os.environ.get('BDB_MYSQL_USER')
+app.config['MYSQL_DATABASE_PASSWORD'] = os.environ.get('BDB_MYSQL_PASS')
+app.config['MYSQL_DATABASE_DB'] = os.environ.get('BDB_MYSQL_DB')
+app.config['MYSQL_DATABASE_HOST'] = os.environ.get('BDB_MYSQL_HOST')
 mysql.init_app(app)
 
 # Dev paths
 
-@app.route("/kpi/q1")
+@app.route("/api/v1/q1")
 def hello():
     global cuenta
     cuenta=cuenta+1
     return "<h1 style='color:blue'>Hello There! v.012 c:"+str(cuenta)+"</h1>"
 
-@app.route("/kpi/q2")
+@app.route("/api/v1/q2")
 def kpi2():
     global cuenta
     cuenta=cuenta+1
@@ -43,21 +43,17 @@ def kpi2():
 #
 # Single value
 #
-@app.route('/kpi/kpi',methods=['POST','GET'])
+@app.route('/api/v1/kpi',methods=['POST','GET'])
 def getKpi():
     try:
 
         app.logger.info('Info')
 
-        cust="Cust16"
-        kpi="RegisteredPhones"
-        domain="/"
         cust   = request.values.get('cust')
         kpi    = request.values.get('kpi')
         domain = request.values.get('domain')
 
         app.logger.info('Info: cust'+cust+', kpi:'+kpi+', domain:'+domain)
-
 
         if not (cust and kpi and domain):
             return json.dumps({'html':'<span>Enter the required fields</span>'})
@@ -99,15 +95,12 @@ def getKpi():
 #
 #like format
 #
-@app.route('/kpi/list',methods=['POST','GET'])
+@app.route('/api/v1/list',methods=['POST','GET'])
 def getList():
     try:
 
         app.logger.info('Info')
 
-        cust="Cust16"
-        kpi="RegisteredPhones"
-        domain="/"
         cust   = request.values.get('cust')
         kpi    = request.values.get('kpi')
         domain = request.values.get('domain')+'%'
@@ -156,15 +149,12 @@ def getList():
 #
 #Log format
 #
-@app.route('/kpi/log',methods=['POST','GET'])
+@app.route('/api/v1/log',methods=['POST','GET'])
 def getLog():
     try:
 
         app.logger.info('Info')
 
-        cust="Cust16"
-        kpi="RegisteredPhones"
-        domain="/"
         cust   = request.values.get('cust')
         kpi    = request.values.get('kpi')
         domain = request.values.get('domain')
@@ -216,10 +206,7 @@ def getLog():
 
 
 
-
-
 #Main
-
 if __name__ == "__main__":
     handler = RotatingFileHandler('foo.log', maxBytes=10000, backupCount=1)
     handler.setLevel(logging.DEBUG)

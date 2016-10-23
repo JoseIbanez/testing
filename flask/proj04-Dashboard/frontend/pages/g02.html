@@ -102,7 +102,7 @@ My counter:
 
   function full_query() {
     $.ajax({
-      url: "/kpi/log?cust=Cust16&kpi=RegisteredPhones&domain=%2F",
+      url: "/api/v1/log?cust=Cust16&kpi=RegisteredPhones&domain=%2F",
       success: function updatePage(result) {
         console.log(result);
         g_data=JSON.parse(result);
@@ -117,7 +117,7 @@ My counter:
 
   function inc_query() {
     $.ajax({
-      url: "/kpi/kpi?cust=Cust16&kpi=RegisteredPhones&domain=%2F",
+      url: "/api/v1/kpi?cust=Cust16&kpi=RegisteredPhones&domain=%2F",
       success: function updatePage(result) {
         console.log(result);
         ans=JSON.parse(result);
