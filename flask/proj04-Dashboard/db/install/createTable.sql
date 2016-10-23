@@ -38,4 +38,11 @@ CREATE TABLE log (
   date datetime
 );
 
+CREATE USER 'kpi'@'localhost' IDENTIFIED BY 'VFhcs123!';
+CREATE USER 'kpi'@'%'         IDENTIFIED BY 'VFhcs123!';
 
+
+GRANT ALL PRIVILEGES ON fruit.* TO 'kpi'@'localhost';
+GRANT ALL PRIVILEGES ON fruit.* TO 'kpi'@'%' ;
+
+FLUSH PRIVILEGES;
