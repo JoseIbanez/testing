@@ -11,7 +11,7 @@ RUN pip install \
           flask \
           flask-mysql
 
-EXPOSE 8010
+EXPOSE 8000
 COPY . /app
 WORKDIR /app
 #ENTRYPOINT ["python"]
