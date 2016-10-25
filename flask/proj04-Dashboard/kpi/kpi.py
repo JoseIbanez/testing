@@ -11,6 +11,8 @@ mysql = MySQL()
 #app = Flask(__name__,static_url_path='')
 app = Flask(__name__)
 
+
+
 cuenta=0
 
 # MySQL configurations
@@ -20,8 +22,9 @@ app.config['MYSQL_DATABASE_DB'] = os.environ.get('BDB_MYSQL_DB')
 app.config['MYSQL_DATABASE_HOST'] = os.environ.get('BDB_MYSQL_HOST')
 mysql.init_app(app)
 
-# Dev paths
 
+
+# Dev paths
 @app.route("/api/v1/q1")
 def hello():
     global cuenta
@@ -36,6 +39,39 @@ def kpi2():
 	  "kpi2":2000}
     return json.dumps(data)
 
+@app.before_first_request
+def testDB():
+    app.logger.addHandler(logging.StreamHandler())
+    app.logger.setLevel(logging.INFO)
+
+    app.logger.info('Info>>Testing logger')
+    app.logger.error('Error>>Testing logger')
+    app.logger.info('Testing DB connection')
+
+    try:
+        # All Good, let's call MySQL
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                Select count(*)
+                From kpi
+                """)
+        #"""
+        rows = cursor.fetchall()
+        for row in rows:
+            count=row[0]
+            app.logger.info('Count kpi table: '+count)
+
+        cursor.close()
+        conn.close()
+        return 0
+
+    except Exception as e:
+        app.logger.info('DB connection error '+str(e))
+        return -1
+
+
 #############3
 # KPI
 #
@@ -45,20 +81,20 @@ def kpi2():
 #
 @app.route('/api/v1/kpi',methods=['POST','GET'])
 def getKpi():
+
+    app.logger.info('New KPI request')
+
+    cust   = request.values.get('cust')
+    kpi    = request.values.get('kpi')
+    domain = request.values.get('domain')
+
+    if not (cust and kpi and domain):
+        return json.dumps({'html':'<span>Enter the required fields</span>'})
+
+    app.logger.info('Info: cust'+cust+', kpi:'+kpi+', domain:'+domain)
+
+
     try:
-
-        app.logger.info('Info')
-
-        cust   = request.values.get('cust')
-        kpi    = request.values.get('kpi')
-        domain = request.values.get('domain')
-
-        app.logger.info('Info: cust'+cust+', kpi:'+kpi+', domain:'+domain)
-
-        if not (cust and kpi and domain):
-            return json.dumps({'html':'<span>Enter the required fields</span>'})
-
-
         # All Good, let's call MySQL
         conn = mysql.connect()
         cursor = conn.cursor()
@@ -80,17 +116,14 @@ def getKpi():
                 d['value']=row[1]
                 oList.append(d)
 
-
+        cursor.close()
+        conn.close()
         #return json.dumps(oList)
         return json.dumps(d)
 
 
     except Exception as e:
         return json.dumps({'error':str(e)})
-
-    finally:
-        cursor.close()
-        conn.close()
 
 #
 #like format
@@ -153,7 +186,7 @@ def getList():
 def getLog():
     try:
 
-        app.logger.info('Info')
+        app.logger.info('New request KPI')
 
         cust   = request.values.get('cust')
         kpi    = request.values.get('kpi')
@@ -208,8 +241,17 @@ def getLog():
 
 #Main
 if __name__ == "__main__":
-    handler = RotatingFileHandler('foo.log', maxBytes=10000, backupCount=1)
-    handler.setLevel(logging.DEBUG)
-    app.logger.addHandler(handler)
-    app.debug=True
+    #handler = RotatingFileHandler('/tmp/foo.log', maxBytes=10000, backupCount=1)
+    #handler.setLevel(logging.DEBUG)
+    #app.logger.addHandler(handler)
+    #app.logger.setLevel(logging.DEBUG)
+    #app.logger.handlers.extend(logging.getLogger("gunicorn.error").handlers)
+
+    #handler = logging.StreamHandler()
+    #handler.setLevel(logging.INFO)
+    #app.logger.addHandler(handler)
+    #app.logger.setLevel(logging.INFO)
+    # fix gives access to the gunicorn error log facility
+    #app.logger.handlers.extend(logging.getLogger("gunicorn.error").handlers)
+    #app.debug=True
     app.run(host='0.0.0.0')
