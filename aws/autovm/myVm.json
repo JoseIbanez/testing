@@ -1,6 +1,0 @@
-{
-  "ImageId": "ami-87564feb",
-  "KeyName": "kumo",
-  "SecurityGroupIds": [ "sg-c5175fac" ],
-  "InstanceType": "m3.large"
-}

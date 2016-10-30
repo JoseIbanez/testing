@@ -1,5 +1,8 @@
 #!/bin/sh
 
+apt-get install puppetmaster
+
+
 #
 # https://www.howtoforge.com/puppet-ubuntu-14.04
 #
@@ -10,7 +13,7 @@ cp -av puppet/modules/*   /etc/puppet/modules/
 cp -av puppet/manifests/* /etc/puppet/manifests/
 
 
-service puppet restart
+service puppetmaster restart
 
 puppet cert sign u10
 puppet cert sign --all

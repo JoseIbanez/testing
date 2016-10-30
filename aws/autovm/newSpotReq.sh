@@ -16,14 +16,13 @@ else
 fi
 
 
-cp ./myVM.j2 ./myVM.json
-sed -i "s/{{size}}/$size/g" ./myVM.json
+cat ./myVM.j2 | sed  "s/{{size}}/$size/g" > /tmp/myVM.json
 
-cat ./myVM.json
+cat /tmp/myVM.json
 
 aws ec2 \
 request-spot-instances \
 --spot-price "$price" \
 --instance-count 1 \
 --type "one-time" \
---launch-specification file://myVm.json
+--launch-specification file:///tmp/myVm.json
