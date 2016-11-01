@@ -16,4 +16,3 @@ cust=pathParm[-3]
 
 print date,lote,cust
 
-

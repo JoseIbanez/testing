@@ -18,8 +18,6 @@ if (defined $file){
   $is_stdin++;
 }
 
-
-
 my $phase=0;
 my $lastLine="";
 
@@ -37,12 +35,12 @@ while( my $line = <$fi>)  {
 
     if (($phase == 0) && ($line =~ /.*: /)) {
 
-	($col,$value) = split(' ',$line,2);
+        ($col,$value) = split(' ',$line,2);
 
 
         if ($col eq "cust:") {
            $cust=$value;
-	}
+        }
 
         if ($col eq "ldate:") {
            $date=$value;
@@ -72,18 +70,11 @@ while( my $line = <$fi>)  {
         }
         $value=$line;
 
-
         printf("%s,%s,%s,%s,%s\n",$cust,$kpi,$domain,$value,$date);
 
 
     }
-
-
-
 }
 
 
-
 close $fi unless $is_stdin;
-
-
