@@ -1,4 +1,4 @@
-from flask import Flask, json, request, send_from_directory
+from flask import Flask, json, request, send_from_directory, redirect
 from flask import render_template
 import collections
 from flask.ext.mysql import MySQL
@@ -14,9 +14,9 @@ app = Flask(__name__)
 cuenta=0
 
 # MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'VFhcs123!'
-app.config['MYSQL_DATABASE_DB'] = 'fruit'
+app.config['MYSQL_DATABASE_USER'] = 'kpi'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'passw0rd'
+app.config['MYSQL_DATABASE_DB'] = 'bdb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
@@ -44,6 +44,8 @@ def send_vendor(path):
 @app.route('/')
 def send_index():
     return render_template('index.html')
+
+
 
 # Render templates
 
@@ -93,9 +95,9 @@ def hello():
 def kpi2():
     global cuenta
     cuenta=cuenta+1
-    data={"kpi1":cuenta, 
+    data={"kpi1":cuenta,
 	  "kpi2":2000}
-    return json.dumps(data) 
+    return json.dumps(data)
 
 #############3
 # KPI
@@ -104,7 +106,7 @@ def kpi2():
 #
 # Single value
 #
-@app.route('/kpi',methods=['POST','GET'])
+@app.route('/api/v1/kpi',methods=['POST','GET'])
 def getKpi():
     try:
 
@@ -217,7 +219,7 @@ def getList():
 #
 #Log format
 #
-@app.route('/log',methods=['POST','GET'])
+@app.route('/api/v1/log',methods=['POST','GET'])
 def getLog():
     try:
 
@@ -243,12 +245,12 @@ def getLog():
 
         cursor.execute("""
                 Select * from (
-                  select date,value 
-                  from log 
+                  select date,value
+                  from log
                   where cust=%s and kpi=%s and domain=%s
-                  order by date desc 
+                  order by date desc
                   limit 60
-                ) sub 
+                ) sub
                 order by date;
                 """,
                 (cust,kpi,domain))

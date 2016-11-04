@@ -8,8 +8,8 @@ echo "Configure Additional Repo"
 
 apt-get -y update
 
-debconf-set-selections <<< 'mysql-server mysql-server/root_password password VFhcs123!'
-debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password VFhcs123!'
+debconf-set-selections <<< 'mysql-server mysql-server/root_password password passw0rd'
+debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password passw0rd'
 
 echo "Installing deps"
 apt-get install -y \
@@ -18,8 +18,13 @@ apt-get install -y \
 
 
 
-
 echo "Post configuration"
+
+
+mysql -u root -pVFhcs123! \
+    -e "set @BDB_MYSQL_PASSWD='${BDB_MYSQL_PASSWD}';\
+        source createDB.sql;\
+        source createTable.sql;"
 
 
 echo "Restarting"

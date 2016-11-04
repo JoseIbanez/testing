@@ -1,0 +1,1 @@
+export BDB_MYSQL_PASSWD=passw0rd

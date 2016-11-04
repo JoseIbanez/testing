@@ -186,13 +186,13 @@ def getList():
 def getLog():
     try:
 
-        app.logger.info('New request KPI')
+        app.logger.info('New request: LOG')
 
         cust   = request.values.get('cust')
         kpi    = request.values.get('kpi')
         domain = request.values.get('domain')
 
-        app.logger.info('Info: cust'+cust+', kpi:'+kpi+', domain:'+domain)
+        app.logger.info('Input: cust:'+cust+', kpi:'+kpi+', domain:'+domain)
 
 
         if not (cust and kpi and domain):

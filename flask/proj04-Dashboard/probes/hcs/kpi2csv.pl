@@ -29,11 +29,11 @@ my $date;
 my $kpi;
 my $domain;
 
-while( my $line = <$fi>)  {   
+while( my $line = <$fi>)  {
     chomp $line;
     $line =~ s/^\s+|\s+$//g;
 
-    if (($phase == 0) && ($line =~ /.*: /)) {
+    if ($line =~ /.*: /) {
 
         ($col,$value) = split(' ',$line,2);
 
@@ -58,22 +58,25 @@ while( my $line = <$fi>)  {
 
     }
 
+    if (length($line) < 1) {
+       $phase=0;
+       $cust="";
+       $date="";
+       $kpi="";
+       next;
+    }
+
 
     if (($phase == 1)) {
-
-      	if (length($line) < 1) {
-           $phase=0;
-           $cust="";
-           $date="";
-           $kpi="";
-           next;
-        }
         $value=$line;
-
+        $phase=0;
         printf("%s,%s,%s,%s,%s\n",$cust,$kpi,$domain,$value,$date);
-
-
     }
+
+
+
+
+
 }
 
 

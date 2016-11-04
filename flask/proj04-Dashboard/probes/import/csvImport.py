@@ -68,7 +68,7 @@ with open(inputfile, 'rb') as csvfile:
         print cust, kpi, domain, value, date
 
         cursor.execute("""
-                Insert into log
+                Insert ignore into log
                   (cust,kpi,domain,value,date)
                   values
                   (%s,%s,%s,%s,%s);
@@ -78,7 +78,7 @@ with open(inputfile, 'rb') as csvfile:
 
 
         cursor.execute("""
-                Insert ignore into kpi 
+                Insert ignore into kpi
                   (cust,kpi,domain)
                   values
                   (%s,%s,%s)
