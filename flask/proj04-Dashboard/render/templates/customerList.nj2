@@ -1,0 +1,23 @@
+<!doctype html>
+{% include 'header.html' %}
+
+
+<title>Customer List</title>
+<h1>Customer List</h1>
+
+
+<div class="container">
+  <h2>List</h2>
+
+{% for i in custs %}
+
+  <div>
+    <a href="/customerDetail/{{i.cust}}">{{i.cust}}</a>
+  </div>
+
+{% endfor %}
+
+</div>
+
+
+{% include 'footer.html' %}

@@ -15,17 +15,16 @@ echo "Installing deps"
 apt-get install -y \
         mysql-server
 
-
-
-
 echo "Post configuration"
 
-
-mysql -u root -pVFhcs123! \
-    -e "set @BDB_MYSQL_PASSWD='${BDB_MYSQL_PASSWD}';\
-        source createDB.sql;\
-        source createTable.sql;"
-
+sed -i 's/bind-address.*/bind-address = 0.0.0.0/g' /etc/mysql/my.cnf
 
 echo "Restarting"
+service mysql restart
 
+echo "Crate DB"
+
+mysql -u root -ppassw0rd \
+    -e "set @BDB_MYSQL_PASSWD='${BDB_MYSQL_PASS}';\
+        source createDB.sql;\
+        source createTable.sql;"

@@ -59,6 +59,66 @@ def perfmon(cust=None):
 
 
 
+@app.route('/customerList')
+def customerlist(cust=None):
+
+        # All Good, let's call MySQL
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                Select distinct cust
+                From kpi
+                Order by cust
+                """)
+
+        #"""
+
+        rows = cursor.fetchall()
+
+        d = collections.OrderedDict()
+        oList=[]
+        for row in rows:
+                d = collections.OrderedDict()
+                d['cust']=row[0]
+                oList.append(d)
+
+
+        return render_template('customerList.nj2', custs=oList)
+
+
+
+@app.route('/customerDetail/<cust>')
+def customerDetail(cust=None):
+
+        # All Good, let's call MySQL
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                Select id,cust,kpi,domain
+                From kpi
+                where cust=%s and domain="/"
+                """,
+                (cust))
+        #"""
+
+        rows = cursor.fetchall()
+        d = collections.OrderedDict()
+        oList=[]
+        for row in rows:
+                d = collections.OrderedDict()
+                d['id']=row[0]
+                d['cust']=row[1]
+                d['kpi']=row[2]
+                d['domain']=row[3]
+                oList.append(d)
+
+
+        return render_template('customerDetail.nj2', cust=cust, kpis=oList)
+
+
+
 
 
 #Main
@@ -67,4 +127,4 @@ if __name__ == "__main__":
     handler.setLevel(logging.DEBUG)
     app.logger.addHandler(handler)
     app.debug=True
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port=8000)

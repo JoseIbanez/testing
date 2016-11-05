@@ -7,5 +7,5 @@ COPY ./html/js      /usr/share/nginx/html/js/
 COPY ./html/dist    /usr/share/nginx/html/dist/
 COPY ./html/vendor  /usr/share/nginx/html/vendor/
 
-COPY ./install/default.conf     /etc/nginx/conf.d/default.conf
-COPY ./install/nginx.conf       /etc/nginx/nginx.conf
+COPY ./conf/default.conf     /etc/nginx/conf.d/default.conf
+COPY ./conf/nginx.conf       /etc/nginx/nginx.conf
