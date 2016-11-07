@@ -5,3 +5,7 @@ Boot:
 https://docs.fedoraproject.org/en-US/Fedora/13/html/Installation_Guide/s1-kickstart2-startinginstall.html
 Add to boot:
   ks=hd:fd0:/ks.cfg
+
+
+Alter DVD
+https://ask.fedoraproject.org/en/question/46020/build-a-bootable-dvd-that-uses-kickstart/
