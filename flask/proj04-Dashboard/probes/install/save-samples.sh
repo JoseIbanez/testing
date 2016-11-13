@@ -1,23 +1,13 @@
 #!/bin/sh
 
-stg="/mnt/tmp/stg"
+if [ ! -z $1 ]; then
+gpg -v --passphrase-file ~/.gnupg/testing.pass --output $1.gpg  -c $1
+fi
 
-tar -czv -f /tmp/hc.sample.tgz $stg
-gpg --passphrase-file ~/.gnupg/testing.pass --output /tmp/hc.sample.tgz.gpg  -c /tmp/hc.sample.tgz
+if [ ! -z $2 ]; then
+aws s3 sync /mnt/tmp/stg/ s3://$aws_bucket/dev01/ --exclude "*" --include "*.gpg"
+fi
 
-gpg --passphrase-file ~/.gnupg/testing.pass --output /mnt/tmp/stg/2016-09.tgz.gpg  -c /mnt/tmp/stg/2016-09.tgz
-gpg --passphrase-file ~/.gnupg/testing.pass --output /mnt/tmp/stg/2016-08.tgz.gpg  -c /mnt/tmp/stg/2016-08.tgz
-gpg --passphrase-file ~/.gnupg/testing.pass --output /mnt/tmp/stg/2016-07.tgz.gpg  -c /mnt/tmp/stg/2016-07.tgz
-gpg --passphrase-file ~/.gnupg/testing.pass --output /mnt/tmp/stg/2016-06.tgz.gpg  -c /mnt/tmp/stg/2016-06.tgz
-
-
-
-aws s3 cp /tmp/hc.sample.tgz.gpg s3://$aws_bucket/dev01/
-
-aws s3 cp /mnt/tmp/stg/2016-09.tgz.gpg s3://$aws_bucket/dev01/
-aws s3 cp /mnt/tmp/stg/2016-08.tgz.gpg s3://$aws_bucket/dev01/
-aws s3 cp /mnt/tmp/stg/2016-07.tgz.gpg s3://$aws_bucket/dev01/
-aws s3 cp /mnt/tmp/stg/2016-06.tgz.gpg s3://$aws_bucket/dev01/
 
 
 

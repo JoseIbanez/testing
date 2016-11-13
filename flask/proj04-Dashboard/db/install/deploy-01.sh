@@ -18,6 +18,7 @@ apt-get install -y \
 echo "Post configuration"
 
 sed -i 's/bind-address.*/bind-address = 0.0.0.0/g' /etc/mysql/my.cnf
+sed -i 's/bind-address.*/bind-address = 0.0.0.0/g' /etc/mysql/mysql.conf.d/mysqld.cnf
 
 echo "Restarting"
 service mysql restart
