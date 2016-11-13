@@ -8,8 +8,10 @@ echo "Configure Additional Repo"
 
 apt-get -y update
 
-debconf-set-selections <<< 'mysql-server mysql-server/root_password password passw0rd'
-debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password passw0rd'
+export DEBIAN_FRONTEND="noninteractive"
+
+debconf-set-selections <<< "mysql-server mysql-server/root_password password ${BDB_MYSQL_ROOT}"
+debconf-set-selections <<< "mysql-server mysql-server/root_password_again password ${BDB_MYSQL_ROOT}"
 
 echo "Installing deps"
 apt-get install -y \
@@ -23,8 +25,10 @@ echo "Restarting"
 service mysql restart
 
 echo "Crate DB"
+cat ./createDB.sql | \
+  sed "s/{{BDB_MYSQL_PASSWD}}/${BDB_MYSQL_ROOT}/g" | \
+  mysql -u root -p${BDB_MYSQL_ROOT}
 
-mysql -u root -ppassw0rd \
-    -e "set @BDB_MYSQL_PASSWD='${BDB_MYSQL_PASS}';\
-        source createDB.sql;\
-        source createTable.sql;"
+echo "Create table"
+mysql -u root -p${BDB_MYSQL_ROOT} bdb \
+  -e "source createTable.sql;"

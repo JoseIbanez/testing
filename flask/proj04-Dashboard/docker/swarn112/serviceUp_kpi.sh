@@ -1,6 +1,8 @@
 #!/bin/sh
 docker network create -d overlay bdbnet
 
+###
+
 docker service create \
   --replicas 1 \
   --name kpi \
