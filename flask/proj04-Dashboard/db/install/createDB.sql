@@ -9,13 +9,13 @@ USE  `bdb`;
 # Create Users
 #
 
-GRANT USAGE ON *.* TO 'kpi'@'localhost' IDENTIFIED BY 'passw0rd';
-GRANT USAGE ON *.* TO 'kpi'@'%'         IDENTIFIED BY 'passw0rd';
+GRANT USAGE ON *.* TO 'kpi'@'localhost' IDENTIFIED BY '{{BDB_MYSQL_PASSWD}}';
+GRANT USAGE ON *.* TO 'kpi'@'%'         IDENTIFIED BY '{{BDB_MYSQL_PASSWD}}';
 DROP USER 'kpi'@'localhost';
 DROP USER 'kpi'@'%';
 
-CREATE USER 'kpi'@'localhost' IDENTIFIED BY 'passw0rd';
-CREATE USER 'kpi'@'%'         IDENTIFIED BY 'passw0rd';
+CREATE USER 'kpi'@'localhost' IDENTIFIED BY '{{BDB_MYSQL_PASSWD}}';
+CREATE USER 'kpi'@'%'         IDENTIFIED BY '{{BDB_MYSQL_PASSWD}}';
 
 
 GRANT ALL PRIVILEGES ON bdb.* TO 'kpi'@'localhost';
@@ -51,4 +51,3 @@ CREATE TABLE log (
   value integer,
   date datetime
 );
-

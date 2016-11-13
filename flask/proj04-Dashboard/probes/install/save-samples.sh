@@ -7,7 +7,3 @@ fi
 if [ ! -z $2 ]; then
 aws s3 sync /mnt/tmp/stg/ s3://$aws_bucket/dev01/ --exclude "*" --include "*.gpg"
 fi
-
-
-
-
