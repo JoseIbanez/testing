@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cat > /etc/yum.repos.d/rhel7dvd.repo << EOF
+cat > ./rhel7dvd.repo << EOF
 [InstallMedia]
 name=Red Hat Enterprise Linux 7.2
 mediaid=1446216863.790260

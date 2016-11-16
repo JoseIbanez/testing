@@ -9,3 +9,9 @@ Add to boot:
 
 Alter DVD
 https://ask.fedoraproject.org/en/question/46020/build-a-bootable-dvd-that-uses-kickstart/
+
+
+
+yum yum group install -y "Development Tools"
+yum install -y kexec-tools
+yum install -y net-tools
