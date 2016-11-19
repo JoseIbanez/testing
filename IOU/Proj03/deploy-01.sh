@@ -12,7 +12,8 @@ apt-get install -y \
   libssl1.0.0:i386 \
   libnet-pcap-perl libpcap0.8 \
   uml-utilities bridge-utils \
-  joe awscli
+  joe awscli \
+  ntp
 
 
 echo "Post configuration"
@@ -30,13 +31,19 @@ chmod +x $IOU/bin/*
 
 $IOU/scripts/keygen.py | grep -e 'lic' -e '=' > ~/.iourc
 
-echo "Restarting"
+echo "Networking"
 tunctl -t tap0
-
-brctl addbr virbr0
-ifconfig virbr0 192.168.1.50 up
-
 ifconfig tap0 up
 
+brctl addbr virbr0
 brctl addif virbr0 tap0
 
+ifconfig virbr0 192.168.1.50 up
+route add  -net 192.168.2.0/24 gw 192.168.1.20
+
+
+echo "Syslog"
+
+echo "Ntp"
+echo "restrict 192.168.0.0 mask 255.255.0.0 notrust" >> /etc/ntp.conf
+service ntp restart

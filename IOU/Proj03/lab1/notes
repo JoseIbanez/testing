@@ -1,202 +1,194 @@
-en
-conf t
-
-hostname r1
 
 
-no router bgp
-!
-router bgp 19250
- bgp log-neighbor-changes
- neighbor 19.250.0.130 remote-as 19250
+vrf definition management
+ rd 10:1
  !
  address-family ipv4
- network 19.250.0.0 mask 255.255.0.0
- redistribute connected
-  neighbor 19.250.0.130 activate
-  neighbor 19.250.0.130 soft-reconfiguration inbound
- exit-address-family
-!
-!
-
-
-
-
-
-int e0/0
-ip address 19.250.0.129 255.255.255.252
-no shut
-
-
-int e0/1
-ip address 19.250.0.130 255.255.255.252
-no shut
-
-
-r2----------------------------------------
-no router bgp 19250
-
-router bgp 19250
- bgp log-neighbor-changes
- neighbor 19.250.0.129 remote-as 19250
- neighbor 19.250.0.134 remote-as 19250
- !
- address-family ipv4
-  network 19.250.0.0 mask 255.255.0.0
-  redistribute connected
-  neighbor 19.250.0.129 activate
-  neighbor 19.250.0.129 soft-reconfiguration inbound
-  neighbor 19.250.0.134 activate
-  neighbor 19.250.0.134 soft-reconfiguration inbound
  exit-address-family
 !
 
+ip route vrf management 192.168.1.0 255.255.255.0 192.168.2.1
 
 
- exit-address-family
+ntp server vrf management 192.168.1.50
+logging host 192.168.1.50 vrf management
+
+interface Ethernet3/3
+ vrf forwarding management
 
 
- int e0/0
- ip address 19.250.0.133 255.255.255.252
- no shut
+########################################3
 
 
- int e0/1
- ip address 19.250.0.134 255.255.255.252
- no shut
+n22#show run
+Building configuration...
 
- r3----------------------------------------
- no router bgp
- router bgp 19250
-  bgp log-neighbor-changes
-  neighbor 19.250.0.133 remote-as 19250
-  !
-  address-family ipv4
-   network 19.250.0.0
-   neighbor 19.250.0.133 activate
-   neighbor 19.250.0.133 soft-reconfiguration inbound
-
-
-
-
-
-   int e0/0
-   ip address 19.250.0.137 255.255.255.252
-   no shut
-
-
-   int e0/1
-   ip address 19.250.0.138 255.255.255.252
-   no shut
-
-
-
-   r4----------------------------------------
-   no router bgp
-   router bgp 19250
-    bgp log-neighbor-changes
-    neighbor 19.250.0.133 remote-as 19250
-    !
-    address-family ipv4
-     network 19.250.0.0
-     neighbor 19.250.0.133 activate
-     neighbor 19.250.0.133 soft-reconfiguration inbound
-
-
-     neighbor 19.250.0.138 activate
-     neighbor 19.250.0.138 route-reflector-client
-     neighbor 19.250.0.138 soft-reconfiguration inbound
-
-
-
-
-
----------------------------------------------------
-28022
-
-en
-conf t
-
-hostname r11
-
-
-int lo 0
- ip address 28.22.0.1 255.255.255.255
-
-int lo 0
- ip address 28.22.0.2 255.255.255.255
-
- int lo 0
-  ip address 28.22.0.3 255.255.255.255
-
-int lo 0
- ip address 28.22.0.4 255.255.255.255
-
-
-
-  router ospf 110
-   router-id 28.22.0.4
-   network 28.22.0.0 0.0.255.255 area 0
-
-
-
-
-int e0/0
-ip address 28.22.0.129 255.255.255.252
-no shut
-
-
-int e0/1
-ip address 28.22.0.130 255.255.255.252
-no shut
-
-
------
-int e0/0
-ip address 28.22.0.133 255.255.255.252
-no shut
-
-int e0/1
-ip address 28.22.0.134 255.255.255.252
-no shut
-
-
------
-int e0/0
-ip address 28.22.0.137 255.255.255.252
-no shut
-
-int e0/1
-ip address 28.22.0.138 255.255.255.252
-no shut
-
-
-------
-
-int e0/0
-ip address 28.22.0.141 255.255.255.252
-no shut
-
-int e0/1
-ip address 28.22.0.142 255.255.255.252
-no shut
-
-
-no router bgp
-router bgp 28022
- bgp router-id 28.22.0.4
- bgp log-neighbor-changes
- neighbor 19.250.0.253 remote-as 19250
+Current configuration : 1975 bytes
+!
+! Last configuration change at 21:20:36 UTC Fri Nov 18 2016
+!
+version 15.6
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname n22
+!
+boot-start-marker
+boot-end-marker
+!
+!
+vrf definition management
+ rd 10:1
  !
  address-family ipv4
-  neighbor 19.250.0.253 activate
-  neighbor 19.250.0.253 soft-reconfiguration inbound
+ exit-address-family
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
 
 
+!
+!
+!
+ip audit notify log
+ip audit po max-events 100
 
-  router bgp 19250
-   neighbor 19.250.0.254 remote-as 28022
-   !
-   address-family ipv4
-    neighbor 19.250.0.254 activate
-    neighbor 19.250.0.254 soft-reconfiguration inbound
+ip cef
+no ipv6 cef
+!
+!
+!
+!
+!
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ duplex auto
+!
+interface Ethernet0/1
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet1/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet1/1
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ duplex auto
+!
+interface Ethernet1/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet1/3
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet2/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet2/1
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet2/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet2/3
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet3/0
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet3/1
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet3/2
+ no ip address
+ shutdown
+ duplex auto
+!
+interface Ethernet3/3
+ vrf forwarding management
+ ip address 192.168.2.22 255.255.255.0
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route vrf management 192.168.1.0 255.255.255.0 192.168.2.1
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login
+!
+ntp server vrf management 192.168.1.50
+end
