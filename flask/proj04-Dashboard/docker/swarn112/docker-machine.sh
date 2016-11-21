@@ -11,6 +11,16 @@ docker-machine create \
   --amazonec2-instance-type m3.large \
   dck-01 &
 
+  docker-machine create \
+    --driver amazonec2 \
+    --engine-install-url https://test.docker.com \
+    --amazonec2-vpc-id vpc-608b6f09 \
+    --amazonec2-request-spot-instance \
+    --amazonec2-spot-price 0.10 \
+    --amazonec2-region eu-central-1 \
+    --amazonec2-instance-type m3.large \
+    dck-02 &
+
 
 
 #####
