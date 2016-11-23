@@ -1,0 +1,10 @@
+{
+  "ID": "example2",
+  "Name": "example2",
+  "Tags": [
+    "specific",
+    "v1"
+  ],
+  "Address": "8.8.8.8",
+  "Port": 8000
+}

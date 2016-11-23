@@ -1,0 +1,18 @@
+{
+  "ID": "redis1",
+  "Name": "redis",
+  "Tags": [
+    "master",
+    "v1"
+  ],
+  "Address": "127.0.0.1",
+  "Port": 8000,
+  "EnableTagOverride": false,
+  "Check": {
+    "DeregisterCriticalServiceAfter": "90m",
+    "Script": "/usr/local/bin/check_redis.py",
+    "HTTP": "http://localhost:5000/health",
+    "Interval": "10s",
+    "TTL": "15s"
+  }
+}

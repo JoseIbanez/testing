@@ -16,7 +16,8 @@ apt-get -y update
 
 echo "Installing packages"
 apt-get install -y \
-        docker-engine
+        docker-engine \
+        jq
 
 
 echo "Post configuration"
