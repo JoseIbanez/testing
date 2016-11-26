@@ -1,19 +1,23 @@
 
 
 vrf definition management
- rd 10:1
- !
  address-family ipv4
- exit-address-family
-!
 
-ip route vrf management 192.168.1.0 255.255.255.0 192.168.2.1
+ip route vrf management 192.168.100.0 255.255.255.0 192.168.101.1
+
+ntp server vrf management 192.168.100.1
+logging host 192.168.100.1 vrf management
 
 
-ntp server vrf management 192.168.1.50
-logging host 192.168.1.50 vrf management
+
+########################################
+logging discriminator EXCESS severity drops 6 msg-body drops EXCESSCOLL
+logging buffered 50000
+logging console discriminator EXCESS
+
 
 interface Ethernet3/3
+ no switchport
  vrf forwarding management
 
 

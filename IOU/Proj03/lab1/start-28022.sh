@@ -1,8 +1,8 @@
 #!/bin/sh
 
-IOU="/home/vagrant/IOU"
+IOU="/opt/IOU"
 
-$IOU/scripts/wrapper.bin -m $IOU/bin/i86bi-linux-l2-ipbasek9-15.1g.bin -p 2001 -- -e4 -s0 01 &
+$IOU/scripts/wrapper.bin -m $IOU/bin/i86bi-linux-l3-ipbase-12.4.bin -p 2001 -- -e4 -s0 01 &
 sleep 5
 
 

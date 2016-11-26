@@ -13,7 +13,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       m1.vm.hostname = "m1"
       m1.vm.network "private_network", ip: "172.20.20.11"
       m1.vm.network "public_network", type: "dhcp", bridge: "enp5s0"
-      m1.vm.provision "file",  source: "~/.aws", destination: "~/.aws"
+      m1.vm.provision "file",  source: "~/.aws", destination: ".aws"
       m1.vm.provision "shell", path: "./deploy-01.sh"
   end
 
