@@ -1,0 +1,26 @@
+- vrf
+
+ - inside: Cust16_Inside
+ - outside: Cust16_Outside
+
+- vlan
+
+ - cucm: 
+
+   - id: 1160
+   - name: Cust16_cucm
+   - vrf: Cust16_Inside
+   - mask: 255.255.255.192
+   - hsrp: 172.30.16.1
+   - ip: 172.30.16.2
+   - ip: 172.30.16.3
+
+ - interdc: 
+
+   - vlan: 1161
+   - name: Cust16_InterDC
+   - vrf: Cust16_Inside
+   - mask: 255.255.255.248
+   - ip: 172.30.16.65
+   - ip: 172.30.16.66
+

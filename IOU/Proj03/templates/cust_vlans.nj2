@@ -1,0 +1,49 @@
+@L on01
+conf t
+!
+! VLAN
+!
+vlan {{vlan.cucm.id}}
+ name {{vlan.cucm.name}}
+vlan {{vlan.interdc.id}}
+ name {{vlan.interdc.name}}
+end
+!
+! VRF
+!
+conf t
+vrf definition {{vrf.inside.id}}
+  address-family ipv4
+  exit-address-family
+vrf definition Cust{{vrf.outside.id}}
+  exit-address-family
+  address-family ipv4
+end
+
+!
+! PortChannel
+!
+conf t
+interface Po1
+ switchport trunk allowed vlan add {{vlan.cucm.id}}
+ switchport trunk allowed vlan add {{vlan.interdc.id}}
+
+interface Po11
+ switchport trunk allowed vlan add {{vlan.interdc.id}}
+end
+!
+! Interface VLAN
+!
+interface {{vlan.cucm.id}}
+ description {{vlan.cucm.name}}
+ vrf forwarding {{vlan.cucm.vrf}}
+ ip address {{vlan.cucm.ip}} {{vlan.cucm.mask}}
+!
+interface {{vlan.interdc.id}}
+ description {{vlan.interdc.name}}
+ vrf forwarding {{vlan.interdc.vrf}}
+ ip address {{vlan.interdc.ip}} {{vlan.interdc.mask}}
+
+
+exit
+end

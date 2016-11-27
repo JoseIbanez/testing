@@ -1,0 +1,11 @@
+
+
+cat input.var | grep -v "#DCB" | grep -v "#DeviceB" | sed 's/#[A-Za-z]\+ //g' | sed 's/^ //g' > input_AA.vagrant
+cat input.var | grep -v "#DCB" | grep -v "#DeviceA" | sed 's/#[A-Za-z]\+ //g' | sed 's/^ //g' > input_AB.vagrant
+
+cat input.var | grep -v "#DCA" | grep -v "#DeviceB" | sed 's/#[A-Za-z]\+ //g' | sed 's/^ //g' > input_BA.vagrant
+cat input.var | grep -v "#DCA" | grep -v "#DeviceA" | sed 's/#[A-Za-z]\+ //g' | sed 's/^ //g' > input_BB.vagrant
+
+
+cat Cust16.a.yaml | grep -v "^$" | sed 's/ #DeviceA//g' | grep -v "#D" > Cust16.aa.yaml
+cat Cust16.a.yaml | grep -v "^$" | sed 's/ #DeviceB//g' | grep -v "#D" > Cust16.ab.yaml 

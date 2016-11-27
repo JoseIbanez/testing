@@ -1,0 +1,164 @@
+#!/usr/bin/expect -f
+# Set up various other variables here ($user, $password)
+# Usage: ./ios_cmd.v3.exp EU 10.108.7.211 n7k-1-leg ../secret/n7k.key  ../cmd/cmd_to_n7k.cmd &
+
+#sanity
+set timeout 30
+match_max 100000
+
+#As first thing we check to have 5 arguments:
+if {[llength $argv] != 6} {
+        puts "usage: ios_cmd.exp <host> <label> <user> <password> <enable> <file>"
+        exit 1
+        }
+
+#We define the variables used to handle the parameters passed to the script
+set customer   [lindex $argv 0]
+set host       [lindex $argv 1]
+set port       [lindex $argv 2]
+set label      [lindex $argv 3]
+set secret     [lindex $argv 4]
+set input_file [lindex $argv 5]
+
+#Import secret to have the user name and the password
+source [file join [file dirname [info script]] $secret]
+
+
+set now $env(lote_date)
+set lote $env(lote_name)
+
+
+# We set up the path to store the data extracted during the execution of the script
+set path "../UC_ops/[clock format $now -format {%Y-%m}]/$customer/$lote/[clock format $now -format {%Y%m%d-%H%M}]/"
+exec mkdir -p $path
+
+#Update last run date
+exec mkdir -p "../UC_ops/$customer/"
+set of [open "../UC_ops/$customer/$lote.last" "w"]
+puts $of [clock format $now -format {%Y%m%d-%H%M}]
+close $of
+
+# Get the commands to run, one per line
+set f [open $input_file]
+
+set of [open "$path$label-login.txt" "w"]
+
+#Login
+#spawn ssh -o "StrictHostKeyChecking no" "$user\@$host"
+spawn telnet $host $port
+send "\n"
+send "\n"
+
+set timeout 1
+set count 10
+while {1} {
+    expect {
+          "'^]'." {
+            puts $of $expect_out(buffer)
+            send "\n"
+          }
+          "login:" {
+            puts $of $expect_out(buffer)
+            send "$user\n"
+          }
+          "assword:" {
+             puts $of $expect_out(buffer)
+             send "$password\n"
+             }
+          -re ">|#" {
+             puts $of $expect_out(buffer)
+             send "\n"
+             break
+             }
+          timeout {
+             puts "timeout"
+             puts $of $expect_out(buffer)
+             send "\r"
+             }
+          }
+    set count "[expr $count - 1]"
+    if { $count < 0 } {
+       exit
+    }
+}
+
+
+set count 5
+while {1} {
+    expect {
+          ">" {
+              puts $of $expect_out(buffer)
+              send "enable\n"
+              }
+          "assword:" {
+                    puts $of $expect_out(buffer)
+                    send "$enable\r"
+              }
+          -re "#$|# $" {
+                    puts $of $expect_out(buffer)
+                    send "\r"
+                    break
+              }
+    }
+    set count "[expr $count - 1]"
+    if { $count < 0 } {
+       exit 1
+    }
+}
+
+expect "#"
+
+
+#Capture Prompt
+#set prompt $expect_out(buffer)
+set prompt [string range $expect_out(buffer) 3 end]
+puts "---Prompt: >>>$prompt<<<\n"
+
+
+send "terminal length 0\r"
+expect $prompt
+
+
+# Iterate over the commands, one per line
+while {[gets $f line] != -1} {
+    if [string match "@L *" $line] {
+        set name [string range $line 3 end]
+        set of [open "$path$label-$name.txt" "w"]
+        continue
+    } else {
+        # The command is sent to the network element
+        send "$line\r"
+        sleep .5
+
+        expect {
+                "(nxos)#" {
+                        puts $of $expect_out(buffer)
+                        }
+                -re "/act#|/stby#" {
+                        puts $of $expect_out(buffer)
+                        }
+                "(config*)#" {
+                        puts $of $expect_out(buffer)
+                        }
+                "$prompt" {
+                        puts $of $expect_out(buffer)
+                        }
+                timeout {
+                        puts $of $expect_out(buffer)
+                        }
+                full_buffer {
+                        puts "full_buffer\n"
+                        puts -nonewline $of $expect_out(buffer)
+                        exp_continue
+                        }
+        }
+    }
+}
+
+
+# Exit
+send "exit\r"
+expect eof
+#close
+
+close $f
