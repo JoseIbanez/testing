@@ -1,0 +1,10 @@
+@L po1
+conf t
+!
+router bgp {{bgp.main.as}}
+ bgp router-id {{bgp.main.rd}}
+ bgp log-neighbor-changes
+ !
+end
+exit
+wr

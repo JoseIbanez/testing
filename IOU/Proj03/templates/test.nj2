@@ -1,0 +1,8 @@
+conf t
+vrf definition {{vrf.inside}}
+  address-family ipv4
+  exit-address-family
+vrf definition Cust{{vrf.outside}}
+  exit-address-family
+  address-family ipv4
+end

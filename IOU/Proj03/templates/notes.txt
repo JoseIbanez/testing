@@ -8,4 +8,21 @@ cat input.var | grep -v "#DCA" | grep -v "#DeviceA" | sed 's/#[A-Za-z]\+ //g' | 
 
 
 cat Cust16.a.yaml | grep -v "^$" | sed 's/ #DeviceA//g' | grep -v "#D" > Cust16.aa.yaml
-cat Cust16.a.yaml | grep -v "^$" | sed 's/ #DeviceB//g' | grep -v "#D" > Cust16.ab.yaml 
+cat Cust16.a.yaml | grep -v "^$" | sed 's/ #DeviceB//g' | grep -v "#D" > Cust16.ab.yaml
+
+
+
+class BDict(dict):
+     def __init__(self,**kw):
+         dict.__init__(self,kw)
+         self.__dict__.update(kw)
+
+
+aux=BDict()
+aux.id=1
+
+vrf=BDict()
+vlan=BDict()
+
+vlan.cucm=aux
+vlan.interdc=aux

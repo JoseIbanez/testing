@@ -1,0 +1,26 @@
+@L pre_show_run
+show run
+
+@L configure
+conf t
+!
+! VRF Router ID
+!
+vrf definition {{bgp.inside.vrf}}
+ rd {{bgp.inside.rd}}:1
+!
+!
+router bgp {{bgp.inside.as}}
+ address-family ipv4 vrf {{bgp.inside.vrf}}
+  redistribute connected
+  neighbor {{bgp.inside.neighbor}} remote-as {{bgp.inside.as}}
+  neighbor {{bgp.inside.neighbor}} activate
+ exit-address-family
+!
+!
+end
+write
+!
+@L post_show_run
+show run
+exit
