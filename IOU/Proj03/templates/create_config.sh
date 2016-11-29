@@ -1,16 +1,29 @@
 #!/bin/bash
 
-config=$1
-template=$2
+group=$1
+config=$2
+template=$3
+
+if [ "$group" = "sw" ]; then
+  devices="s11 s12 s21 s22"
+elif [ "$group" = "fw" ]; then
+  devices="a13 a23"
+elif [ "$group" = "pe" ]; then
+  devices="p19 p29"
+elif [ "$group" = "all" ]; then
+  devices="s11 s12 s21 s22 a13 a23 p19 p29"
+fi
+
+set -f                      # avoid globbing (expansion of *).
+array=(${devices// / })
+for dev in "${array[@]}"
+do
+    echo "$dev"
+    cat ${config}.yaml | sed "s/#Device$dev//g" | grep -v "#Device" | grep -v "^$" > ../cmd/${config}.${dev}.yaml
+    ./render.py -c ../cmd/${config}.${dev}.yaml -t ${template}.nj2 > ../cmd/${template}.${dev}.cmd
+
+done
 
 
-cat ${config}.yaml | grep -v "#DCB" | grep -v "#DeviceB" | sed 's/#[A-Za-z]\+//g'  | grep -v "^$" > ${config}.aa.yaml
-cat ${config}.yaml | grep -v "#DCB" | grep -v "#DeviceA" | sed 's/#[A-Za-z]\+//g'  | grep -v "^$" > ${config}.ab.yaml
-cat ${config}.yaml | grep -v "#DCA" | grep -v "#DeviceB" | sed 's/#[A-Za-z]\+//g'  | grep -v "^$" > ${config}.ba.yaml
-cat ${config}.yaml | grep -v "#DCA" | grep -v "#DeviceA" | sed 's/#[A-Za-z]\+//g'  | grep -v "^$" > ${config}.bb.yaml
 
-
-./render.py -c ${config}.aa.yaml -t ${template}.nj2 > ../cmd/${template}.s11.cmd
-./render.py -c ${config}.ab.yaml -t ${template}.nj2 > ../cmd/${template}.s12.cmd
-./render.py -c ${config}.ba.yaml -t ${template}.nj2 > ../cmd/${template}.s21.cmd
-./render.py -c ${config}.bb.yaml -t ${template}.nj2 > ../cmd/${template}.s22.cmd
+#./render.py -c ${config}.aa.yaml -t ${template}.nj2 > ../cmd/${template}.s11.cmd

@@ -44,6 +44,9 @@ route add  -net 192.168.101.0/24 gw 192.168.100.1
 
 
 echo "Syslog"
+syslog -i 's/^#\$UDPServerRun/\$UDPServerRun/g'  /etc/rsyslog.conf
+syslog -i 's/^#\$InputTCPServerRun/\$InputTCPServerRun/g'  /etc/rsyslog.conf
+service rsyslog restart
 
 echo "Ntp"
 echo "restrict 192.168.0.0 mask 255.255.0.0 notrust" >> /etc/ntp.conf

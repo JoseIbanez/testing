@@ -1,0 +1,40 @@
+
+vrf:
+
+ management:
+  id: Management
+
+basic:
+
+ mgnt:
+  hostname: s11 #Devices11
+  hostname: s12 #Devices12
+  hostname: s21 #Devices21
+  hostname: s22 #Devices22
+  hostname: a13 #Devicea13
+  hostname: a23 #Devicea23
+  hostname: p19 #Devicep19
+  hostname: p29 #Devicep29
+
+
+  mask: 255.255.255.0
+  gw: 192.168.101.1
+  vrf: Management
+  ip: 192.168.101.11 #Devices11
+  ip: 192.168.101.12 #Devices12
+  ip: 192.168.101.21 #Devices21
+  ip: 192.168.101.22 #Devices22
+  ip: 192.168.101.13 #Devicea13
+  ip: 192.168.101.23 #Devicea23
+  ip: 192.168.101.19 #Devicep19
+  ip: 192.168.101.29 #Devicep29
+
+
+ ntp:
+  a: 192.168.101.1
+  b: 192.168.100.1
+
+ syslog:
+  a: 192.168.100.1
+
+

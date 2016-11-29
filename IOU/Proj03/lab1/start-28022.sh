@@ -14,3 +14,14 @@ $IOU/scripts/wrapper.bin -m $IOU/bin/i86bi-linux-l2-ipbasek9-15.1g.bin -p 2021 -
 sleep 5
 $IOU/scripts/wrapper.bin -m $IOU/bin/i86bi-linux-l2-ipbasek9-15.1g.bin -p 2022 -- -e4 -s0 22 &
 sleep 5
+
+
+$IOU/scripts/wrapper.bin -m $IOU/bin/i86bi-linux-l3-adventerprisek9-12.4.bin -p 2013 -- -e4 -s0 13 &
+sleep 5
+$IOU/scripts/wrapper.bin -m $IOU/bin/i86bi-linux-l3-adventerprisek9-12.4.bin -p 2023 -- -e4 -s0 23 &
+sleep 5
+$IOU/scripts/wrapper.bin -m $IOU/bin/i86bi-linux-l3-adventerprisek9-12.4.bin -p 2019 -- -e4 -s0 19 &
+sleep 5
+$IOU/scripts/wrapper.bin -m $IOU/bin/i86bi-linux-l3-adventerprisek9-12.4.bin -p 2029 -- -e4 -s0 29 &
+sleep 5
+
