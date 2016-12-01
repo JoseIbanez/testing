@@ -1,4 +1,7 @@
+#!/bin/sh
 export IOU="/opt/IOU"
+hostname m1
+echo "127.0.0.1" >> /etc/hosts
 
 #==================================================
 echo "Configure Additional Repo"
@@ -12,9 +15,11 @@ apt-get install -y \
   libssl1.0.0:i386 \
   libnet-pcap-perl libpcap0.8 \
   uml-utilities bridge-utils \
-  joe awscli \
+  joe python-pip expect \
   ntp
 
+pip install awscli
+pip install Jinja2
 
 echo "Post configuration"
 ln -s /lib/i386-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so.4
@@ -22,6 +27,8 @@ ln -s /lib/i386-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so.4
 
 mkdir -p $IOU
 cp -a /home/vagrant/.aws /root/
+cp -a /home/ubuntu/.aws /root/
+
 aws --region eu-west-1  s3 sync s3://fibratel.es/utils/Cisco-IOU-L2-L3-Collection-v4 $IOU
 
 echo "Generate license file"
@@ -44,8 +51,10 @@ route add  -net 192.168.101.0/24 gw 192.168.100.1
 
 
 echo "Syslog"
-syslog -i 's/^#\$UDPServerRun/\$UDPServerRun/g'  /etc/rsyslog.conf
-syslog -i 's/^#\$InputTCPServerRun/\$InputTCPServerRun/g'  /etc/rsyslog.conf
+sed -i 's/^#\$UDPServerRun/\$UDPServerRun/g'  /etc/rsyslog.conf
+sed -i 's/^#\$InputTCPServerRun/\$InputTCPServerRun/g'  /etc/rsyslog.conf
+sed -i 's/^#\$ModLoad imudp/\$ModLoad imudp/g' /etc/rsyslog.conf
+sed -i 's/^#\$ModLoad imtcp/\$ModLoad imtcp/g' /etc/rsyslog.conf
 service rsyslog restart
 
 echo "Ntp"
