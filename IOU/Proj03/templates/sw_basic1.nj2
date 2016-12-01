@@ -1,0 +1,110 @@
+@L configure
+conf t
+!
+! Template: sw_basic1.nj2
+! Data: mgnt.yaml
+!
+!
+hostname {{basic.mgnt.hostname}}
+!
+! Interfaces
+!
+interface range e0/0 - 3 , e1/0 - 3
+shutdown
+!
+interface range e2/0 - 3 , e3/0 - 3
+shutdown
+!
+!
+! VRF
+!
+vrf definition {{vrf.management.id}}
+ address-family ipv4
+ exit-address-family
+!
+!
+!
+default int e0/0
+default int po1
+default int po11
+!
+int po1
+description IntraDC
+switchport
+switchport trunk encapsulation dot1q
+switchport mode trunk
+!
+int e0/0
+description IntraDC
+switchport
+switchport trunk encapsulation dot1q
+switchport mode trunk
+channel-group 1 mode active
+duplex full
+no shut
+!
+int po1
+switchport trunk allowed vlan 1000
+!
+int e0/0
+switchport trunk allowed vlan 1000
+!
+!
+!
+!
+default int e1/0
+default int po11
+!
+int po11
+description InterDC
+switchport
+switchport trunk encapsulation dot1q
+switchport mode trunk
+!
+int e1/0
+description InterDC
+switchport
+switchport trunk encapsulation dot1q
+switchport mode trunk
+channel-group 11 mode active
+duplex full
+no shut
+!
+int po11
+switchport trunk allowed vlan 1001
+!
+int e1/0
+switchport trunk allowed vlan 1001
+!
+!
+!
+!
+! Management Interface
+!
+interface Ethernet3/3
+ no switchport
+ vrf forwarding {{basic.mgnt.vrf}}
+ ip address {{basic.mgnt.ip}} {{basic.mgnt.mask}}
+ no shut
+!
+ip route vrf {{basic.mgnt.vrf}} 0.0.0.0 0.0.0.0 {{basic.mgnt.gw}}
+!
+! ntp
+!
+ntp server vrf {{basic.mgnt.vrf}} {{basic.ntp.a}}
+ntp server vrf {{basic.mgnt.vrf}} {{basic.ntp.b}}
+!
+! syslog
+!
+logging host {{basic.syslog.a}} vrf {{basic.mgnt.vrf}}
+!
+!
+!
+!
+end
+wr
+@L sh_run
+show run
+@L sh_po
+show etherchannel summary
+exit

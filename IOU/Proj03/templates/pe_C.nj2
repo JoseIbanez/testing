@@ -1,0 +1,61 @@
+@L configure
+conf t
+!
+! VRF
+!
+vrf definition {{vlan.pe.vrf}}
+  rd {{vlan.interpe.ip}}:1
+  address-family ipv4
+  exit-address-family
+!
+! Interfaces
+!
+interface Ethernet0/0.{{vlan.interpe.id}}
+  encapsulation dot1Q {{vlan.interpe.id}}
+  description PE-PE_{{vlan.pe.vrf}}
+  vrf forwarding {{vlan.pe.vrf}}
+  ip address {{vlan.interpe.ip}} {{vlan.interpe.mask}}
+  no shut
+!
+!
+interface e0/1.{{vlan.pe.id}}
+  encapsulation dot1Q {{vlan.pe.id}}
+  description SW1_{{vlan.pe.vrf}}
+  vrf forwarding {{vlan.pe.vrf}}
+  ip address {{vlan.pe.ip1}} {{vlan.pe.mask}}
+  no shut
+!
+!
+interface e0/2.{{vlan.pe.id}}
+  encapsulation dot1Q {{vlan.pe.id}}
+  description SW2_{{vlan.pe.vrf}}
+  vrf forwarding {{vlan.pe.vrf}}
+  ip address {{vlan.pe.ip2}} {{vlan.pe.mask}}
+  no shut
+!
+!
+! BGP
+!
+router bgp {{bgp.pe.as}}
+!
+!
+address-family ipv4 vrf {{bgp.pe.vrf}}
+ no synchronization
+ redistribute connected
+ neighbor {{bgp.pe.neighbor1}} remote-as {{bgp.pe.custas}}
+ neighbor {{bgp.pe.neighbor1}} activate
+ neighbor {{bgp.pe.neighbor2}} remote-as {{bgp.pe.custas}}
+ neighbor {{bgp.pe.neighbor2}} activate
+ neighbor {{bgp.pe.peer}} remote-as {{bgp.pe.as}}
+ neighbor {{bgp.pe.peer}} activate
+
+exit-address-family
+!
+!
+end
+write
+!
+@L show_run
+show run
+!
+exit

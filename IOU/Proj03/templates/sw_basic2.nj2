@@ -1,0 +1,28 @@
+@L configure
+conf t
+!
+! Template: sw_basic2.nj2
+! Data: mgnt.yaml
+!
+! Interfaces
+!
+interface e2/0
+ no switchport
+ no ip address
+ no shutdown
+!
+!
+! BGP
+!
+router bgp {{bgp.sw.as}}
+ bgp router-id {{bgp.sw.rd}}
+ bgp log-neighbor-changes
+!
+!
+end
+write
+!
+@L show_run
+show run
+!
+exit

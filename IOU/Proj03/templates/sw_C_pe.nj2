@@ -1,0 +1,41 @@
+@L pre_show_run
+show run
+
+@L configure
+conf t
+!
+! VRF
+!
+vrf definition {{bgp.outside.vrf}}
+  rd {{bgp.outside.rd}}:1
+  address-family ipv4
+  exit-address-family
+!
+! Interface to PE
+!
+interface e2/0.{{vlan.tope.id}}
+  encapsulation dot1Q {{vlan.tope.id}}
+  description {{vlan.tope.name}}
+  vrf forwarding {{vlan.tope.vrf}}
+  ip address {{vlan.tope.ip}} {{vlan.tope.mask}}
+!
+! BGP
+!
+router bgp {{bgp.outside.as}}
+!
+address-family ipv4 vrf {{bgp.outside.vrf}}
+ no synchronization
+ redistribute connected
+ neighbor {{bgp.outside.pe}} remote-as {{bgp.outside.as}}
+ neighbor {{bgp.outside.pe}} activate
+ neighbor {{bgp.outside.peer}} remote-as {{bgp.outside.as}}
+ neighbor {{bgp.outside.peer}} activate
+!
+!
+!
+end
+write
+
+@L post_show_run
+show run
+exit
