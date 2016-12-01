@@ -1,7 +1,7 @@
 #!/bin/sh
 export IOU="/opt/IOU"
 hostname m1
-echo "127.0.0.1" >> /etc/hosts
+cat /etc/hosts | grep "m1$" ||  echo "127.0.0.1   m1" >> /etc/hosts
 
 #==================================================
 echo "Configure Additional Repo"
