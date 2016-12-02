@@ -3,34 +3,34 @@ conf t
 !
 ! VRF
 !
-vrf definition {{vlan.pe.vrf}}
-  rd {{vlan.interpe.ip}}:1
+vrf definition {{pe.ce.vrf}}
+  rd {{pe.interpe.ip}}:1
   address-family ipv4
   exit-address-family
 !
 ! Interfaces
 !
-interface Ethernet0/0.{{vlan.interpe.id}}
-  encapsulation dot1Q {{vlan.interpe.id}}
-  description PE-PE_{{vlan.pe.vrf}}
-  vrf forwarding {{vlan.pe.vrf}}
-  ip address {{vlan.interpe.ip}} {{vlan.interpe.mask}}
+interface Ethernet0/0.{{pe.interpe.vlan}}
+  encapsulation dot1Q {{pe.interpe.vlan}}
+  description PE-PE_{{pe.ce.vrf}}
+  vrf forwarding {{pe.ce.vrf}}
+  ip address {{pe.interpe.ip}} {{pe.interpe.mask}}
   no shut
 !
 !
-interface e0/1.{{vlan.pe.id}}
-  encapsulation dot1Q {{vlan.pe.id}}
-  description SW1_{{vlan.pe.vrf}}
-  vrf forwarding {{vlan.pe.vrf}}
-  ip address {{vlan.pe.ip1}} {{vlan.pe.mask}}
+interface e0/1.{{pe.ce.vlan}}
+  encapsulation dot1Q {{pe.ce.vlan}}
+  description SW1_{{pe.ce.vrf}}
+  vrf forwarding {{pe.ce.vrf}}
+  ip address {{pe.ce.ip1}} {{pe.ce.mask}}
   no shut
 !
 !
-interface e0/2.{{vlan.pe.id}}
-  encapsulation dot1Q {{vlan.pe.id}}
-  description SW2_{{vlan.pe.vrf}}
-  vrf forwarding {{vlan.pe.vrf}}
-  ip address {{vlan.pe.ip2}} {{vlan.pe.mask}}
+interface e0/2.{{pe.ce.vlan}}
+  encapsulation dot1Q {{pe.ce.vlan}}
+  description SW2_{{pe.ce.vrf}}
+  vrf forwarding {{pe.ce.vrf}}
+  ip address {{pe.ce.ip2}} {{pe.ce.mask}}
   no shut
 !
 !

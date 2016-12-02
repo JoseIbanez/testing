@@ -52,7 +52,12 @@ send "\n"
 set timeout 1
 set count 10
 while {1} {
-    expect {
+       expect {
+          "initial configuration dialog" {
+            puts $of $expect_out(buffer)
+            send "no\r"
+            set count 20
+          }
           "'^]'." {
             puts $of $expect_out(buffer)
             send "\n"

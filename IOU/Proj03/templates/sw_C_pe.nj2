@@ -13,11 +13,19 @@ vrf definition {{bgp.outside.vrf}}
 !
 ! Interface to PE
 !
-interface e2/0.{{vlan.tope.id}}
-  encapsulation dot1Q {{vlan.tope.id}}
-  description {{vlan.tope.name}}
-  vrf forwarding {{vlan.tope.vrf}}
-  ip address {{vlan.tope.ip}} {{vlan.tope.mask}}
+interface e2/0.{{n7k.tope.vlan}}
+  encapsulation dot1Q {{n7k.tope.vlan}}
+  description {{n7k.tope.name}}
+  vrf forwarding {{n7k.tope.vrf}}
+  ip address {{n7k.tope.ip}} {{n7k.tope.mask}}
+!
+!
+! Static routes
+!
+ip route vrf {{static.inside.vrf}} {{static.inside.peer_route}} {{static.inside.peer_mask}} {{static.inside.peer_gw}}
+ip route vrf {{static.inside.vrf}} 0.0.0.0 0.0.0.0 {{static.inside.gw}}
+!
+ip route vrf {{static.outside.vrf}} {{static.outside.cucm1_route}} {{static.outside.cucm1_mask}} {{static.outside.cucm1_gw}}
 !
 ! BGP
 !
@@ -26,7 +34,8 @@ router bgp {{bgp.outside.as}}
 address-family ipv4 vrf {{bgp.outside.vrf}}
  no synchronization
  redistribute connected
- neighbor {{bgp.outside.pe}} remote-as {{bgp.outside.as}}
+ redistribute static
+ neighbor {{bgp.outside.pe}} remote-as {{bgp.pe.as}}
  neighbor {{bgp.outside.pe}} activate
  neighbor {{bgp.outside.peer}} remote-as {{bgp.outside.as}}
  neighbor {{bgp.outside.peer}} activate

@@ -23,10 +23,10 @@ vrf definition {{vrf.management.id}}
  exit-address-family
 !
 !
+! Inf IntraDC
 !
 default int e0/0
 default int po1
-default int po11
 !
 int po1
 description IntraDC
@@ -50,7 +50,7 @@ int e0/0
 switchport trunk allowed vlan 1000
 !
 !
-!
+! Inf InterDC
 !
 default int e1/0
 default int po11
@@ -77,12 +77,44 @@ int e1/0
 switchport trunk allowed vlan 1001
 !
 !
+! Inf to ASA
+!
+no int po41
+default int e0/2
+!
+interface e0/2
+description ASA
+switchport
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 1000
+switchport trunk allowed vlan 1003
+duplex full
+no shut
+!
+!
+! Inf to P.E.
+!
+interface e2/0
+ description PE
+ no switchport
+ no ip address
+ no shutdown
+!
+! BGP
+!
+router bgp {{bgp.sw.as}}
+ bgp router-id {{bgp.sw.rd}}
+ bgp log-neighbor-changes
+!
+!
 !
 !
 ! Management Interface
 !
 interface Ethernet3/3
  no switchport
+ description Management
  vrf forwarding {{basic.mgnt.vrf}}
  ip address {{basic.mgnt.ip}} {{basic.mgnt.mask}}
  no shut
