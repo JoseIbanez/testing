@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+  config.vm.box = "trusty64"
+
+
+  config.vm.define "lxc01" do |lxc01|
+      lxc01.vm.provision "shell", path: "./deploy-01.sh"
+      lxc01.vm.hostname = "lxc01"
+      lxc01.vm.network "private_network", ip: "172.20.20.11"
+  end
+
+  config.vm.define "lxc02" do |lxc02|
+      lxc02.vm.provision "shell", path: "./deploy-01.sh"
+      lxc02.vm.hostname = "lxc02"
+      lxc02.vm.network "private_network", ip: "172.20.20.12"
+  end
+
+
+
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "2048"]
+    vb.customize ["modifyvm", :id, "--cpus", "2"]
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+  end
+
+end
