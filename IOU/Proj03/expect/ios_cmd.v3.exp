@@ -56,7 +56,7 @@ while {1} {
           "initial configuration dialog" {
             puts $of $expect_out(buffer)
             send "no\r"
-            set count 20
+            set count 60
           }
           "'^]'." {
             puts $of $expect_out(buffer)
@@ -133,7 +133,7 @@ while {[gets $f line] != -1} {
     } else {
         # The command is sent to the network element
         send "$line\r"
-        sleep .5
+        sleep .2
 
         expect {
                 "(nxos)#" {

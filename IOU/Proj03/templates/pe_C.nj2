@@ -3,25 +3,17 @@ conf t
 !
 ! VRF
 !
-vrf definition {{pe.ce.vrf}}
-  rd {{pe.interpe.ip}}:1
-  address-family ipv4
-  exit-address-family
+ip vrf {{pe.ce.vrf}}
+  rd {{bgp.pe.as}}:{{bgp.pe.rd}}
+  route-target export {{bgp.pe.as}}:{{bgp.pe.rd}}
+  route-target import {{bgp.pe.as}}:{{bgp.pe.rd}}
 !
 ! Interfaces
-!
-interface Ethernet0/0.{{pe.interpe.vlan}}
-  encapsulation dot1Q {{pe.interpe.vlan}}
-  description PE-PE_{{pe.ce.vrf}}
-  vrf forwarding {{pe.ce.vrf}}
-  ip address {{pe.interpe.ip}} {{pe.interpe.mask}}
-  no shut
-!
 !
 interface e0/1.{{pe.ce.vlan}}
   encapsulation dot1Q {{pe.ce.vlan}}
   description SW1_{{pe.ce.vrf}}
-  vrf forwarding {{pe.ce.vrf}}
+  ip vrf forwarding {{pe.ce.vrf}}
   ip address {{pe.ce.ip1}} {{pe.ce.mask}}
   no shut
 !
@@ -29,7 +21,7 @@ interface e0/1.{{pe.ce.vlan}}
 interface e0/2.{{pe.ce.vlan}}
   encapsulation dot1Q {{pe.ce.vlan}}
   description SW2_{{pe.ce.vrf}}
-  vrf forwarding {{pe.ce.vrf}}
+  ip vrf forwarding {{pe.ce.vrf}}
   ip address {{pe.ce.ip2}} {{pe.ce.mask}}
   no shut
 !
@@ -42,13 +34,10 @@ router bgp {{bgp.pe.as}}
 address-family ipv4 vrf {{bgp.pe.vrf}}
  no synchronization
  redistribute connected
- neighbor {{bgp.pe.neighbor1}} remote-as {{bgp.pe.custas}}
- neighbor {{bgp.pe.neighbor1}} activate
- neighbor {{bgp.pe.neighbor2}} remote-as {{bgp.pe.custas}}
- neighbor {{bgp.pe.neighbor2}} activate
- neighbor {{bgp.pe.peer}} remote-as {{bgp.pe.as}}
- neighbor {{bgp.pe.peer}} activate
-
+ neighbor {{bgp.pe.ce1}} remote-as {{bgp.outside.as}}
+ neighbor {{bgp.pe.ce1}} activate
+ neighbor {{bgp.pe.ce2}} remote-as {{bgp.outside.as}}
+ neighbor {{bgp.pe.ce2}} activate
 exit-address-family
 !
 !

@@ -1,0 +1,35 @@
+@L test
+!
+! Template: ro_M_test.nj2
+! Data: mgnt.yaml
+!
+! Test: Configured, VRF
+show vrf | i {{basic.mgnt.vrf}}
+!
+! Test: Configured, Default GW
+show ip route vrf {{basic.mgnt.vrf}} | i  via {{basic.mgnt.gw}}
+!
+! Test: Configured, Logging server
+show logging | i Logging to {{basic.syslog.a}}
+!
+! Test: Configured, NTP
+show ntp associations | i {{basic.ntp.a}}
+!
+!
+! Test: Ping, Local interface
+ping vrf {{basic.mgnt.vrf}} {{basic.mgnt.ip}}
+!
+! Test: Ping, Default GW
+ping vrf {{basic.mgnt.vrf}} {{basic.mgnt.gw}}
+!
+! Test: Ping, NTP b
+ping vrf {{basic.mgnt.vrf}} {{basic.ntp.b}}
+!
+! Test: Ping, NTP b
+ping vrf {{basic.mgnt.vrf}} {{basic.ntp.b}}
+!
+!
+! Test: Synchronized, NTP
+show ntp associations | i [+|#]{{basic.ntp.a}}
+!
+exit

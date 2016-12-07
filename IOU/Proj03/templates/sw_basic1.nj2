@@ -89,7 +89,6 @@ switchport trunk encapsulation dot1q
 switchport mode trunk
 switchport trunk allowed vlan 1000
 switchport trunk allowed vlan 1003
-duplex full
 no shut
 !
 !

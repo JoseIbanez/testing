@@ -26,8 +26,9 @@ vrf definition {{vrf.management.id}}
 ! Interfaces
 !
 interface Ethernet0/0
- description PE-PE
- no ip address
+ description PE-MPLS
+ mpls ip
+ ip address {{mpls.inside.ip}} {{mpls.inside.mask}}
  no shut
 !
 interface Ethernet0/1
@@ -61,9 +62,16 @@ logging host {{basic.syslog.a}} vrf {{basic.mgnt.vrf}}
 ! BGP
 !
 router bgp {{bgp.pe.as}}
+ no synchronization
  bgp router-id {{bgp.pe.rd}}
  bgp log-neighbor-changes
-!
+ neighbor {{mpls.inside.peer}} remote-as {{bgp.pe.as}}
+ no auto-summary
+ !
+ address-family vpnv4
+  neighbor {{mpls.inside.peer}} activate
+  neighbor {{mpls.inside.peer}} send-community extended
+ exit-address-family!
 !
 end
 write
