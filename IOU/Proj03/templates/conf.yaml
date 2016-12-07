@@ -1,0 +1,282 @@
+
+
+vrf:
+
+ inside:
+  id: Cust16_Inside
+ outside:
+  id: Cust16_Outside
+
+net:
+
+
+
+
+
+
+
+n7k: #DCA
+
+ cucm: #DCA
+  subnet: 172.30.16.0 #DCA
+  mask: 255.255.255.224 #DCA
+  vlan: 1160 #DCA
+  name: Cust16_cucm #DCA
+  vrf: Cust16_Inside #DCA
+  hsrp: 172.30.16.29 #DCA
+  ip: 172.30.16.28 #DeviceA #DCA
+  ip: 172.30.16.30 #DeviceB #DCA
+
+ interdc: #DCA
+
+  vlan: 1161 #DCA
+  name: Cust16_InterDC #DCA
+  vrf: Cust16_Inside #DCA
+  mask: 255.255.255.248 #DCA
+  hsrp: 172.30.16.227 #DCA
+  ip: 172.30.16.225 #DeviceA #DCA
+  ip: 172.30.16.226 #DeviceB #DCA
+
+ cubesp: #DCA
+
+  mask: 255.255.255.240 #DCA
+  vlan: 1163 #DCA
+  name: Cust16_CubeSP #DCA
+  vrf: Cust16_Outside #DCA
+  hsrp: 172.30.16.46 #DCA
+  ip: 172.30.16.45 #DeviceA #DCA
+  ip: 172.30.16.44 #DeviceB #DCA
+
+
+ tope: #DCA
+
+
+  vlan: 1169 #DCA
+  name: Cust16_ToPE #DCA
+  vrf: Cust16_Outside #DCA
+  mask: 255.255.255.252 #DCA
+  ip: 172.30.16.249 #DeviceA #DCA
+  ip: 172.30.16.253 #DeviceB #DCA
+
+pe: #DCA
+
+ ce: #DCA
+  vrf: Cust16 #DCA
+  mask: 255.255.255.252 #DCA
+  vlan: 1169 #DCA
+  ip1: 172.30.16.250 #DCA
+  ip2: 172.30.16.254 #DCA
+
+
+
+
+
+
+
+
+asa: #DCA
+
+ cucm: #DCA
+
+  mask: 255.255.255.224 #DCA
+  vlan: 1160 #DCA
+  name: Cust16_cucm #DCA
+  vrf: Cust16 #DCA
+  hsrp: 172.30.16.1 #DCA
+  ip: 172.30.16.2 #DeviceA #DCA
+  ip: 172.30.16.3 #DeviceB #DCA
+
+ cubesp: #DCA
+
+  mask: 255.255.255.240 #DCA
+  vlan: 1163 #DCA
+  name: Cust16_CubeSP #DCA
+  vrf: Cust16 #DCA
+  hsrp: 172.30.16.34 #DCA
+  ip: 172.30.16.33 #DeviceA #DCA
+  ip: 172.30.16.35 #DeviceB #DCA
+
+
+static: #DCA
+
+ inside: #DCA
+  vrf: Cust16_Inside #DCA
+  gw: 172.30.16.1 #DCA
+  peer_route: 172.31.16.0 #DCA
+  peer_mask: 255.255.255.224 #DCA
+  peer_gw: 172.30.16.228 #DCA
+
+ asa: #DCA
+  vrf: Cust16 #DCA
+  gw: 172.30.16.46 #DCA
+  cucm1_route: 172.30.16.0 #DCA
+  cucm1_mask: 255.255.255.224 #DCA
+  cucm1_gw: 172.30.16.29 #DCA
+
+ outside: #DCA
+  vrf: Cust16_Outside #DCA
+  cucm1_route: 172.30.16.0 #DCA
+  cucm1_mask: 255.255.255.224 #DCA
+  cucm1_gw: 172.30.16.34 #DCA
+
+
+bgp: #DCA
+
+ outside: #DCA
+  as: 65000 #DCA
+  vrf: Cust16_Outside #DCA
+  rd: 172.30.16.45 #DeviceA #DCA
+  rd: 172.30.16.44 #DeviceB #DCA
+  peer: 172.30.16.44 #DeviceA #DCA
+  peer: 172.30.16.45 #DeviceB #DCA
+  pe: 172.30.16.250 #DeviceA #DCA
+  pe: 172.30.16.254 #DeviceB #DCA
+
+ pe: #DCA
+  as: 4555 #DCA
+  vrf: Cust16 #DCA
+  rd: 16 #DCA
+  ce1: 172.30.16.249 #DCA
+  ce2: 172.30.16.253 #DCA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+n7k: #DCB
+
+ cucm: #DCB
+  subnet: 172.31.16.0 #DCB
+  mask: 255.255.255.224 #DCB
+  vlan: 1160 #DCB
+  name: Cust16_cucm #DCB
+  vrf: Cust16_Inside #DCB
+  hsrp: 172.31.16.29 #DCB
+  ip: 172.31.16.28 #DeviceA #DCB
+  ip: 172.31.16.30 #DeviceB #DCB
+
+ interdc: #DCB
+
+  vlan: 1161 #DCB
+  name: Cust16_InterDC #DCB
+  vrf: Cust16_Inside #DCB
+  mask: 255.255.255.248 #DCB
+  hsrp: 172.30.16.228 #DCB
+  ip: 172.30.16.229 #DeviceA #DCB
+  ip: 172.30.16.230 #DeviceB #DCB
+
+ cubesp: #DCB
+
+  mask: 255.255.255.240 #DCB
+  vlan: 1163 #DCB
+  name: Cust16_CubeSP #DCB
+  vrf: Cust16_Outside #DCB
+  hsrp: 172.31.16.46 #DCB
+  ip: 172.31.16.45 #DeviceA #DCB
+  ip: 172.31.16.44 #DeviceB #DCB
+
+
+ tope: #DCB
+
+
+  vlan: 1169 #DCB
+  name: Cust16_ToPE #DCB
+  vrf: Cust16_Outside #DCB
+  mask: 255.255.255.252 #DCB
+  ip: 172.31.16.249 #DeviceA #DCB
+  ip: 172.31.16.253 #DeviceB #DCB
+
+pe: #DCB
+
+ ce: #DCB
+  vrf: Cust16 #DCB
+  mask: 255.255.255.252 #DCB
+  vlan: 1169 #DCB
+  ip1: 172.31.16.250 #DCB
+  ip2: 172.31.16.254 #DCB
+
+
+
+
+
+
+
+
+asa: #DCB
+
+ cucm: #DCB
+
+  mask: 255.255.255.224 #DCB
+  vlan: 1160 #DCB
+  name: Cust16_cucm #DCB
+  vrf: Cust16 #DCB
+  hsrp: 172.31.16.1 #DCB
+  ip: 172.31.16.2 #DeviceA #DCB
+  ip: 172.31.16.3 #DeviceB #DCB
+
+ cubesp: #DCB
+
+  mask: 255.255.255.240 #DCB
+  vlan: 1163 #DCB
+  name: Cust16_CubeSP #DCB
+  vrf: Cust16 #DCB
+  hsrp: 172.31.16.34 #DCB
+  ip: 172.31.16.33 #DeviceA #DCB
+  ip: 172.31.16.35 #DeviceB #DCB
+
+
+static: #DCB
+
+ inside: #DCB
+  vrf: Cust16_Inside #DCB
+  gw: 172.31.16.1 #DCB
+  peer_route: 172.30.16.0 #DCB
+  peer_mask: 255.255.255.224 #DCB
+  peer_gw: 172.30.16.227 #DCB
+
+ asa: #DCB
+  vrf: Cust16 #DCB
+  gw: 172.31.16.46 #DCB
+  cucm1_route: 172.31.16.0 #DCB
+  cucm1_mask: 255.255.255.224 #DCB
+  cucm1_gw: 172.31.16.29 #DCB
+
+ outside: #DCB
+  vrf: Cust16_Outside #DCB
+  cucm1_route: 172.31.16.0 #DCB
+  cucm1_mask: 255.255.255.224 #DCB
+  cucm1_gw: 172.31.16.34 #DCB
+
+
+bgp: #DCB
+
+ outside: #DCB
+  as: 65000 #DCB
+  vrf: Cust16_Outside #DCB
+  rd: 172.31.16.45 #DeviceA #DCB
+  rd: 172.31.16.44 #DeviceB #DCB
+  peer: 172.31.16.44 #DeviceA #DCB
+  peer: 172.31.16.45 #DeviceB #DCB
+  pe: 172.31.16.250 #DeviceA #DCB
+  pe: 172.31.16.254 #DeviceB #DCB
+
+ pe: #DCB
+  as: 4555 #DCB
+  vrf: Cust16 #DCB
+  rd: 16 #DCB
+  ce1: 172.31.16.249 #DCB
+  ce2: 172.31.16.253 #DCB
+

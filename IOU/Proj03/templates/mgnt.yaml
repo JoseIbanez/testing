@@ -1,4 +1,6 @@
 
+
+
 vrf:
 
  management:
@@ -36,5 +38,39 @@ basic:
 
  syslog:
   a: 192.168.100.1
+
+
+
+
+
+
+
+
+bgp:
+
+ sw:
+  as: 65000
+  rd: 192.168.101.11 #Devices11
+  rd: 192.168.101.12 #Devices12
+  rd: 192.168.101.21 #Devices21
+  rd: 192.168.101.22 #Devices22
+
+ pe:
+  as: 4555
+  rd: 192.168.101.19 #Devicep19
+  rd: 192.168.101.29 #Devicep29
+
+
+mpls:
+
+ inside:
+
+
+
+  mask: 255.255.255.0
+  ip: 10.100.0.19 #Devicep19
+  ip: 10.100.0.29 #Devicep29
+  peer: 10.100.0.29 #Devicep19
+  peer: 10.100.0.19 #Devicep29
 
 
