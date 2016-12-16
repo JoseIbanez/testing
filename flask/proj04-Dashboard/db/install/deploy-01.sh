@@ -24,8 +24,8 @@ echo "Installing pakages"
 
 export DEBIAN_FRONTEND="noninteractive"
 
-debconf-set-selections <<< "mysql-server mysql-server/root_password password ${BDB_MYSQL_ROOT}"
-debconf-set-selections <<< "mysql-server mysql-server/root_password_again password ${BDB_MYSQL_ROOT}"
+debconf-set-selections <<< "mysql-server mysql-server/root_password password ${BDB_MYSQL_PASS}"
+debconf-set-selections <<< "mysql-server mysql-server/root_password_again password ${BDB_MYSQL_PASS}"
 
 apt-get install -y \
         mysql-server
