@@ -275,3 +275,91 @@ line vty 0 4
 !
 ntp server vrf management 192.168.1.50
 end
+
+
+
+
+
+
+router bgp 65000
+ no synchronization
+ bgp router-id 192.168.101.19
+ bgp log-neighbor-changes
+ neighbor 10.100.0.29 remote-as 65000
+ no auto-summary
+ !
+ address-family vpnv4
+  neighbor 10.100.0.29 activate
+  neighbor 10.100.0.29 send-community extended
+ exit-address-family
+ !
+ address-family ipv4 vrf Cust16
+  no synchronization
+  redistribute connected
+  neighbor 172.30.16.249 remote-as 65000
+  neighbor 172.30.16.249 activate
+  neighbor 172.30.16.253 remote-as 65000
+  neighbor 172.30.16.253 activate
+ exit-address-family
+
+
+
+
+
+
+
+
+
+
+ router bgp 65000
+  no synchronization
+  bgp router-id 192.168.101.29
+  bgp log-neighbor-changes
+  neighbor 10.100.0.19 remote-as 65000
+  no auto-summary
+  !
+  address-family vpnv4
+   neighbor 10.100.0.19 activate
+   neighbor 10.100.0.19 send-community extended
+  exit-address-family
+  !
+  address-family ipv4 vrf Cust16
+   no synchronization
+   redistribute connected
+   neighbor 172.31.16.249 remote-as 65000
+   neighbor 172.31.16.249 activate
+   neighbor 172.31.16.253 remote-as 65000
+   neighbor 172.31.16.253 activate
+  exit-address-family
+ !
+
+
+
+
+ router bgp 65000
+  address-family ipv4 vrf Cust16_Outside
+   neighbor 172.30.16.250 remote-as 65000
+   neighbor 172.30.16.250 activate
+
+  exit-address-family
+
+
+
+
+
+  router bgp 65000
+  address-family ipv4 vrf Cust16_Outside
+    neighbor 172.31.16.250 remote-as 65000
+    neighbor 172.31.16.250 activate
+   exit-address-family
+  !
+
+
+ip vrf Cust16
+no rd 4555:16
+ no route-target export 4555:16
+ no route-target import 4555:16
+
+ rd 65000:16
+ route-target export 65000:16
+ route-target import 65000:16
