@@ -25,11 +25,15 @@ echo "Post configuration"
 ln -s /lib/i386-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so.4
 
 
-mkdir -p $IOU
+mkdir -p $IOU/bin
+mkdir -p $IOU/scripts
+
 cp -a /home/vagrant/.aws /root/
 cp -a /home/ubuntu/.aws /root/
 
-aws --region eu-west-1  s3 sync s3://fibratel.es/utils/Cisco-IOU-L2-L3-Collection-v4 $IOU
+aws --region eu-west-1 s3 sync \
+    s3://fibratel.es/utils/Cisco-IOU-L2-L3-Collection-v4/scripts \
+    $IOU/scripts
 
 echo "Generate license file"
 chmod +x $IOU/scripts/*.py

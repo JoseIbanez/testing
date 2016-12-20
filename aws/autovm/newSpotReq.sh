@@ -28,5 +28,5 @@ request-spot-instances \
 --launch-specification file:///tmp/myVm.json
 
 
-aws ec2 describe-instances --filters "Name=spot-instance-request-id,Values=sir-vv6gh3hn" | jq -r ".Reservations[] | .Instances[] | .InstanceId"
-aws ec2 create-tags --resources "sir-vv6gh3hn" --tags "Key=Name,Value=kumo-m1"
+#aws ec2 describe-instances --filters "Name=spot-instance-request-id,Values=sir-vv6gh3hn" | jq -r ".Reservations[] | .Instances[] | .InstanceId"
+#aws ec2 create-tags --resources "sir-vv6gh3hn" --tags "Key=Name,Value=kumo-m1"

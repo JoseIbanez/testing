@@ -1,0 +1,72 @@
+
+show mpls ldp neighbor
+ - re "ip"
+
+show ip vrf interfaces
+ - re "ip up"
+
+
+
+ip vrf Customer_A
+rd 65000:1
+route-target both 65000:1
+ip vrf Customer_B
+rd 65000:2
+route-target both 65000:2
+
+-------VRF--------
+#PE1
+interface e0/0.1169
+encapsulation dot1Q 1169
+ip vrf forwarding Customer_A
+ip address 10.0.1.1 255.255.255.252
+
+interface e0/0.1219
+encapsulation dot1Q 1219
+ip vrf forwarding Customer_B
+ip address 10.0.1.5 255.255.255.252
+
+
+#PE2
+interface e0/0.1169
+encapsulation dot1Q 1169
+ip vrf forwarding Customer_A
+ip address 10.0.2.1 255.255.255.252
+
+interface e0/0.1219
+encapsulation dot1Q 1219
+ip vrf forwarding Customer_B
+ip address 10.0.2.5 255.255.255.252
+
+
+-------BGP----
+
+router bgp 65000
+neighbor 192.168.101.11 remote-as 65000
+neighbor 192.168.101.11 update-source loopback 0
+address-family vpnv4
+neighbor 192.168.101.11 activate
+
+router bgp 65000
+neighbor 192.168.101.12 remote-as 65000
+neighbor 192.168.101.12 update-source loopback 0
+address-family vpnv4
+neighbor 192.168.101.12 activate
+
+router bgp 65000
+address-family ipv4 vrf Customer_B
+ no synchronization
+exit-address-family
+!
+address-family ipv4 vrf Customer_A
+ no synchronization
+exit-address-family
+
+
+router bgp 65000
+address-family ipv4 vrf Customer_A
+redistribute connected
+redistribute static
+address-family ipv4 vrf Customer_B
+redistribute connected
+redistribute static
