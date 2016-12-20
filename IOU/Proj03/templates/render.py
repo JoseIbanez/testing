@@ -26,6 +26,7 @@ TEMPLATE_ENVIRONMENT = Environment(
 def render_template(template_filename, context):
     return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
+#print("Conf file:"+options.conf)
 with open(options.conf, 'r') as stream:
     try:
         y=yaml.load(stream)
