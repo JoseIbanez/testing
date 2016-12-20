@@ -1,0 +1,66 @@
+@L configure
+conf t
+!
+! Template: pe_basic2.nj2
+! Data: mgnt.yaml
+!
+! hostname
+!
+hostname {{basic.id.hostname}}
+!
+!
+!
+!
+! Interfaces
+!
+interface Loopback0
+ ip address {{basic.loopback.ip}} {{basic.loopback.mask}}
+ no shut
+!
+interface Ethernet0/0
+ description
+ no ip address
+ no shut
+!
+!
+! RING
+!
+interface {{net.ring.int_a}}
+ desc {{net.ring.desc_a}}
+ ip address {{net.ring.ip_a}} {{net.ring.mask}}
+ mpls ip
+ no shut
+!
+interface {{net.ring.int_b}}
+ desc {{net.ring.desc_b}}
+ ip address {{net.ring.ip_b}} {{net.ring.mask}}
+ mpls ip
+ no shut
+!
+! Router OSPF / BGP
+!
+router ospf 110
+ log-adjacency-changes
+ network {{net.ospf.net1}} {{net.ospf.mask1}} area 0
+ network {{net.ospf.net2}} {{net.ospf.mask2}} area 0
+!
+router bgp 4555
+ no synchronization
+ bgp log-neighbor-changes
+!
+! ntp
+!
+ntp server {{basic.ntp.a}}
+ntp server {{basic.ntp.b}}
+!
+! syslog
+!
+logging host {{basic.syslog.a}}
+!
+end
+write
+!
+@L show_run
+show run
+!
+exit

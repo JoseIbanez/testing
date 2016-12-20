@@ -16,11 +16,11 @@ parser.add_option("-t", "--template", dest="template",
 
 #
 
-PATH = os.path.dirname(os.path.abspath(__file__))
+PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),"..")
 TEMPLATE_ENVIRONMENT = Environment(
     autoescape=False,
 #    loader=FileSystemLoader(os.path.join(PATH, 'templates')),
-    loader=FileSystemLoader("."),
+    loader=FileSystemLoader(".."),
     trim_blocks=False)
 
 def render_template(template_filename, context):
