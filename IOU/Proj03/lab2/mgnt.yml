@@ -1,0 +1,97 @@
+basic:
+
+
+
+
+
+
+ id:
+  hostname: pe11 #Device_pe11
+  hostname: pe12 #Device_pe12
+  hostname: pe13 #Device_pe13
+  hostname: pe14 #Device_pe14
+  hostname: pe15 #Device_pe15
+
+
+
+
+
+
+ mgnt:
+  vrf: Management
+
+ loopback:
+
+
+  mask: 255.255.255.255
+
+
+  ip: 192.168.101.11 #Device_pe11
+  ip: 192.168.101.12 #Device_pe12
+  ip: 192.168.101.13 #Device_pe13
+  ip: 192.168.101.14 #Device_pe14
+  ip: 192.168.101.15 #Device_pe15
+
+  ip: 192.168.101.21 #Device_nx21
+  ip: 192.168.101.22 #Device_nx22
+  ip: 192.168.101.23 #Device_nx23
+  ip: 192.168.101.24 #Device_nx24
+
+
+
+
+
+
+
+ ntp:
+  a: 192.168.101.1
+  b: 192.168.100.1
+
+ syslog:
+  a: 192.168.101.1
+
+
+net:
+
+ ospf:
+  net1: 192.168.101.0
+  mask1: 0.0.0.255
+  net2: 172.10.200.0
+  mask2: 0.0.0.255
+
+
+ ring:
+
+  mask: 255.255.255.252
+  int_a: e1/0
+  int_b: e1/1
+
+
+  desc_a: "Link pe11 - pe12" #Device_pe11
+  desc_b: "Link pe11 - pe12" #Device_pe12
+  ip_a: 172.10.200.1 #Device_pe11
+  ip_b: 172.10.200.2 #Device_pe12
+
+
+  desc_a: "Link pe12 - pe13" #Device_pe12
+  desc_b: "Link pe12 - pe13" #Device_pe13
+  ip_a: 172.10.200.5 #Device_pe12
+  ip_b: 172.10.200.6 #Device_pe13
+
+
+  desc_a: "Link pe13 - pe14" #Device_pe13
+  desc_b: "Link pe13 - pe14" #Device_pe14
+  ip_a: 172.10.200.9 #Device_pe13
+  ip_b: 172.10.200.10 #Device_pe14
+
+
+  desc_a: "Link pe14 - pe15" #Device_pe14
+  desc_b: "Link pe14 - pe15" #Device_pe15
+  ip_a: 172.10.200.13 #Device_pe14
+  ip_b: 172.10.200.14 #Device_pe15
+
+
+  desc_a: "Link pe15 - pe11" #Device_pe15
+  desc_b: "Link pe15 - pe11" #Device_pe11
+  ip_a: 172.10.200.17 #Device_pe15
+  ip_b: 172.10.200.18 #Device_pe11

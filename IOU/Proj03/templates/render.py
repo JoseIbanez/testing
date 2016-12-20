@@ -20,12 +20,13 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_ENVIRONMENT = Environment(
     autoescape=False,
 #    loader=FileSystemLoader(os.path.join(PATH, 'templates')),
-    loader=FileSystemLoader("."),
+    loader=FileSystemLoader(".."),
     trim_blocks=False)
 
 def render_template(template_filename, context):
     return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
+#print("Conf file:"+options.conf)
 with open(options.conf, 'r') as stream:
     try:
         y=yaml.load(stream)
