@@ -12,6 +12,5 @@ LDFLAGS=
 all:
 	#go build ${LDFLAGS} -o ${BINARY} test1.go
 	go build github.com/JoseIbanez/cdr
-	go build github.com/JoseIbanez/hello
 	go install github.com/JoseIbanez/hello
 	echo "a,b,c" | hello
