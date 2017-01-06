@@ -1,12 +1,21 @@
 #!/bin/sh
 
+file="hc.sample.tgz"
 stg="/tmp/stg/"
 
 
-aws s3 cp s3://$aws_bucket/dev01/hc.sample.tgz.gpg /tmp/
+src="s3://$aws_bucket/dev01/$file.gpg"
+echo $src
 
-gpg --passphrase-file ~/.gnupg/testing.pass --output /tmp/hc.sample.tgz -d /tmp/hc.sample.tgz.gpg
+if [ ! -f /tmp/$file.gpg ]; then
+  aws s3 cp $src /tmp/
+fi
 
-tar -xzv -f /tmp/hc.sample.tgz -C $stg
+if [ ! -f /tmp/$file ]; then
+  gpg --batch --passphrase-file ~/.gnupg/testing.pass --output /tmp/$file -d /tmp/$file.gpg
+fi
+
+
+#tar -xzv -f /tmp/hc.sample.tgz -C $stg
 
 
