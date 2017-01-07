@@ -34,7 +34,7 @@ def main():
     with tarfile.open(srcFile) as tar:
         for tarinfo in tar:
             line=line+1
-            if line > 20000:
+            if line > 200:
                 logging.debug("Stop")
                 break
 
@@ -55,7 +55,6 @@ def main():
                 cmdLine=l.strip('\n').strip('\r').rstrip(' ')
                 sc.parseCmdLine(cmdLine)
 
-            print sc.host + str(sc.cmd.kpi)
 
 
 if __name__ == "__main__":

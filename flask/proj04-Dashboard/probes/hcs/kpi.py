@@ -6,6 +6,11 @@ from datetime import datetime
 
 class superCmd:
 
+    def __init__(self):
+        self.cmdList=[]
+        self.cmdList.append(ccmNtpStatus())
+        self.cmdList.append(ccmLoad())
+
     def parseCmdPath(self,path):
         logging.debug("ParseCmdPath Input: "+path)
         pathParm=path.split("/")
@@ -24,24 +29,37 @@ class superCmd:
     def knownCmd(self):
         if self.cmdFile == "ntp.txt":
             return True
+        if self.cmdFile == "load.txt":
+            return True
         return False
 
     def parseCmdLine(self,line):
-        if self.cmd == None and Kpi.isCmd(line):
-            self.cmd=Kpi()
 
-        if self.cmd == None and ccmNtpStatus.isCmd(line):
-            self.cmd=ccmNtpStatus()
+        if self.cmd == None:
+            for c in self.cmdList:
+                if c.isCmd(line):
+                    self.cmd=c
+                    self.cmd.inside=True
+                    logging.debug(self.cmd)
+                    break
+            return
 
+        if self.cmd == None:
+            return
 
-        if self.cmd != None:
-            self.cmd.parseLine(line)
+        self.cmd.parseLine(line)
+
+        if not self.cmd.inside and self.cmd:
+            print self.host+str(self.cmd.kpi)
+            self.cmd=None
 
         return
 
 
     def __str__(self):
         return self.cust+", "+self.host+", "+self.cmdFile
+
+
 
 
 class Kpi:
@@ -66,7 +84,7 @@ class Kpi:
         self.kpi={}
 
     def __str__(self):
-        return str(self.host)+str(self.kpi)
+        return str(self.kpi)
 
     def parseLine(self,l):
         print(l)
@@ -79,26 +97,20 @@ class ccmNtpStatus(Kpi):
     @staticmethod
     def isCmd(line):
         k=re.search(":utils ntp status",line)
-        logging.debug(k)
         if not k == None:
             logging.debug("Detect known cmd: ccmNtpStatus")
-            return True
-        return False
+        return k
 
     def parseLine(self,line):
         logging.debug(line)
-        if not self.inside and re.search("^utils ntp status",line):
-            self.inside=True
-            logging.debug("Cmd Inside")
-            return
 
         if not self.inside:
-            return
+            return False
 
         if re.search("^admin:",line):
             self.inside=False
             logging.debug("Cmd End")
-            return None
+            return False
 
 
         if re.search("^synchronised.*stratum",line):
@@ -111,4 +123,40 @@ class ccmNtpStatus(Kpi):
             logging.debug("NTP Stratum "+r.group(0))
             self.kpi['ccmNtpStratum']=int(r.group(0))
 
-        return
+        return True
+
+
+
+class ccmLoad(Kpi):
+
+    @staticmethod
+    def isCmd(line):
+        k=re.search(":show process load",line)
+        logging.debug(k)
+        if not k == None:
+            logging.debug("Detect known cmd: ccmLoad")
+            return True
+        return False
+
+    def parseLine(self,line):
+        logging.debug(line)
+        if not self.inside and re.search("^show process load",line):
+            self.inside=True
+            logging.debug("Cmd Inside")
+            return True
+
+        if not self.inside:
+            return False
+
+        if re.search("^admin:",line):
+            self.inside=False
+            logging.debug("Cmd End")
+            return False
+
+
+        r=re.search("(?<=load average: )\d+.\d+",line)
+        if r:
+            logging.debug("Load average "+r.group(0))
+            self.kpi['ccmLoadAVG1']=float(r.group(0))
+
+        return True
