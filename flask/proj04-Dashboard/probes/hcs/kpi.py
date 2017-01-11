@@ -145,10 +145,6 @@ class ccmLoad(Kpi):
 
     def parseLine(self,line):
         logging.debug(line)
-        if not self.inside and re.search("^show process load",line):
-            self.inside=True
-            logging.debug("Cmd Inside")
-            return True
 
         if not self.inside:
             return False
