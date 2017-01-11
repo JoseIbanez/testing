@@ -35,51 +35,68 @@ class superCmd:
 
     def parseCmdLine(self,line):
 
-        if self.cmd == None:
+        if not self.cmd:
             for c in self.cmdList:
                 if c.isCmd(line):
                     self.cmd=c
                     self.cmd.inside=True
-                    logging.debug(self.cmd)
+                    self.cmd.finished=False
                     break
             return
 
-        if self.cmd == None:
+        if not self.cmd:
             return
 
         self.cmd.parseLine(line)
 
-        if not self.cmd.inside and self.cmd:
-            print self.host+str(self.cmd.kpi)
+        if not self.cmd.inside and self.cmd.finished:
+            print self
             self.cmd=None
 
         return
 
 
     def __str__(self):
-        return self.cust+", "+self.host+", "+self.cmdFile
+        return self.date.strftime("%Y-%m-%d %H:%M")+", "+self.host+", "+self.cmdFile+", "+str(self.cmd)
+
+
+
 
 
 
 
 class Kpi:
+    cmdName="test"
+    reIn=":test in"
+    reOut=":test out"
 
-    @staticmethod
-    def hello():
-        return "hello"
+    @classmethod
+    def hello(cls):
+        return cls.cmdName
 
-    @staticmethod
-    def isCmd(line):
-        k=re.search("test cmd",line)
+    @classmethod
+    def isCmd(cls,line):
+        k=re.search(cls.reIn,line)
         logging.debug(k)
-        if not k == None:
-            return True
-        return False
+        if k:
+            logging.debug(line)
+            logging.debug("Detect known cmd: "+cls.cmdName)
+        return k
+
+
+    def isOut(self,line):
+        k=re.search(self.reOut,line)
+        if k:
+            self.inside=False
+            self.finished=True
+            logging.debug("Detect end of cmd: "+self.cmdName)
+        return k
 
 
     def __init__(self):
         self.ret=0
-        self.inside=0
+        self.inside=False
+        self.finished=False
         self.section=""
         self.kpi={}
 
@@ -87,19 +104,16 @@ class Kpi:
         return str(self.kpi)
 
     def parseLine(self,l):
-        print(l)
+        logging.debug(l)
         return 0
 
 
 
 class ccmNtpStatus(Kpi):
+    cmdName="ccmNtpStatus"
+    reIn=":utils ntp status"
+    reOut="^admin:"
 
-    @staticmethod
-    def isCmd(line):
-        k=re.search(":utils ntp status",line)
-        if not k == None:
-            logging.debug("Detect known cmd: ccmNtpStatus")
-        return k
 
     def parseLine(self,line):
         logging.debug(line)
@@ -107,20 +121,16 @@ class ccmNtpStatus(Kpi):
         if not self.inside:
             return False
 
-        if re.search("^admin:",line):
-            self.inside=False
-            logging.debug("Cmd End")
+        if self.isOut(line):
             return False
 
-
         if re.search("^synchronised.*stratum",line):
-            logging.debug("NTP synchronised")
+            logging.info("NTP synchronised")
             self.kpi['ccmNtpSynchronised']=1
-
 
         r=re.search("(?<=stratum )\d+",line)
         if r:
-            logging.debug("NTP Stratum "+r.group(0))
+            logging.info("NTP Stratum "+r.group(0))
             self.kpi['ccmNtpStratum']=int(r.group(0))
 
         return True
@@ -129,14 +139,9 @@ class ccmNtpStatus(Kpi):
 
 class ccmLoad(Kpi):
 
-    @staticmethod
-    def isCmd(line):
-        k=re.search(":show process load",line)
-        logging.debug(k)
-        if not k == None:
-            logging.debug("Detect known cmd: ccmLoad")
-            return True
-        return False
+    cmdName="ccmLoad"
+    reIn=":show process load"
+    reOut="^admin:"
 
     def parseLine(self,line):
         logging.debug(line)
@@ -148,15 +153,12 @@ class ccmLoad(Kpi):
         if not self.inside:
             return False
 
-        if re.search("^admin:",line):
-            self.inside=False
-            logging.debug("Cmd End")
+        if self.isOut(line):
             return False
-
 
         r=re.search("(?<=load average: )\d+.\d+",line)
         if r:
-            logging.debug("Load average "+r.group(0))
+            logging.info("Load average "+r.group(0))
             self.kpi['ccmLoadAVG1']=float(r.group(0))
 
         return True
