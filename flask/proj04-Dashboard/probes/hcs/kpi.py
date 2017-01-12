@@ -10,6 +10,7 @@ class superCmd:
         self.cmdList=[]
         self.cmdList.append(ccmNtpStatus())
         self.cmdList.append(ccmLoad())
+        self.cmdList.append(ccmStatus())
 
     def parseCmdPath(self,path):
         logging.debug("ParseCmdPath Input: "+path)
@@ -27,10 +28,9 @@ class superCmd:
         logging.debug("ParseCmdPath Result: "+str(self))
 
     def knownCmd(self):
-        if self.cmdFile == "ntp.txt":
-            return True
-        if self.cmdFile == "load.txt":
-            return True
+        for c in self.cmdList:
+            if c.isFile(self.cmdFile):
+                return True
         return False
 
     def parseCmdLine(self,line):
@@ -66,6 +66,7 @@ class superCmd:
 
 
 class Kpi:
+    cmdFile="file"
     cmdName="test"
     reIn=":test in"
     reOut=":test out"
@@ -73,6 +74,13 @@ class Kpi:
     @classmethod
     def hello(cls):
         return cls.cmdName
+
+    @classmethod
+    def isFile(cls,filename):
+        if cls.cmdFile==filename:
+            return True
+        return False
+
 
     @classmethod
     def isCmd(cls,line):
@@ -110,6 +118,7 @@ class Kpi:
 
 
 class ccmNtpStatus(Kpi):
+    cmdFile="ntp.txt"
     cmdName="ccmNtpStatus"
     reIn=":utils ntp status"
     reOut="^admin:"
@@ -138,7 +147,7 @@ class ccmNtpStatus(Kpi):
 
 
 class ccmLoad(Kpi):
-
+    cmdFile="load.txt"
     cmdName="ccmLoad"
     reIn=":show process load"
     reOut="^admin:"
@@ -156,5 +165,46 @@ class ccmLoad(Kpi):
         if r:
             logging.info("Load average "+r.group(0))
             self.kpi['ccmLoadAVG1']=float(r.group(0))
+
+        return True
+
+
+class ccmStatus(Kpi):
+    cmdFile=""
+    cmdName="ccmStatus"
+    reIn=":show status"
+    reOut="^admin:"
+
+    def parseLine(self,line):
+        logging.debug(line)
+
+        if not self.inside:
+            return False
+
+        if self.isOut(line):
+            return False
+
+        r=re.search("(?<=Free: ) +(\d+)K",line)
+        if r:
+            logging.info("Free Memory (0) "+r.group(0))
+            logging.info("Free Memory (1) "+r.group(1))
+            self.kpi['ccmFreeMemK']=int(r.group(1))
+
+
+        r=re.search("(?<=Disk/active).+\((\d+)%\)",line)
+        if r:
+            logging.info("Used Disk/active "+r.group(1))
+            self.kpi['ccmUsedDiskActiveP']=int(r.group(1))
+
+        r=re.search("(?<=Disk/active).+\((\d+)%\)",line)
+        if r:
+            logging.info("Used Disk/inactive "+r.group(1))
+            self.kpi['ccmUsedDiskInactiveP']=int(r.group(1))
+
+        r=re.search("(?<=Disk/logging).+\((\d+)%\)",line)
+        if r:
+            logging.info("Used Disk/logging "+r.group(1))
+            self.kpi['ccmUsedDiskLoggingP']=int(r.group(1))
+
 
         return True

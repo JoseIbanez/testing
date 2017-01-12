@@ -2,6 +2,7 @@
 
 import tarfile
 from datetime import datetime
+from os.path import expanduser
 import re
 import logging
 import argparse
@@ -27,14 +28,14 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
         logging.debug("Debug active.")
 
-    srcFile="/tmp/hc.sample.tgz"
+    srcFile="~/Downloads/hc.sample.tgz"
     line=0
     sc=kpi.superCmd()
 
-    with tarfile.open(srcFile) as tar:
+    with tarfile.open(expanduser(srcFile)) as tar:
         for tarinfo in tar:
             line=line+1
-            if line > 200:
+            if line > 20000:
                 logging.debug("Stop")
                 break
 
