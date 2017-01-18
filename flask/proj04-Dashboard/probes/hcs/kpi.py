@@ -11,6 +11,7 @@ class superCmd:
         self.cmdList.append(ccmNtpStatus())
         self.cmdList.append(ccmLoad())
         self.cmdList.append(ccmStatus())
+        self.cmdList.append(ccmDBreplication())
 
     def parseCmdPath(self,path):
         logging.debug("ParseCmdPath Input: "+path)
@@ -39,6 +40,7 @@ class superCmd:
             for c in self.cmdList:
                 if c.isCmd(line):
                     self.cmd=c
+                    #Pte: self.cmd.reset()
                     self.cmd.inside=True
                     self.cmd.finished=False
                     break
@@ -65,7 +67,7 @@ class superCmd:
 
 
 
-class Kpi:
+class Kpi(object):
     cmdFile="file"
     cmdName="test"
     reIn=":test in"
@@ -147,7 +149,7 @@ class ccmNtpStatus(Kpi):
 
 
 class ccmLoad(Kpi):
-    cmdFile="load.txt"
+    cmdFile="XXX load.txt"
     cmdName="ccmLoad"
     reIn=":show process load"
     reOut="^admin:"
@@ -166,11 +168,12 @@ class ccmLoad(Kpi):
             logging.info("Load average "+r.group(0))
             self.kpi['ccmLoadAVG1']=float(r.group(0))
 
+
         return True
 
 
 class ccmStatus(Kpi):
-    cmdFile=""
+    cmdFile="XXX status.txt"
     cmdName="ccmStatus"
     reIn=":show status"
     reOut="^admin:"
@@ -205,6 +208,41 @@ class ccmStatus(Kpi):
         if r:
             logging.info("Used Disk/logging "+r.group(1))
             self.kpi['ccmUsedDiskLoggingP']=int(r.group(1))
+
+
+        return True
+
+class ccmDBreplication(Kpi):
+    cmdFile="dbreplication.txt"
+    cmdName="ccmDBreplication"
+    reIn=":utils dbreplication runtimestate"
+    reOut="^admin:"
+
+    def __init__(self):
+        super(ccmDBreplication, self).__init__()
+        self.kpi['ccmDBreplicationOk']=0
+        self.kpi['ccmDBreplicationError']=0
+
+    def parseLine(self,line):
+        logging.debug(line)
+
+        if not self.inside:
+            return False
+
+        if self.isOut(line):
+            return False
+
+        r=re.search("(?<=\().+\) +\((.)\)",line)
+        if r:
+            logging.debug("Replication Status "+r.group(0))
+            logging.debug("Replication Status "+r.group(1))
+            #self.kpi['ccmLoadAVG1']=float(r.group(0))
+            if (r.group(1) == "2"):
+                self.kpi['ccmDBreplicationOk'] += 1
+                logging.debug("Replication Status: OK, Nodes:"+str(self.kpi['ccmDBreplicationOk']))
+            else:
+                self.kpi['ccmDBreplicationError'] += 1
+                logging.info("Replication Status: Error, Nodes:"+str(self.kpi['ccmDBreplicationError']))
 
 
         return True

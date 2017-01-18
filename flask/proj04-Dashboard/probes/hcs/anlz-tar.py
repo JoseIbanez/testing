@@ -19,16 +19,17 @@ def main():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-s", "--section",  metavar="STRING", help="String to match in section header", default="")
-    parser.add_argument("-c", "--child", metavar="STRING", help="String to match inside section", default="")
-    parser.add_argument("--debug", nargs='?', help="Enable debug", default="")
+    parser.add_argument("-f", "--file",  metavar="STRING", help="Tar file to parser",
+                        default="~/Downloads/hc.sample.tgz")
+    parser.add_argument("--debug", nargs='?', help="Enable debug",
+                        default="")
     args = parser.parse_args()
 
     if (args.debug is None):
         logging.basicConfig(level=logging.DEBUG)
         logging.debug("Debug active.")
 
-    srcFile="~/Downloads/hc.sample.tgz"
+    srcFile=args.file
     line=0
     sc=kpi.superCmd()
 
