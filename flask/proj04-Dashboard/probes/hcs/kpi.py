@@ -16,6 +16,7 @@ class superCmd:
     def parseCmdPath(self,path):
         logging.debug("ParseCmdPath Input: "+path)
         pathParm=path.split("/")
+        self.path=path
         self.fileName=pathParm[-1]
         self.date=datetime.strptime(pathParm[-2],'%Y%m%d-%H%M')
         self.lote=pathParm[-3]
@@ -40,9 +41,7 @@ class superCmd:
             for c in self.cmdList:
                 if c.isCmd(line):
                     self.cmd=c
-                    #Pte: self.cmd.reset()
-                    self.cmd.inside=True
-                    self.cmd.finished=False
+                    self.cmd.reset()
                     break
             return
 
@@ -53,6 +52,8 @@ class superCmd:
 
         if not self.cmd.inside and self.cmd.finished:
             print self
+            if not self.cmd.parse:
+                logging.error(str(self.cmd.cmdName)+" not found in "+self.path)
             self.cmd=None
 
         return
@@ -83,7 +84,6 @@ class Kpi(object):
             return True
         return False
 
-
     @classmethod
     def isCmd(cls,line):
         k=re.search(cls.reIn,line)
@@ -105,6 +105,7 @@ class Kpi(object):
 
     def __init__(self):
         self.ret=0
+        self.parse=False
         self.inside=False
         self.finished=False
         self.section=""
@@ -116,6 +117,10 @@ class Kpi(object):
     def parseLine(self,l):
         logging.debug(l)
         return 0
+
+    def reset(self):
+        self.__init__()
+        self.inside=True
 
 
 
@@ -143,13 +148,14 @@ class ccmNtpStatus(Kpi):
         if r:
             logging.info("NTP Stratum "+r.group(0))
             self.kpi['ccmNtpStratum']=int(r.group(0))
+            self.parse=True
 
         return True
 
 
 
 class ccmLoad(Kpi):
-    cmdFile="XXX load.txt"
+    cmdFile="load.txt"
     cmdName="ccmLoad"
     reIn=":show process load"
     reOut="^admin:"
@@ -167,7 +173,7 @@ class ccmLoad(Kpi):
         if r:
             logging.info("Load average "+r.group(0))
             self.kpi['ccmLoadAVG1']=float(r.group(0))
-
+            self.parse=True
 
         return True
 
@@ -223,6 +229,12 @@ class ccmDBreplication(Kpi):
         self.kpi['ccmDBreplicationOk']=0
         self.kpi['ccmDBreplicationError']=0
 
+    def reset(self):
+        super(ccmDBreplication, self).reset()
+        self.kpi['ccmDBreplicationOk']=0
+        self.kpi['ccmDBreplicationError']=0
+
+
     def parseLine(self,line):
         logging.debug(line)
 
@@ -232,11 +244,11 @@ class ccmDBreplication(Kpi):
         if self.isOut(line):
             return False
 
-        r=re.search("(?<=\().+\) +\((.)\)",line)
+        r=re.search("(?<=\().+\).+\((.)\)",line)
         if r:
             logging.debug("Replication Status "+r.group(0))
             logging.debug("Replication Status "+r.group(1))
-            #self.kpi['ccmLoadAVG1']=float(r.group(0))
+            self.parse=True
             if (r.group(1) == "2"):
                 self.kpi['ccmDBreplicationOk'] += 1
                 logging.debug("Replication Status: OK, Nodes:"+str(self.kpi['ccmDBreplicationOk']))
