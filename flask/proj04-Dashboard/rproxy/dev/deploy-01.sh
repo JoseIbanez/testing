@@ -14,7 +14,7 @@ apt-get install -y \
 
 echo "Post configuration"
 service nginx stop
-sudo rm /usr/share/nginx/html /usr/share/nginx/html.orig
+sudo mv /usr/share/nginx/html /usr/share/nginx/html.orig
 sudo ln -s /vagrant/rproxy/html/ /usr/share/nginx/html
 
 cp /vagrant/rproxy/dev/nginx.conf    /etc/nginx/nginx.conf
