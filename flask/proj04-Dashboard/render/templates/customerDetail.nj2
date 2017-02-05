@@ -5,48 +5,59 @@
 <h1>Customer {{ cust }}, Detail</h1>
 
 
+<h2>Virtual Machine status</h2>
 <div class="container">
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Node</th>
+        <th>LoadAVG1</th>
+        <th>NTP Stratun</th>
+      </tr>
+    </thead>
+    <tbody>
+
 {% for i in kpis %}
-  <h2>Graph: {{i.kpi}}</h2>
-  <div id="g{{i.id}}" style="height: 250px;"></div>
+  <tr>
+  <td>{{i.domain}}</td>
+  <td id="{{i.ccmLoadAVG1_id}}">{{i.ccmLoadAVG1_value}}</td>
+  <td id="{{i.ccmNtpStratum_id}}">{{i.ccmNtpStratum_value}}</td>
+  </tr>
 {% endfor %}
+
+    </tbody>
+    </table>
 </div>
 
 
-
+<h2>CUCM Performance Monitor</h2>
 <div class="container">
-<h2>KPIs</h2>
-{% for i in kpis %}
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Node</th>
+        <th>Registered Phones</th>
+        <th>Calls Active</th>
+      </tr>
+    </thead>
+    <tbody>
 
-  <div>
-    {{i.kpi}}<div id="{{i.id}}">-</div>
-  </div>
-
+{% for i in perfmon %}
+  <tr>
+  <td>{{i.domain}}</td>
+  <td id="{{i.RegisteredHardwarePhones_id}}">{{i.RegisteredHardwarePhones_value}}</td>
+  <td id="{{i.CallsActive_id}}">{{i.CallsActive_value}}</td>
+  </tr>
 {% endfor %}
+
+    </tbody>
+    </table>
 </div>
+
 <script>
-var gKPI={{ kpis|tojson }};
-var vKPI={{ kpis|tojson }};
-var myG = {};
-var g_data= [];
-
-{% for i in kpis %}
-
-myG['{{i.id}}'] = Morris.Line({
-  element: 'g{{i.id}}',
-  data: g_data,
-  xkey: 'date',
-  ykeys: ['value'],
-  labels: ['Value']
-});
-
-{% endfor %}
-
-
-
+var vKPI={{ kpisId|tojson }};
 </script>
-
-
 {% include 'customerDetail.js' %}
+
 
 {% include 'footer.html' %}

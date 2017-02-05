@@ -26,7 +26,6 @@ class superCmd:
         self.cmdFile=pathParm[1]
         self.cmdType=None
         self.cmd=None
-
         logging.debug("ParseCmdPath Result: "+str(self))
 
     def knownCmd(self):
@@ -51,7 +50,8 @@ class superCmd:
         self.cmd.parseLine(line)
 
         if not self.cmd.inside and self.cmd.finished:
-            print self
+            #print self
+            self.toPrint()
             if not self.cmd.parse:
                 logging.error(str(self.cmd.cmdName)+" not found in "+self.path)
             self.cmd=None
@@ -62,7 +62,10 @@ class superCmd:
     def __str__(self):
         return self.date.strftime("%Y-%m-%d %H:%M")+", "+self.host+", "+self.cmdFile+", "+str(self.cmd)
 
-
+    def toPrint(self):
+        for key,value in self.cmd.kpi.iteritems():
+            myOutput=",".join([self.cust,key,self.host,str(value),str(self.date)])
+            print(myOutput)
 
 
 
@@ -124,6 +127,8 @@ class Kpi(object):
 
 
 
+
+
 class ccmNtpStatus(Kpi):
     cmdFile="ntp.txt"
     cmdName="ccmNtpStatus"
@@ -179,7 +184,7 @@ class ccmLoad(Kpi):
 
 
 class ccmStatus(Kpi):
-    cmdFile="XXX status.txt"
+    cmdFile="status.txt"
     cmdName="ccmStatus"
     reIn=":show status"
     reOut="^admin:"

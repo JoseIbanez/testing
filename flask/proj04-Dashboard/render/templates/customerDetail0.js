@@ -1,4 +1,5 @@
 <script>
+  onload=function() { queryGraph() };
   setInterval(function() { queryKPI() }, 3000);
 
 
@@ -10,7 +11,7 @@
   function queryKPI() {
     var arrayLength = vKPI.length;
     for (var i = 0; i < arrayLength; i++) {
-        url="/api/v1/id?id="+vKPI[i].id;
+        url="/api/v1/kpi?cust="+vKPI[i].cust+"&kpi="+vKPI[i].kpi+"&domain="+vKPI[i].domain;
         console.log(url)
 
         $.ajax({

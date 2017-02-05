@@ -14,7 +14,7 @@ apt-get install -y \
         python-pip python-dev \
         libmysqlclient-dev
 
-pip install flask flask-mysql
+pip install flask flask-mysql MySQL-python
 
 
 

@@ -1,0 +1,52 @@
+<!doctype html>
+{% include 'header.html' %}
+
+<title>Customer {{ cust }}, Detail</title>
+<h1>Customer {{ cust }}, Detail</h1>
+
+
+<div class="container">
+{% for i in kpis %}
+  <h2>Graph: {{i.kpi}}</h2>
+  <div id="g{{i.id}}" style="height: 250px;"></div>
+{% endfor %}
+</div>
+
+
+
+<div class="container">
+<h2>KPIs</h2>
+{% for i in kpis %}
+
+  <div>
+    {{i.kpi}}<div id="{{i.id}}">-</div>
+  </div>
+
+{% endfor %}
+</div>
+<script>
+var gKPI={{ kpis|tojson }};
+var vKPI={{ kpis|tojson }};
+var myG = {};
+var g_data= [];
+
+{% for i in kpis %}
+
+myG['{{i.id}}'] = Morris.Line({
+  element: 'g{{i.id}}',
+  data: g_data,
+  xkey: 'date',
+  ykeys: ['value'],
+  labels: ['Value']
+});
+
+{% endfor %}
+
+
+
+</script>
+
+
+{% include 'customerDetail.js' %}
+
+{% include 'footer.html' %}

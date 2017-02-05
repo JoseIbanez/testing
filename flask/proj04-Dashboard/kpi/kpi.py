@@ -75,6 +75,57 @@ def testDB():
 #############3
 # KPI
 #
+#
+# Single value by ID
+#
+@app.route('/api/v1/id',methods=['POST','GET'])
+def getid():
+
+    app.logger.info('New KPI request')
+    id   = request.values.get('id')
+
+    if not (id):
+        return json.dumps({'html':'<span>Enter the required fields</span>'})
+
+    app.logger.info('Info: id:'+str(id))
+
+
+    try:
+        # All Good, let's call MySQL
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                Select date,value,cust,domain,kpi
+                From kpi
+                where id=%s
+                """,
+		(id))
+        #"""
+        rows = cursor.fetchall()
+
+        d = collections.OrderedDict()
+        oList=[]
+        for row in rows:
+                d = collections.OrderedDict()
+                d['date']=row[0].strftime("%Y-%m-%d %H:%M:%SZ")
+                d['value']=row[1]
+                d['cust']=row[2]
+                d['domain']=row[3]
+                d['kpi']=row[4]
+                oList.append(d)
+
+        cursor.close()
+        conn.close()
+        #return json.dumps(oList)
+        return json.dumps(d)
+
+
+    except Exception as e:
+        return json.dumps({'error':str(e)})
+
+
+
 
 #
 # Single value
@@ -254,4 +305,4 @@ if __name__ == "__main__":
     # fix gives access to the gunicorn error log facility
     #app.logger.handlers.extend(logging.getLogger("gunicorn.error").handlers)
     #app.debug=True
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port=8010)

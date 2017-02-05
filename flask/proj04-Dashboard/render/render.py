@@ -62,60 +62,105 @@ def perfmon(cust=None):
 @app.route('/customerList')
 def customerlist(cust=None):
 
-        # All Good, let's call MySQL
-        conn = mysql.connect()
-        cursor = conn.cursor()
+    # All Good, let's call MySQL
+    conn = mysql.connect()
+    cursor = conn.cursor()
 
-        cursor.execute("""
-                Select distinct cust
-                From kpi
-                Order by cust
-                """)
+    cursor.execute("""
+            Select distinct cust,count(*)
+            From kpi
+            group by cust
+            order by cust
+            """)
 
-        #"""
+    #"""
 
-        rows = cursor.fetchall()
+    rows = cursor.fetchall()
 
-        d = collections.OrderedDict()
-        oList=[]
-        for row in rows:
-                d = collections.OrderedDict()
-                d['cust']=row[0]
-                oList.append(d)
+    d = collections.OrderedDict()
+    oList=[]
+    for row in rows:
+            d = collections.OrderedDict()
+            d['cust']=row[0]
+            d['count']=row[1]
+            oList.append(d)
 
 
-        return render_template('customerList.nj2', custs=oList)
-
+    return render_template('customerList.nj2', custs=oList)
 
 
 @app.route('/customerDetail/<cust>')
 def customerDetail(cust=None):
 
-        # All Good, let's call MySQL
-        conn = mysql.connect()
-        cursor = conn.cursor()
+    # All Good, let's call MySQL
+    conn = mysql.connect()
+    cursor = conn.cursor()
 
-        cursor.execute("""
-                Select id,cust,kpi,domain
-                From kpi
-                where cust=%s and domain="/"
-                """,
-                (cust))
-        #"""
-
-        rows = cursor.fetchall()
+    cursor.execute("""
+        Select cust,domain,
+            ccmLoadAVG1_id,ccmLoadAVG1_value,
+            ccmNtpStratum_id,ccmNtpStratum_value
+        From hostStatus
+            where cust=%s
+            """,
+            (cust))
+    #"""
+    oId=[]
+    i = collections.OrderedDict()
+    ####
+    rows = cursor.fetchall()
+    d = collections.OrderedDict()
+    oList=[]
+    for row in rows:
         d = collections.OrderedDict()
-        oList=[]
-        for row in rows:
-                d = collections.OrderedDict()
-                d['id']=row[0]
-                d['cust']=row[1]
-                d['kpi']=row[2]
-                d['domain']=row[3]
-                oList.append(d)
+        d['cust']=row[0]
+        d['domain']=row[1]
+        d['ccmLoadAVG1_id']=row[2]
+        d['ccmLoadAVG1_value']=row[3]
+        d['ccmNtpStratum_id']=row[4]
+        d['ccmNtpStratum_value']=row[5]
+        oList.append(d)
+        i = collections.OrderedDict()
+        i['id']=row[2]
+        oId.append(i)
+        i = collections.OrderedDict()
+        i['id']=row[4]
+        oId.append(i)
 
 
-        return render_template('customerDetail.nj2', cust=cust, kpis=oList)
+    #Query 2: Perfmon
+    cursor.execute("""
+        Select cust,domain,
+            RegisteredHardwarePhones_id,RegisteredHardwarePhones_value,
+            CallsActive_id,CallsActive_value
+        From perfmon
+            where cust=%s
+            """,
+            (cust))
+    #"""
+
+    rows = cursor.fetchall()
+    d = collections.OrderedDict()
+    oList2=[]
+    for row in rows:
+        d = collections.OrderedDict()
+        d['cust']=row[0]
+        d['domain']=row[1]
+        d['RegisteredHardwarePhones_id']=row[2]
+        d['RegisteredHardwarePhones_value']=row[3]
+        d['CallsActive_id']=row[4]
+        d['CallsActive_value']=row[5]
+        oList2.append(d)
+        i = collections.OrderedDict()
+        i['id']=row[2]
+        oId.append(i)
+        i = collections.OrderedDict()
+        i['id']=row[4]
+        oId.append(i)
+
+
+
+    return render_template('customerDetail.nj2', cust=cust, kpis=oList, perfmon=oList2, kpisId=oId)
 
 
 

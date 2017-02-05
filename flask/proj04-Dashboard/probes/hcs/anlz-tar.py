@@ -36,7 +36,7 @@ def main():
     with tarfile.open(expanduser(srcFile)) as tar:
         for tarinfo in tar:
             line=line+1
-            if line > 20000:
+            if line > 20000000000:
                 logging.debug("Stop")
                 break
 
@@ -49,7 +49,7 @@ def main():
             if not sc.knownCmd():
                 continue
 
-            print sc.cmdFile,sc.host
+            logging.info(sc.cmdFile,sc.host)
 
 
             f=tar.extractfile(tarinfo)

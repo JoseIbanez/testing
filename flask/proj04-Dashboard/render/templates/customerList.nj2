@@ -7,16 +7,20 @@
 
 
 <div class="container">
-  <h2>List</h2>
+<h2>Customer</h2>
+<ul class="list-group">
+
 
 {% for i in custs %}
 
-  <div>
-    <a href="/customerDetail/{{i.cust}}">{{i.cust}}</a>
-  </div>
+<a href="/customerDetail/{{i.cust}}" class="list-group-item">
+  <span class="badge"> {{i.count}}</span>
+  {{i.cust}}
+</a>
 
 {% endfor %}
 
+</ul>
 </div>
 
 
