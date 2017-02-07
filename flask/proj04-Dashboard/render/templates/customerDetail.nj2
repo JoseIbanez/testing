@@ -20,8 +20,8 @@
 {% for i in kpis %}
   <tr>
   <td>{{i.domain}}</td>
-  <td id="{{i.ccmLoadAVG1_id}}">{{i.ccmLoadAVG1_value}}</td>
-  <td id="{{i.ccmNtpStratum_id}}">{{i.ccmNtpStratum_value}}</td>
+  <td id="{{i.ccmLoadAVG1_id}}">n/a</td>
+  <td id="{{i.ccmNtpStratum_id}}">n/a</td>
   </tr>
 {% endfor %}
 
@@ -55,8 +55,9 @@
 </div>
 
 <script>
-var vKPI={{ kpisId|tojson }};
+var custId='{{ cust }}';
 </script>
+
 {% include 'customerDetail.js' %}
 
 

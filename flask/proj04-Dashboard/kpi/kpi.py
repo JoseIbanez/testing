@@ -125,6 +125,55 @@ def getid():
         return json.dumps({'error':str(e)})
 
 
+#
+#For a customer
+#
+@app.route('/api/v1/byCust',methods=['POST','GET'])
+def getListbyCust():
+    try:
+        cust   = request.values.get('cust')
+
+        app.logger.info('Query: cust:'+cust)
+
+
+        if not (cust):
+            return json.dumps({'html':'<span>Enter the required fields</span>'})
+
+
+        # All Good, let's call MySQL
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                Select id,value,TIMESTAMPDIFF(MINUTE,date,NOW()) as age
+                From kpi
+                where cust=%s and date > date_add(now(), interval -1 day)
+                """,
+                (cust))
+        #"""
+        rows = cursor.fetchall()
+
+        oList=[]
+        for row in rows:
+                d = collections.OrderedDict()
+                d['id']=row[0]
+                d['value']=row[1]
+                d['age']=row[2]
+
+                oList.append(d)
+
+
+        return json.dumps(oList)
+        #return json.dumps(d)
+
+
+    except Exception as e:
+        return json.dumps({'error':str(e)})
+
+    finally:
+        cursor.close()
+
+
 
 
 #
