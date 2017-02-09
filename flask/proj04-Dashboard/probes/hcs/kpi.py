@@ -90,7 +90,7 @@ class Kpi(object):
     @classmethod
     def isCmd(cls,line):
         k=re.search(cls.reIn,line)
-        logging.debug(k)
+        #logging.debug(k)
         if k:
             logging.debug(line)
             logging.debug("Detect known cmd: "+cls.cmdName)
@@ -137,7 +137,6 @@ class ccmNtpStatus(Kpi):
 
 
     def parseLine(self,line):
-        logging.debug(line)
 
         if not self.inside:
             return False
@@ -241,7 +240,6 @@ class ccmDBreplication(Kpi):
 
 
     def parseLine(self,line):
-        logging.debug(line)
 
         if not self.inside:
             return False
@@ -251,8 +249,8 @@ class ccmDBreplication(Kpi):
 
         r=re.search("(?<=\().+\).+\((.)\)",line)
         if r:
-            logging.debug("Replication Status "+r.group(0))
-            logging.debug("Replication Status "+r.group(1))
+            #logging.debug("Replication Status "+r.group(0))
+            #logging.debug("Replication Status "+r.group(1))
             self.parse=True
             if (r.group(1) == "2"):
                 self.kpi['ccmDBreplicationOk'] += 1
