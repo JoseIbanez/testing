@@ -4,71 +4,6 @@ import re
 import logging
 from datetime import datetime
 
-class superCmd:
-
-    def __init__(self):
-        self.cmdList=[]
-        self.cmdList.append(ccmNtpStatus())
-        self.cmdList.append(ccmLoad())
-        self.cmdList.append(ccmStatus())
-        self.cmdList.append(ccmDBreplication())
-
-    def parseCmdPath(self,path):
-        logging.debug("ParseCmdPath Input: "+path)
-        pathParm=path.split("/")
-        self.path=path
-        self.fileName=pathParm[-1]
-        self.date=datetime.strptime(pathParm[-2],'%Y%m%d-%H%M')
-        self.lote=pathParm[-3]
-        self.cust=pathParm[-4]
-        pathParm=self.fileName.split("-",1)
-        self.host=pathParm[0]
-        self.cmdFile=pathParm[1]
-        self.cmdType=None
-        self.cmd=None
-        logging.debug("ParseCmdPath Result: "+str(self))
-
-    def knownCmd(self):
-        for c in self.cmdList:
-            if c.isFile(self.cmdFile):
-                return True
-        return False
-
-    def parseCmdLine(self,line):
-
-        if not self.cmd:
-            for c in self.cmdList:
-                if c.isCmd(line):
-                    self.cmd=c
-                    self.cmd.reset()
-                    break
-            return
-
-        if not self.cmd:
-            return
-
-        self.cmd.parseLine(line)
-
-        if not self.cmd.inside and self.cmd.finished:
-            #print self
-            self.toPrint()
-            if not self.cmd.parse:
-                logging.error(str(self.cmd.cmdName)+" not found in "+self.path)
-            self.cmd=None
-
-        return
-
-
-    def __str__(self):
-        return self.date.strftime("%Y-%m-%d %H:%M")+", "+self.host+", "+self.cmdFile+", "+str(self.cmd)
-
-    def toPrint(self):
-        for key,value in self.cmd.kpi.iteritems():
-            myOutput=",".join([self.cust,key,self.host,str(value),str(self.date)])
-            print(myOutput)
-
-
-
 
 
 class Kpi(object):
@@ -114,8 +49,10 @@ class Kpi(object):
         self.section=""
         self.kpi={}
 
+
     def __str__(self):
         return str(self.kpi)
+
 
     def parseLine(self,l):
         logging.debug(l)
@@ -202,6 +139,7 @@ class ccmStatus(Kpi):
             logging.info("Free Memory (0) "+r.group(0))
             logging.info("Free Memory (1) "+r.group(1))
             self.kpi['ccmFreeMemK']=int(r.group(1))
+            self.parse=True
 
 
         r=re.search("(?<=Disk/active).+\((\d+)%\)",line)
@@ -209,7 +147,7 @@ class ccmStatus(Kpi):
             logging.info("Used Disk/active "+r.group(1))
             self.kpi['ccmUsedDiskActiveP']=int(r.group(1))
 
-        r=re.search("(?<=Disk/active).+\((\d+)%\)",line)
+        r=re.search("(?<=Disk/inactive).+\((\d+)%\)",line)
         if r:
             logging.info("Used Disk/inactive "+r.group(1))
             self.kpi['ccmUsedDiskInactiveP']=int(r.group(1))
@@ -261,3 +199,41 @@ class ccmDBreplication(Kpi):
 
 
         return True
+
+
+class ccmPerfCCM(Kpi):
+    cmdFile="perfCCM.txt"
+    cmdName="ccmPerfCCM"
+    reIn=":show perf query class \"Cisco CallManager\""
+    reOut="^admin:"
+
+    def parseLine(self,line):
+        logging.debug(line)
+
+        if not self.inside:
+            return False
+
+        if self.isOut(line):
+            return False
+
+        keyStrings=["CallsInProgress", 
+                    "CallsAttempted",
+                    "RegisteredHardwarePhones",
+                    "CallsCompleted"]
+
+        for string in keyStrings:
+            r=re.search("(?<= -> "+string+").+= (\d+)",line)
+            if r:
+                logging.info(string+" "+r.group(1))
+                self.kpi["ccm"+string]=int(r.group(1))
+        
+        r=re.search("(?<= -> CallsActive).+= (\d+)",line)
+        if r:
+            logging.info("CallsActive "+r.group(1))
+            self.kpi['ccmCallsActive']=int(r.group(1))
+            self.parse=True
+
+
+        return True
+
+

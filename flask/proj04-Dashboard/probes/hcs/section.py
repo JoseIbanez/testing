@@ -81,7 +81,7 @@ def main():
     section=Section(name,child)
 
     for line in sys.stdin:
-        section.parse(line)
+        section.parse(line.strip('\n').strip('\r').rstrip(' '))
 
 
     section.close()

@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
 import tarfile
+import sys
 from datetime import datetime
 from os.path import expanduser
 import re
 import logging
 import argparse
 import kpi
+import superCmd
 
 def lookforKnownCmd(line):
     k=re.search(":utils ntp status",line)
@@ -20,48 +22,82 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-t", "--tar",  metavar="STRING", help="Tar file to parser",
-                        default="~/Downloads/hc.sample.tgz")
+                        default="")
     parser.add_argument("-f", "--filter", metavar="STRING", help="Filer to path",
+                        default="")
+
+    parser.add_argument("-n", "--name", metavar="STRING", help="Simulated path",
                         default="")
 
     parser.add_argument("--debug", nargs='?', help="Enable debug",
                         default="")
+
     args = parser.parse_args()
 
     if (args.debug is None):
         logging.basicConfig(level=logging.DEBUG)
         logging.debug("Debug active.")
     else:
-        logging.basicConfig(level=logging.INFO)
+        #logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.ERROR)
 
 
-    sc=kpi.superCmd()
-    srcFile=args.tar
-    line=0
-    with tarfile.open(expanduser(srcFile)) as tar:
-        for tarinfo in tar:
-            line=line+1
-            if line > 20000000000:
-                logging.debug("Stop")
-                break
-            if not tarinfo.isreg():
-                #logging.debug(tarinfo.name+" no regular file")
-                continue
 
-            if args.filter and args.filter!=tarinfo.name:
-                continue
 
-            sc.parseCmdPath(tarinfo.name)
-            if not sc.knownCmd():
-                continue
-            logging.info(sc.cmdFile+","+sc.host)
-            f=tar.extractfile(tarinfo)
-            for l in f:
-                cmdLine=l.strip('\n').strip('\r').rstrip(' ')
-                if args.filter and args.filter==tarinfo.name:
-                    logging.debug(cmdLine)
+    sc=superCmd.superCmd()
+    sc.cmdList.append(kpi.ccmNtpStatus())
+    sc.cmdList.append(kpi.ccmLoad())
+    sc.cmdList.append(kpi.ccmStatus())
+    sc.cmdList.append(kpi.ccmDBreplication())
+    sc.cmdList.append(kpi.ccmPerfCCM())
 
-                sc.parseCmdLine(cmdLine)
+    sc.aliasList=[]
+    sc.aliasList.append(superCmd.nodeAlias("ucs1-swi","UKXSWIFI03"))
+    sc.aliasList.append(superCmd.nodeAlias("ucs1-grl","UKXLS2FI03"))
+    sc.aliasList.append(superCmd.nodeAlias("ucs2-grl","UKXLS2FI06"))
+
+
+    #Tar mode
+    if args.tar:
+        srcFile=expanduser(args.tar)
+        numFile=0
+        with tarfile.open(srcFile) as tar:
+            for tarinfo in tar:
+
+                numFile=numFile+1
+                if numFile > 20000000000:
+                    logging.debug("Stop. numFile:"+str(numFile))
+                    break
+
+                if not tarinfo.isreg():
+                    continue
+                if not sc.parseCmdPath(tarinfo.name):
+                    continue
+                if not sc.knownCmd():
+                    continue
+                logging.info(sc.cmdFile+","+sc.host)
+
+                f=tar.extractfile(tarinfo)
+                for l in f:
+                    cmdLine=l.strip('\n').strip('\r').rstrip(' ')
+                    sc.parseCmdLine(cmdLine)
+
+        logging.debug("End of tar, numFile:"+str(numFile))        
+
+
+    #Stdin Mode
+    if args.name:
+        if not sc.parseCmdPath(args.name):
+            sys.exit()
+        if not sc.knownCmd():
+            sys.exit()
+        logging.info(sc.cmdFile+","+sc.host)
+        f=sys.stdin
+        for l in f:
+            cmdLine=l.strip('\n').strip('\r').rstrip(' ')
+            sc.parseCmdLine(cmdLine)
+
+
 
 
 if __name__ == "__main__":

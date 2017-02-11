@@ -3,11 +3,16 @@
 source aws.env
 
 file="hc.sample.tgz"
-stg="$HOME/Downloads/"
+
+if [ ! -z "$1" ]; then
+  file=$1
+fi
+stg="$hcs_stg"
 
 
 src="s3://$aws_bucket/dev01/$file.gpg"
-echo $src
+echo "Src:" $src
+echo "Dst:" $stg
 
 if [ ! -f $stg/$file.gpg ]; then
   aws s3 cp $src $stg
