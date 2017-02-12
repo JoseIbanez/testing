@@ -1,0 +1,6 @@
+
+
+Cust16,Domain,Node,Cluster,Datacenter,Type,CallsActive,33,Date
+
+
+Type inside Kpi, ccmCallsActive <> cubeCallsActive

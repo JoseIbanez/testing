@@ -8,6 +8,7 @@ import re
 import logging
 import argparse
 import kpi
+import kpiCube
 import superCmd
 
 def lookforKnownCmd(line):
@@ -51,10 +52,19 @@ def main():
     sc.cmdList.append(kpi.ccmDBreplication())
     sc.cmdList.append(kpi.ccmPerfCCM())
 
+    sc.cmdList.append(kpiCube.cubeCallStatCurrentDay())
+
+
     sc.aliasList=[]
     sc.aliasList.append(superCmd.nodeAlias("ucs1-swi","UKXSWIFI03"))
     sc.aliasList.append(superCmd.nodeAlias("ucs1-grl","UKXLS2FI03"))
     sc.aliasList.append(superCmd.nodeAlias("ucs2-grl","UKXLS2FI06"))
+
+    sc.aliasList.append(superCmd.nodeAlias("cube1-grl","UKXLS2SB01"))
+    sc.aliasList.append(superCmd.nodeAlias("cube1-swi","UKXSWISB01"))
+    sc.aliasList.append(superCmd.nodeAlias("cube2-grl","UKXLS2SB02"))
+    sc.aliasList.append(superCmd.nodeAlias("cube2-swi","UKXSWISB02"))
+
 
 
     #Tar mode

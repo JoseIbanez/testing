@@ -9,6 +9,7 @@ class superCmd:
     def __init__(self):
         self.cmdList=[]
 
+
     def parseNodeAlias(self,path):
         newPath=path
         for a in self.aliasList:
@@ -51,7 +52,6 @@ class superCmd:
 
 
     def parseCmdLine(self,line):
-
         if not self.cmd:
             for c in self.cmdList:
                 if c.isCmd(line):
