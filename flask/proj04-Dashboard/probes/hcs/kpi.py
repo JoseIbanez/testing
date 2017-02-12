@@ -63,6 +63,33 @@ class Kpi(object):
         self.inside=True
 
 
+class kpiCucm(object):
+    @classmethod
+    def node2path(cls,nodename):
+
+        try:
+            #UKXSW1C101016
+            #Datacentre,Region
+            dc=nodename[:6]
+            datacentre=None
+            region=None
+            if dc=="UKXSW1":
+                datacentre="SWI"
+                region="UK"
+            if dc=="UKXLS2":
+                datacentre="GRL"
+                region="UK"
+            #Customer
+            c=nodename[11:3]
+            cust=region+"-Cust"+c
+            #Cluster
+            cl=nodename[9:2]
+            cluster="CL"+cl
+            #Path
+            path=cust+".ccm."+cluster+"."+datacentre+"."+nodename+"."
+            return path
+        except:
+            return "error."
 
 
 
@@ -216,7 +243,7 @@ class ccmPerfCCM(Kpi):
         if self.isOut(line):
             return False
 
-        keyStrings=["CallsInProgress", 
+        keyStrings=["CallsInProgress",
                     "CallsAttempted",
                     "RegisteredHardwarePhones",
                     "CallsCompleted"]
@@ -226,14 +253,12 @@ class ccmPerfCCM(Kpi):
             if r:
                 logging.info(string+" "+r.group(1))
                 self.kpi["ccm"+string]=int(r.group(1))
-        
+
         r=re.search("(?<= -> CallsActive).+= (\d+)",line)
         if r:
             logging.info("CallsActive "+r.group(1))
-            self.kpi['ccmCallsActive']=int(r.group(1))
+            self.kpi['cust.ccm.cluster.datacentre.node.calls']=int(r.group(1))
             self.parse=True
 
 
         return True
-
-

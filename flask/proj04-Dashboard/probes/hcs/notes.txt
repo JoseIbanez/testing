@@ -4,3 +4,19 @@ Cust16,Domain,Node,Cluster,Datacenter,Type,CallsActive,33,Date
 
 
 Type inside Kpi, ccmCallsActive <> cubeCallsActive
+
+
+#########################
+
+cust.ccm.cluster.datacentre.node.hardwarePhones.Registered
+
+cust.ccm.cluster.datacentre.node.calls.Active
+                                       InProgress
+                                       Attempted
+                                       Completed
+
+cust.cube.cluster.datacentre.ajacency.calls.xxxxx
+
+########################
+
+cust.l2.XXX.datacentre.vlan1601.mac.node.Active
