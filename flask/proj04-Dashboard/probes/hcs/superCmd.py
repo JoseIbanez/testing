@@ -13,7 +13,7 @@ class superCmd:
     def parseNodeAlias(self,path):
         newPath=path
         for a in self.aliasList:
-            logging.debug("parseNodeAlias, alias:"+a.alias+", path:"+path)
+            #logging.debug("parseNodeAlias, alias:"+a.alias+", path:"+path)
             newPath=re.sub(a.alias,a.canonical,path)
             if path!=newPath:
                 logging.debug("New path: "+newPath)
@@ -57,6 +57,7 @@ class superCmd:
                 if c.isCmd(line):
                     self.cmd=c
                     self.cmd.reset()
+                    self.cmd.host=self.host
                     break
             return
 
@@ -79,8 +80,8 @@ class superCmd:
 
 
     def toPrint(self):
-        for key,value in self.cmd.kpi.iteritems():
-            myOutput=",".join([self.cust,key,self.host,str(value),str(self.date)])
+        for item in self.cmd.kpiList:
+            myOutput=",".join([self.cust,self.host,self.cmd.cmdName,str(item),str(self.date)])
             print(myOutput)
 
 
@@ -90,4 +91,3 @@ class nodeAlias(object):
         self.canonical=canonical
         self.alias=alias
         self.re=re.compile(alias)
-

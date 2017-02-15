@@ -8,6 +8,7 @@ import re
 import logging
 import argparse
 import kpi
+import kpiCucm
 import kpiCube
 import superCmd
 
@@ -46,11 +47,11 @@ def main():
 
 
     sc=superCmd.superCmd()
-    sc.cmdList.append(kpi.ccmNtpStatus())
-    sc.cmdList.append(kpi.ccmLoad())
-    sc.cmdList.append(kpi.ccmStatus())
-    sc.cmdList.append(kpi.ccmDBreplication())
-    sc.cmdList.append(kpi.ccmPerfCCM())
+    sc.cmdList.append(kpiCucm.ccmNtpStatus())
+    #sc.cmdList.append(kpi.ccmLoad())
+    #sc.cmdList.append(kpi.ccmStatus())
+    #sc.cmdList.append(kpi.ccmDBreplication())
+    #sc.cmdList.append(kpi.ccmPerfCCM())
 
     sc.cmdList.append(kpiCube.cubeCallStatCurrentDay())
 
@@ -92,7 +93,7 @@ def main():
                     cmdLine=l.strip('\n').strip('\r').rstrip(' ')
                     sc.parseCmdLine(cmdLine)
 
-        logging.debug("End of tar, numFile:"+str(numFile))        
+        logging.debug("End of tar, numFile:"+str(numFile))
 
 
     #Stdin Mode

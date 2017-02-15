@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 import kpi
 
-class cubeCallStatCurrentDay(kpi.Kpi):
+class cubeCallStatCurrentDay(kpi.Cmd):
     cmdFile="call-stats-currentday.txt"
     cmdName="cubeCallStatCurrentDay"
     reIn="show sbc SBC sbe call-stats all currentday"
@@ -63,13 +63,9 @@ class cubeCallStatCurrentDay(kpi.Kpi):
         if r:
             logging.debug(line)
             logging.debug("cubeCallAttempts: "+r.group(1))
-            self.kpi[self.currentAdj+'/'+self.currentFlow+':cubeCallAttemps']=int(r.group(0))
+            self.addKpi(self.currentAdj+"/"+self.currentFlow,"cubeCallAttempts",int(r.group(0)))
+            #self.kpi[self.currentAdj+'/'+self.currentFlow+':cubeCallAttemps']=int(r.group(0))
             #self.currentAdj=r.group(0)
             #self.currentFlow="media"
- 
-
-
 
         return True
-
-
