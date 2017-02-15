@@ -48,10 +48,10 @@ def main():
 
     sc=superCmd.superCmd()
     sc.cmdList.append(kpiCucm.ccmNtpStatus())
-    #sc.cmdList.append(kpi.ccmLoad())
-    #sc.cmdList.append(kpi.ccmStatus())
-    #sc.cmdList.append(kpi.ccmDBreplication())
-    #sc.cmdList.append(kpi.ccmPerfCCM())
+    sc.cmdList.append(kpiCucm.ccmLoad())
+    sc.cmdList.append(kpiCucm.ccmStatus())
+    sc.cmdList.append(kpiCucm.ccmDBreplication())
+    #sc.cmdList.append(kpiCucm.ccmPerfCCM())
 
     sc.cmdList.append(kpiCube.cubeCallStatCurrentDay())
 

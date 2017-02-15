@@ -49,8 +49,7 @@ class ccmLoad(kpi.Cmd):
 
         r=re.search("(?<=load average: )\d+.\d+",line)
         if r:
-            logging.info("Load average "+r.group(0))
-            self.kpi['ccmLoadAVG1']=float(r.group(0))
+            self.addKpi(self.host+"/cpu/AVG1","load",float(r.group(0)))
             self.parse=True
 
         return True
@@ -73,27 +72,20 @@ class ccmStatus(kpi.Cmd):
 
         r=re.search("(?<=Free: ) +(\d+)K",line)
         if r:
-            logging.info("Free Memory (0) "+r.group(0))
-            logging.info("Free Memory (1) "+r.group(1))
-            self.kpi['ccmFreeMemK']=int(r.group(1))
+            self.addKpi(self.host,"freeMem",int(r.group(1)))
             self.parse=True
-
 
         r=re.search("(?<=Disk/active).+\((\d+)%\)",line)
         if r:
-            logging.info("Used Disk/active "+r.group(1))
-            self.kpi['ccmUsedDiskActiveP']=int(r.group(1))
+            self.addKpi(self.host+"/Partition/Active","usedDisk",int(r.group(1)))
 
         r=re.search("(?<=Disk/inactive).+\((\d+)%\)",line)
         if r:
-            logging.info("Used Disk/inactive "+r.group(1))
-            self.kpi['ccmUsedDiskInactiveP']=int(r.group(1))
+            self.addKpi(self.host+"/Partition/Inactive","usedDisk",int(r.group(1)))
 
         r=re.search("(?<=Disk/logging).+\((\d+)%\)",line)
         if r:
-            logging.info("Used Disk/logging "+r.group(1))
-            self.kpi['ccmUsedDiskLoggingP']=int(r.group(1))
-
+            self.addKpi(self.host+"/Partition/Logging","usedDisk",int(r.group(1)))
 
         return True
 
@@ -105,13 +97,13 @@ class ccmDBreplication(kpi.Cmd):
 
     def __init__(self):
         super(ccmDBreplication, self).__init__()
-        self.kpi['ccmDBreplicationOk']=0
-        self.kpi['ccmDBreplicationError']=0
+        self.ccmDBreplicationOk=0
+        self.ccmDBreplicationError=0
 
     def reset(self):
         super(ccmDBreplication, self).reset()
-        self.kpi['ccmDBreplicationOk']=0
-        self.kpi['ccmDBreplicationError']=0
+        self.ccmDBreplicationOk=0
+        self.ccmDBreplicationError=0
 
 
     def parseLine(self,line):
@@ -120,19 +112,21 @@ class ccmDBreplication(kpi.Cmd):
             return False
 
         if self.isOut(line):
+            self.addKpi(self.host,"ccmDBreplicationOk",   self.ccmDBreplicationOk)
+            self.addKpi(self.host,"ccmDBreplicationError",self.ccmDBreplicationError)
             return False
+
+        logging.debug(line)
 
         r=re.search("(?<=\().+\).+\((.)\)",line)
         if r:
-            #logging.debug("Replication Status "+r.group(0))
-            #logging.debug("Replication Status "+r.group(1))
             self.parse=True
             if (r.group(1) == "2"):
-                self.kpi['ccmDBreplicationOk'] += 1
-                logging.debug("Replication Status: OK, Nodes:"+str(self.kpi['ccmDBreplicationOk']))
+                self.ccmDBreplicationOk += 1
+                logging.debug("Replication Status: OK, Nodes:"+str(self.ccmDBreplicationOk))
             else:
-                self.kpi['ccmDBreplicationError'] += 1
-                logging.info("Replication Status: Error, Nodes:"+str(self.kpi['ccmDBreplicationError']))
+                self.ccmDBreplicationError += 1
+                logging.info("Replication Status: Error, Nodes:"+str(self.ccmDBreplicationError))
 
 
         return True
