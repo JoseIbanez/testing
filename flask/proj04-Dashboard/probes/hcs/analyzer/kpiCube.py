@@ -4,6 +4,9 @@ import re
 import logging
 from datetime import datetime
 import kpi
+import nameAlias
+
+
 
 class cubeCallStatCurrentDay(kpi.Cmd):
     cmdFile="call-stats-currentday.txt"
@@ -11,10 +14,12 @@ class cubeCallStatCurrentDay(kpi.Cmd):
     reIn="show sbc SBC sbe call-stats all currentday"
     reOut="#$"
 
+
     def __init__(self):
         super(cubeCallStatCurrentDay, self).__init__()
         self.currentAdj=""
         self.currentFlow=""
+        nameAlias.adjacencyAlias()
 
     def reset(self):
         super(cubeCallStatCurrentDay, self).reset()
@@ -40,19 +45,20 @@ class cubeCallStatCurrentDay(kpi.Cmd):
         r=re.search("(?<=statistics for the current day for source adjacency )[\w-]+",line)
         if r:
             logging.debug("Detected new Adjacency stats: (src) "+r.group(0))
-            self.currentAdj=r.group(0)
+            self.currentAdj=nameAlias.adjacencyAlias.search(r.group(0))
             self.currentFlow="src"
+
 
         r=re.search("(?<=statistics for the current day for destination adjacency )[\w-]+",line)
         if r:
             logging.debug("Detected new Adjacency stats: (dst) "+r.group(0))
-            self.currentAdj=r.group(0)
+            self.currentAdj=nameAlias.adjacencyAlias.search(r.group(0))
             self.currentFlow="dst"
 
         r=re.search("(?<=statistics for the current day for adjacency )[\w-]+",line)
         if r:
             logging.debug("Detected new Adjacency stats: (media) "+r.group(0))
-            self.currentAdj=r.group(0)
+            self.currentAdj=nameAlias.adjacencyAlias.search(r.group(0))
             self.currentFlow="media"
 
         if not self.currentAdj:

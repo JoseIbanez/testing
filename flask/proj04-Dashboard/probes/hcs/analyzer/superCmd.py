@@ -2,29 +2,20 @@
 
 import re
 import logging
+import nameAlias
 from datetime import datetime
 
 class superCmd:
 
     def __init__(self):
         self.cmdList=[]
-
-
-    def parseNodeAlias(self,path):
-        newPath=path
-        for a in self.aliasList:
-            #logging.debug("parseNodeAlias, alias:"+a.alias+", path:"+path)
-            newPath=re.sub(a.alias,a.canonical,path)
-            if path!=newPath:
-                logging.debug("New path: "+newPath)
-                break
-
-        return newPath
+        self.alias=nameAlias.deviceAlias()
+        self.alias.load("../inventory/alias-device.csv")
 
 
     def parseCmdPath(self,path):
         logging.debug("ParseCmdPath Input: "+path)
-        path=self.parseNodeAlias(path)
+        path=self.alias.replaceAliasPath(path)
         try:
             pathParm=path.split("/")
             self.path=path
@@ -84,10 +75,3 @@ class superCmd:
             myOutput=",".join([self.cust,self.host,self.cmd.cmdName,str(item),str(self.date)])
             print(myOutput)
 
-
-class nodeAlias(object):
-
-    def __init__(self,alias,canonical):
-        self.canonical=canonical
-        self.alias=alias
-        self.re=re.compile(alias)

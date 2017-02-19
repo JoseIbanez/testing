@@ -7,6 +7,7 @@ from os.path import expanduser
 import re
 import logging
 import argparse
+
 import kpi
 import kpiCucm
 import kpiCube
@@ -52,19 +53,7 @@ def main():
     sc.cmdList.append(kpiCucm.ccmStatus())
     sc.cmdList.append(kpiCucm.ccmDBreplication())
     #sc.cmdList.append(kpiCucm.ccmPerfCCM())
-
     sc.cmdList.append(kpiCube.cubeCallStatCurrentDay())
-
-
-    sc.aliasList=[]
-    sc.aliasList.append(superCmd.nodeAlias("ucs1-swi","UKXSWIFI03"))
-    sc.aliasList.append(superCmd.nodeAlias("ucs1-grl","UKXLS2FI03"))
-    sc.aliasList.append(superCmd.nodeAlias("ucs2-grl","UKXLS2FI06"))
-
-    sc.aliasList.append(superCmd.nodeAlias("cube1-grl","UKXLS2SB01"))
-    sc.aliasList.append(superCmd.nodeAlias("cube1-swi","UKXSWISB01"))
-    sc.aliasList.append(superCmd.nodeAlias("cube2-grl","UKXLS2SB02"))
-    sc.aliasList.append(superCmd.nodeAlias("cube2-swi","UKXSWISB02"))
 
 
 
