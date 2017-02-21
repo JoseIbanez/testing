@@ -33,4 +33,4 @@ CUBE,UKXLS2SB01,cubeCallStatCurrentDay,CUCM-cust014-4/Dir/src,callAttempts,0,201
 CUBE,UKXLS2SB01,cubeCallStatCurrentDay,CUCM-cust014-5/Dir/src,callAttempts,0,2017-01-15 10:10:00
 
 
-calls cust=Cust014UK,cl=1,dc=LS2,Dir=src,adj=CUCM-cust014-5,node=UKXLS2SB01 callAttempts=0 
+calls cust=Cust014UK,cl=1,dc=LS2,Dir=src,adj=CUCM-cust014-5,device=UKXLS2SB01 callAttempts=0 

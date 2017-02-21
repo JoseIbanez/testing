@@ -4,7 +4,6 @@ import re
 import logging
 from datetime import datetime
 import kpi
-import nameAlias
 
 
 
@@ -19,7 +18,6 @@ class cubeCallStatCurrentDay(kpi.Cmd):
         super(cubeCallStatCurrentDay, self).__init__()
         self.currentAdj=""
         self.currentFlow=""
-        nameAlias.adjacencyAlias()
 
     def reset(self):
         super(cubeCallStatCurrentDay, self).reset()
@@ -45,20 +43,20 @@ class cubeCallStatCurrentDay(kpi.Cmd):
         r=re.search("(?<=statistics for the current day for source adjacency )[\w-]+",line)
         if r:
             logging.debug("Detected new Adjacency stats: (src) "+r.group(0))
-            self.currentAdj=nameAlias.adjacencyAlias.search(r.group(0))
-            self.currentFlow="src"
+            self.currentAdj=r.group(0)
+            self.currentFlow="source"
 
 
         r=re.search("(?<=statistics for the current day for destination adjacency )[\w-]+",line)
         if r:
             logging.debug("Detected new Adjacency stats: (dst) "+r.group(0))
-            self.currentAdj=nameAlias.adjacencyAlias.search(r.group(0))
-            self.currentFlow="dst"
+            self.currentAdj=r.group(0)
+            self.currentFlow="destination"
 
         r=re.search("(?<=statistics for the current day for adjacency )[\w-]+",line)
         if r:
             logging.debug("Detected new Adjacency stats: (media) "+r.group(0))
-            self.currentAdj=nameAlias.adjacencyAlias.search(r.group(0))
+            self.currentAdj=r.group(0)
             self.currentFlow="media"
 
         if not self.currentAdj:
@@ -69,7 +67,7 @@ class cubeCallStatCurrentDay(kpi.Cmd):
         if r:
             logging.debug(line)
             logging.debug("cubeCallAttempts: "+r.group(1))
-            self.addKpi(self.currentAdj+"/Dir/"+self.currentFlow,"callAttempts",int(r.group(0)))
+            self.addKpi("Adjacency/"+self.currentAdj+"/Direction/"+self.currentFlow,"callAttempts",int(r.group(0)))
             self.parse=True
 
         return True

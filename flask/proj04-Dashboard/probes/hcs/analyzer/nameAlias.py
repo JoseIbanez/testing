@@ -20,78 +20,70 @@ class aliasItem(object):
 
 class canonicalName(object):
 
-    def __init__(self,type,cname):
+    def __init__(self,device,cname):
         self.region=None
+        self.name=cname
+        self.device=device
         self.dc=None
         self.function=None
         self.cluster=None
         self.customer=None
-        self.type=type
+        self.type=None
 
-        try:
+        logging.debug(device+" "+cname)
 
-            if type=="CUCM":
-                self.region=cname[0:3]
-                self.dc=cname[3:6]
-                self.function=cname[6:8]
-                self.cluster=cname[8:10]
-                self.customer=cname[10:13]
+        r=re.match("UKX...",device)
+        if r:
+            self.region="UK"
+            self.dc=device[3:6]
 
-            if type=="Net":
-                self.region=cname[0:3]
-                self.dc=cname[3:6]
-                self.function=cname[6:8]
-                self.cluster=""
-                self.customer=""
-
-            if type=="Adj":
-                self.region=""
-                self.dc=""
-                self.function=""
-                self.customer=""
-                self.cluster=""
-
-                r=re.search("(?<=CUCM-cust)(\d+)-\d+-CL(\d+)",cname)
-                if r:
-                    logging.debug("Adj:"+cname)
-                    logging.debug("re:"+r.group(0))
-                    logging.debug("Cust:"+r.group(1))
-                    logging.debug("CL:"+r.group(2))
-                    self.function="CUCM"
-                    self.customer=r.group(1)
-                    self.cluster=r.group(2)
-
-                r=re.search("(?<=CUCM-cust)(\d+)-\d+$",cname)
-                if r:
-                    logging.debug("Adj:"+cname)
-                    logging.debug("re:"+r.group(0))
-                    logging.debug("Cust:"+r.group(1))
-                    self.function="CUCM"
-                    self.customer=r.group(1)
-                    self.cluster="1"
-
-                r=re.search("(?<=IMS-SPE)(\d+)-C(\d+)-CL(\d+)",cname)
-                if r:
-                    logging.debug("Adj:"+cname)
-                    logging.debug("re:"+r.group(0))
-                    logging.debug("Cust:"+r.group(2))
-                    logging.debug("CL:"+r.group(3))
-                    self.function="IMS"
-                    self.customer=r.group(2)
-                    self.cluster=r.group(3)
+        r=re.match("(ES|DE)...",device)
+        if r:
+            self.region="EU"
+            self.dc=device[3:6]
 
 
+        r=re.match("UKX...[CBTPU]\d\d\d\d\d\d",cname)
+        if r:
+            self.type="CUCM"
+            self.function=cname[6:8]
+            self.cluster=int(cname[8:10])
+            self.customer=int(cname[10:13])
+
+        r=re.search("(?<=CUCM-cust)(\d+)-\d+-CL(\d+)",cname)
+        if r:
+            self.type="Adjacency"
+            self.function="CUCM"
+            self.customer=int(r.group(1))
+            self.cluster=int(r.group(2))
+
+        r=re.search("(?<=CUCM-cust)(\d+)-\d+$",cname)
+        if r:
+            self.type="Adjacency"
+            self.function="CUCM"
+            self.customer=int(r.group(1))
+            self.cluster=1
+
+        r=re.search("(?<=IMS-SPE)(\d+)-C(\d+)-CL(\d+)",cname)
+        if r:
+            self.type="Adjacency"
+            self.function="IMS"
+            self.customer=int(r.group(2))
+            self.cluster=int(r.group(3))
+
+        logging.debug(str(self))
 
 
+    def __str__(self):
+        return ("Name:"+str(self.name)+
+                ", Device:"+str(self.device)+
+                ", Region:"+str(self.region)+
+                ", DC:"+str(self.dc)+
+                ", Type:"+str(self.type)+
+                ", Function:"+str(self.function)+
+                ", Customer:"+str(self.customer)+
+                ", Cluster:"+str(self.cluster))
 
-            logging.debug("Name:"+cname+", Region:"+self.region+", Dc:"+self.dc+
-                    ", Function:"+self.function+
-                    ", Cluster:"+self.cluster+", Customer:"+self.customer)
-
-
-
-        except:
-            logging.error("Wrong C.Name: "+cname)
 
 
 ###########################################################
@@ -199,13 +191,13 @@ def main():
     print(alias.replaceAliasPath("s/s/cube1-swi-33.txt"))
 
 
-    c1=canonicalName("CUCM","UKXSW1U200016")
-    c2=canonicalName("CUCM","UKXLS2T202016")
-    c2=canonicalName("Net","UKXLS2SB02")
+    c1=canonicalName("UKXSW1U200016","UKXSW1U200016")
+    c2=canonicalName("UKXLS2T202016","UKXLS2T202016")
+    c2=canonicalName("UKXLS2SB02","Net")
 
-    c3=canonicalName("Adj","CUCM-cust017-5-CL2")
-    c3=canonicalName("Adj","CUCM-cust035-2")
-    c3=canonicalName("Adj","IMS-SPE1-C001-CL2")
+    c3=canonicalName("UKXLS2SB02","CUCM-cust017-5-CL2")
+    c3=canonicalName("UKXLS2SB02","CUCM-cust035-2")
+    c3=canonicalName("UKXLS2SB02","IMS-SPE1-C001-CL2")
 
 
     adjAlias=adjacencyAlias()
