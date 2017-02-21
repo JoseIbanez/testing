@@ -16,6 +16,7 @@ class aliasItem(object):
         self.rePath=re.compile("/"+alias)
         self.reDomain=re.compile("^"+alias)
 
+###################################################################
 
 class canonicalName(object):
 
@@ -42,7 +43,7 @@ class canonicalName(object):
                 self.function=cname[6:8]
                 self.cluster=""
                 self.customer=""
-            
+
             if type=="Adj":
                 self.region=""
                 self.dc=""
@@ -79,13 +80,13 @@ class canonicalName(object):
                     self.customer=r.group(2)
                     self.cluster=r.group(3)
 
-                    
+
 
 
 
             logging.debug("Name:"+cname+", Region:"+self.region+", Dc:"+self.dc+
                     ", Function:"+self.function+
-                    ", Cluster:"+self.cluster+", Customer:"+self.customer) 
+                    ", Cluster:"+self.cluster+", Customer:"+self.customer)
 
 
 
@@ -93,7 +94,7 @@ class canonicalName(object):
             logging.error("Wrong C.Name: "+cname)
 
 
-
+###########################################################
 
 
 class deviceAlias(object):
@@ -220,5 +221,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

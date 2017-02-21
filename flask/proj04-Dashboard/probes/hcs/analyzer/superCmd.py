@@ -15,6 +15,7 @@ class superCmd:
 
     def parseCmdPath(self,path):
         logging.debug("ParseCmdPath Input: "+path)
+        self.originalPath=path
         path=self.alias.replaceAliasPath(path)
         try:
             pathParm=path.split("/")
@@ -31,7 +32,7 @@ class superCmd:
             logging.debug("ParseCmdPath Result: "+str(self))
             return True
         except:
-            logging.error("Path parse error:"+path)
+            logging.error("Path parse error:"+self.originalPath)
         return False
 
 
@@ -74,4 +75,3 @@ class superCmd:
         for item in self.cmd.kpiList:
             myOutput=",".join([self.cust,self.host,self.cmd.cmdName,str(item),str(self.date)])
             print(myOutput)
-
