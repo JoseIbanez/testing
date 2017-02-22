@@ -99,7 +99,7 @@ class Cmd(object):
             value=item.name+"="+str(item.value)
             logging.debug(value)
 
-            print(item.group+" "+",".join(tags)+" "+value+" "+self.date.strftime("%Y-%m-%d %H:%M"))
+            print(item.group+","+",".join(tags)+" "+value+" "+self.date.strftime("%s")+"000000000")
 
 
     def parseLine(self,l):
