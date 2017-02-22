@@ -50,6 +50,7 @@ class superCmd:
                     self.cmd=c
                     self.cmd.reset()
                     self.cmd.host=self.host
+                    self.cmd.date=self.date
                     break
             return
 
@@ -72,9 +73,4 @@ class superCmd:
 
 
     def toPrint(self):
-        for item in self.cmd.kpiList:
-            myOutput=",".join([self.cust,self.host,self.cmd.cmdName,str(item),str(self.date)])
-            print(myOutput)
-            logging.debug("Domain: "+str(item.domain))
-            objItems=item.domain.split("/")
-            logging.debug("Domain: "+str(objItems))
+        self.cmd.printKpiList()

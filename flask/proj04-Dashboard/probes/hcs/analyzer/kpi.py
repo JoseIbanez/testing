@@ -3,10 +3,12 @@
 import re
 import logging
 from datetime import datetime
+import nameAlias
 
 class Kpi(object):
 
-    def __init__(self,domain,name,value):
+    def __init__(self,group,domain,name,value):
+        self.group=group
         self.domain=domain
         self.name=name
         self.value=value
@@ -57,10 +59,47 @@ class Cmd(object):
         return str(self.kpi)
 
 
-    def addKpi(self,domain,name,value):
-        item=Kpi(domain,name,value)
+    def addKpi(self,group,domain,name,value):
+        item=Kpi(group,domain,name,value)
         logging.debug("Detected new kpi:"+str(item))
         self.kpiList.append(item)
+
+    def printKpiList(self):
+        nameAlias.objectAlias()
+
+        for item in self.kpiList:
+            logging.debug("Domain: "+str(item.domain))
+            objItems=item.domain.split("/")
+            logging.debug("Domain: "+str(objItems))
+
+            objType=objItems[0]
+            objOrgName=objItems[1]
+            objName=nameAlias.objectAlias.search(objOrgName)
+            logging.debug("Object: "+objType+", "+objOrgName+", "+objName)
+            obj=nameAlias.canonicalName(self.host,objName)
+
+            tags=[]
+            tags.append("region="+obj.region)
+            tags.append("dc="+obj.dc)
+            tags.append("cust="+obj.region+str(obj.customer).zfill(3))
+            tags.append("cluster="+str(obj.cluster))
+            tags.append("device="+obj.device)
+            tags.append(objType+"="+objName)
+
+            if obj.function:
+                tags.append("function="+obj.function)
+
+            try:
+                tags.append(objItems[2]+"="+objItems[3])
+            except:
+                logging.debug("not sub object")
+
+            logging.debug(tags)
+
+            value=item.name+"="+str(item.value)
+            logging.debug(value)
+
+            print(item.group+" "+",".join(tags)+" "+value+" "+self.date.strftime("%Y-%m-%d %H:%M"))
 
 
     def parseLine(self,l):

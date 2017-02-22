@@ -71,6 +71,14 @@ class canonicalName(object):
             self.customer=int(r.group(2))
             self.cluster=int(r.group(3))
 
+        r=re.search("(?<=IMS-SPE)(\d+)-C(\d+)",cname)
+        if r:
+            self.type="Adjacency"
+            self.function="IMS"
+            self.customer=int(r.group(2))
+            self.cluster=1
+
+
         logging.debug(str(self))
 
 
@@ -141,7 +149,7 @@ class deviceAlias(object):
 
 ########################################################################################
 
-class adjacencyAlias(object):
+class objectAlias(object):
     aliasList={}
 
     @classmethod

@@ -67,7 +67,7 @@ class cubeCallStatCurrentDay(kpi.Cmd):
         if r:
             logging.debug(line)
             logging.debug("cubeCallAttempts: "+r.group(1))
-            self.addKpi("Adjacency/"+self.currentAdj+"/Direction/"+self.currentFlow,"callAttempts",int(r.group(0)))
+            self.addKpi("calls","Adjacency/"+self.currentAdj+"/Direction/"+self.currentFlow,"callAttempts",int(r.group(0)))
             self.parse=True
 
         return True
