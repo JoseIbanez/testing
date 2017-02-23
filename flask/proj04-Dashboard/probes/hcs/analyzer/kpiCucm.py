@@ -21,11 +21,11 @@ class ccmNtpStatus(kpi.Cmd):
             return False
 
         if re.search("^synchronised.*stratum",line):
-            self.addKpi(self.host,"ccmNtpSynchronised",1)
+            self.addKpi("ntp","node/"+self.host,"synchronised",1)
 
         r=re.search("(?<=stratum )\d+",line)
         if r:
-            self.addKpi(self.host,"ccmNtpStratum",int(r.group(0)))
+            self.addKpi("ntp","node/"+self.host,"stratum",int(r.group(0)))
             self.parse=True
 
         return True
@@ -49,7 +49,7 @@ class ccmLoad(kpi.Cmd):
 
         r=re.search("(?<=load average: )\d+.\d+",line)
         if r:
-            self.addKpi(self.host+"/cpu/AVG1","load",float(r.group(0)))
+            self.addKpi("cpu","node/"+self.host+"/measure/AVG1","load",float(r.group(0)))
             self.parse=True
 
         return True
@@ -72,20 +72,20 @@ class ccmStatus(kpi.Cmd):
 
         r=re.search("(?<=Free: ) +(\d+)K",line)
         if r:
-            self.addKpi(self.host,"freeMem",int(r.group(1)))
+            self.addKpi("mem","node/"+self.host,"free",int(r.group(1)))
             self.parse=True
 
         r=re.search("(?<=Disk/active).+\((\d+)%\)",line)
         if r:
-            self.addKpi(self.host+"/Partition/Active","usedDisk",int(r.group(1)))
+            self.addKpi("disk","node/"+self.host+"/Partition/Active","used",int(r.group(1)))
 
         r=re.search("(?<=Disk/inactive).+\((\d+)%\)",line)
         if r:
-            self.addKpi(self.host+"/Partition/Inactive","usedDisk",int(r.group(1)))
+            self.addKpi("disk","node/"+self.host+"/Partition/Inactive","used",int(r.group(1)))
 
         r=re.search("(?<=Disk/logging).+\((\d+)%\)",line)
         if r:
-            self.addKpi(self.host+"/Partition/Logging","usedDisk",int(r.group(1)))
+            self.addKpi("disk","node/"+self.host+"/Partition/Logging","used",int(r.group(1)))
 
         return True
 
@@ -112,8 +112,8 @@ class ccmDBreplication(kpi.Cmd):
             return False
 
         if self.isOut(line):
-            self.addKpi(self.host,"ccmDBreplicationOk",   self.ccmDBreplicationOk)
-            self.addKpi(self.host,"ccmDBreplicationError",self.ccmDBreplicationError)
+            self.addKpi("db","node/"+self.host+"Replication/Ok",   "counter", self.ccmDBreplicationOk)
+            self.addKpi("db","node/"+self.host+"Replication/Error","counter", self.ccmDBreplicationError)
             return False
 
         logging.debug(line)

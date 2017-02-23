@@ -79,8 +79,9 @@ class Cmd(object):
             obj=nameAlias.canonicalName(self.host,objName)
 
             tags=[]
-            tags.append("region="+obj.region)
-            tags.append("dc="+obj.dc)
+
+            tags.append("region="+str(obj.region))
+            tags.append("dc="+str(obj.dc))
             tags.append("cust="+obj.region+str(obj.customer).zfill(3))
             tags.append("cluster="+str(obj.cluster))
             tags.append("device="+obj.device)
