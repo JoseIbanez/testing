@@ -22,8 +22,6 @@ class superCmd:
             self.path=path
             self.fileName=pathParm[-1]
             self.date=datetime.strptime(pathParm[-2],'%Y%m%d-%H%M')
-            self.lote=pathParm[-3]
-            self.cust=pathParm[-4]
             pathParm=self.fileName.split("-",1)
             self.host=pathParm[0]
             self.cmdFile=pathParm[1]
@@ -69,7 +67,7 @@ class superCmd:
 
 
     def __str__(self):
-        return self.date.strftime("%Y-%m-%d %H:%M")+", "+self.host+", "+self.cmdFile+", "+self.cust
+        return self.date.strftime("%Y-%m-%d %H:%M")+", "+self.host+", "+self.cmdFile
 
 
     def toPrint(self):
