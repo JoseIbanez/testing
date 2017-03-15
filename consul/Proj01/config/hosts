@@ -1,0 +1,10 @@
+#jumper ansible_port=5555 ansible_host=192.0.2.50
+
+[web]
+u10 ansible_hosts=10.202.5.67
+u11 ansible_hosts=10.202.5.69
+
+[db]
+u20 ansible_hosts=10.202.5.198
+u21 ansible_hosts=10.202.5.221
+u22 ansible_hosts=10.202.5.219
