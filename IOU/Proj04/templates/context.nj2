@@ -1,0 +1,13 @@
+@L {{context.id}}
+change context {{context.name}}
+
+@L {{context.id}}-show_run-PRE
+show run
+
+@L {{context.id}}-config
+conf t
+end
+write
+
+@L {{context.id}}-show_run-POST
+show run
