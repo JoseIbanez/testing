@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"io"
-  "github.com/JoseIbanez/cdr"
+  "cdr"
 )
 
 func main() {
