@@ -25,7 +25,7 @@ response = table.query(
     #ExpressionAttributeNames={ "#yr": "year" }, # Expression Attribute Names for Projection Expression only.
     ExpressionAttributeNames={ "#date": "date", "#temp": "temp" },
     KeyConditionExpression=Key('probe').eq("b827eb.7c3714.c1") & 
-                           Key('date').between('2017-08-09', '2017-08-10')
+                           Key('date').between('2017-08-09', '2017-08-12')
 )
 
 for i in response[u'Items']:
