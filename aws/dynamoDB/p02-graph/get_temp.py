@@ -3,7 +3,35 @@
 import boto3
 import json
 import decimal
+#import datetime
+from datetime import date, timedelta, datetime
+import argparse
 from boto3.dynamodb.conditions import Key, Attr
+
+
+parser = argparse.ArgumentParser(
+    description='Request any Twitter Streaming or REST API endpoint')
+parser.add_argument(
+    '-date',
+    metavar='FILENAME',
+    type=str,
+    help='Last date of the graph')
+parser.add_argument(
+    '-hours',
+    metavar='NAME_VALUE',
+    type=int,
+    help='Number of previous hours',
+    default=24)
+args = parser.parse_args()
+
+
+try:
+    lastDate = datetime.strptime(args.date, "%Y-%m-%d")
+except:
+    lastDate = datetime.today() - timedelta(1)
+
+lastDate=lastDate + timedelta(hours=24)
+initialDate=lastDate - timedelta(hours=args.hours)
 
 # Helper class to convert a DynamoDB item to JSON.
 class DecimalEncoder(json.JSONEncoder):
@@ -19,13 +47,16 @@ dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
 table = dynamodb.Table('temp')
 
 print("reading last values")
+print(initialDate.strftime("%Y-%m-%d"))
+print(lastDate.strftime("%Y-%m-%d"))
 
 response = table.query(
     ProjectionExpression="probe, #date, #temp",
     #ExpressionAttributeNames={ "#yr": "year" }, # Expression Attribute Names for Projection Expression only.
     ExpressionAttributeNames={ "#date": "date", "#temp": "temp" },
     KeyConditionExpression=Key('probe').eq("b827eb.7c3714.c1") & 
-                           Key('date').between('2017-08-09', '2017-08-12')
+                           Key('date').between(initialDate.strftime("%Y-%m-%d"),
+                                               lastDate.strftime("%Y-%m-%d"))
 )
 
 for i in response[u'Items']:
