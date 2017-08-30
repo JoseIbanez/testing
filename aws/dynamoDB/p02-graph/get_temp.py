@@ -24,8 +24,10 @@ response = table.query(
     ProjectionExpression="probe, #date, #temp",
     #ExpressionAttributeNames={ "#yr": "year" }, # Expression Attribute Names for Projection Expression only.
     ExpressionAttributeNames={ "#date": "date", "#temp": "temp" },
-    KeyConditionExpression=Key('probe').eq("28-0414517b55ff") & Key('date').between('2017-07-28', '2017-07-30')
+    KeyConditionExpression=Key('probe').eq("b827eb.7c3714.c1") & 
+                           Key('date').between('2017-08-09', '2017-08-10')
 )
 
 for i in response[u'Items']:
-    print(json.dumps(i, cls=DecimalEncoder))
+    #print(json.dumps(i, cls=DecimalEncoder))
+    print i['date']+','+i['probe']+','+str(i['temp'])
