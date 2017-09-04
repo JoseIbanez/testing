@@ -9,16 +9,22 @@ import argparse
 from boto3.dynamodb.conditions import Key, Attr
 
 
+#Madrid   b827eb.7c3714.c1
+#Siguenza b827eb.61eb84.c3
+
 parser = argparse.ArgumentParser(
     description='Request any Twitter Streaming or REST API endpoint')
 parser.add_argument(
+    '-probe',
+    type=str,
+    help='Probe id',
+    default="b827eb.7c3714.c1")
+parser.add_argument(
     '-date',
-    metavar='FILENAME',
     type=str,
     help='Last date of the graph')
 parser.add_argument(
     '-hours',
-    metavar='NAME_VALUE',
     type=int,
     help='Number of previous hours',
     default=24)
@@ -54,7 +60,7 @@ response = table.query(
     ProjectionExpression="probe, #date, #temp",
     #ExpressionAttributeNames={ "#yr": "year" }, # Expression Attribute Names for Projection Expression only.
     ExpressionAttributeNames={ "#date": "date", "#temp": "temp" },
-    KeyConditionExpression=Key('probe').eq("b827eb.7c3714.c1") & 
+    KeyConditionExpression=Key('probe').eq(args.probe) & 
                            Key('date').between(initialDate.strftime("%Y-%m-%d"),
                                                lastDate.strftime("%Y-%m-%d"))
 )
