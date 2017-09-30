@@ -1,0 +1,10 @@
+{
+    "server": false,
+    "datacenter": "nyc2",
+    "data_dir": "/var/consul",
+    "ui_dir": "/home/consul/dist",
+    "encrypt": "X4SYOinf2pTAcAHRhpj7dA==",
+    "log_level": "INFO",
+    "enable_syslog": true,
+    "start_join": ["192.0.2.1", "192.0.2.2", "192.0.2.3"]
+}

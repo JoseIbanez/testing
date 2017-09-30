@@ -1,0 +1,8 @@
+#cloud-config
+
+packages:
+ - puppet
+
+bootcmd:
+ - grep puppet /etc/hosts || echo 10.0.3.1 puppet >> /etc/hosts
+ - puppet agent --enable

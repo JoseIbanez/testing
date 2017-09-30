@@ -1,0 +1,73 @@
+#!/bin/sh
+
+
+
+sudo apt-get install unzip
+cd /tmp/
+#wget https://releases.hashicorp.com/consul/0.7.5/consul_0.7.5_linux_amd64.zip
+wget https://releases.hashicorp.com/consul/0.9.3/consul_0.9.3_linux_amd64.zip
+unzip -u consul*.zip
+
+mv consul /usr/bin/consul
+
+adduser consul
+
+mkdir /etc/consul.d
+mkdir -p /etc/consul.d/{bootstrap,server,client}
+
+mkdir /var/consul
+chown consul:consul /var/consul
+
+consul --version
+
+
+
+
+------------------------------------
+
+
+
+NAME=consul
+USER=root
+DAEMON=/usr/bin/$NAME
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+DAEMON_ARGS="agent -server -bootstrap-expect 1 -data-dir /tmp/consul -node=agent-one  -bind=10.0.3.167   -client=0.0.0.0   -config-dir /etc/consul.d     -ui-dir /opt/consul-ui/"
+
+
+start-stop-daemon --start --quiet --pidfile $PIDFILE --chuid $USER --background --make-pidfile \
+  --startas /bin/bash -- -c "exec $DAEMON $DAEMON_ARGS > /var/log/consul.log 2>&1"
+
+
+
+--------------------------
+
+NAME=consul
+USER=root
+DAEMON=/usr/bin/$NAME
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+DAEMON_ARGS="agent -data-dir=/tmp/consul -node=agent-two -bind=10.0.3.103 -config-dir=/etc/consul.d"
+
+
+start-stop-daemon --start --quiet --pidfile $PIDFILE --chuid $USER --background --make-pidfile \
+  --startas /bin/bash -- -c "exec $DAEMON $DAEMON_ARGS > /var/log/consul.log 2>&1"
+
+consul join 10.0.3.167
+--------------------------
+
+NAME=consul
+USER=root
+DAEMON=/usr/bin/$NAME
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+HOSTNAME=`hostname`
+DAEMON_ARGS="agent -data-dir=/tmp/consul -node=$HOSTNAME -bind=0.0.0.0 -config-dir=/etc/consul.d"
+
+
+start-stop-daemon --start --quiet --pidfile $PIDFILE --chuid $USER --background --make-pidfile \
+  --startas /bin/bash -- -c "exec $DAEMON $DAEMON_ARGS > /var/log/consul.log 2>&1"
+
+consul join 10.0.3.167
+consul info
+consul members
