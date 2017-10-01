@@ -7,6 +7,7 @@ sudo apt-get update
 sudo apt-get install -y puppetserver
 
 sudo systemctl start puppetserver
+sudo systemctl enable puppetserver
 sudo systemctl status puppetserver
 
 exit
@@ -18,7 +19,11 @@ sudo /opt/puppetlabs/bin/puppet cert sign --all
 
 
 cd /vagrant 
-cp puppet/init.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
+MODULE_HOME=/etc/puppetlabs/code/environments/production/modules/
+#cp puppet/init.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
+cp puppet/site.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
+cp -r puppet/modules/* $MODULE_HOME
+tree $MODULE_HOME
 
 
 lxc exec u10 -- sh -c "/opt/puppetlabs/bin/puppet agent --test"
