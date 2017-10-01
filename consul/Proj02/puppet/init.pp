@@ -1,8 +1,11 @@
 node default {
-   class { 'helloworld': }
-   class { 'helloworld::motd': }
+    class { 'helloworld': }
+    class { 'helloworld::motd': }
 }
 
+node /^u1.\.lxd$/ {
+    class { 'helloworld::packages': }
+}
 
 class helloworld {
    notify { 'hello, world!': }

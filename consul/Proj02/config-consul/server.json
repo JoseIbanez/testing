@@ -6,5 +6,5 @@
     "encrypt": "X4SYOinf2pTAcAHRhpj7dA==",
     "log_level": "INFO",
     "enable_syslog": true,
-    "start_join": ["192.0.2.2", "192.0.2.3"]
+    "start_join": ["10.0.3.156"]
 }
