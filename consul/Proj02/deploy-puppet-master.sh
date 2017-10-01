@@ -10,6 +10,8 @@ sudo systemctl start puppetserver
 sudo systemctl enable puppetserver
 sudo systemctl status puppetserver
 
+/opt/puppetlabs/bin/puppet module install puppet-archive --version 2.0.0
+
 exit
 
 # maintenace commands

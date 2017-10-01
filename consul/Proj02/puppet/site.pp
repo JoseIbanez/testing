@@ -1,6 +1,5 @@
-node /^u1.\.lxd$/ {
-    class { 'helloworld': }
-    class { 'consul': }
+node /^u10\.lxd$/ {
+    class { 'consul::server': }
 }
 
 
