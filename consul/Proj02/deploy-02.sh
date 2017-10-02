@@ -8,8 +8,13 @@ lxc network create br0 ipv6.address=none ipv4.address=10.0.3.1/24 ipv4.nat=true
 lxc network attach-profile br0 default
 
 
-lxc launch ubuntu:16.04 u10 -p default
+lxc storage create pool1 lvm source=/dev/xvdh1
+
+lxc launch ubuntu:16.04 u10 -p default 
 lxc launch ubuntu:16.04 u11 -p default
+lxc launch ubuntu:16.04 u11 -p default -s pool1
+
+
 
 lxc exec u11 -- sh -c "wget http://google.es | gzip > 33.gz"
 
