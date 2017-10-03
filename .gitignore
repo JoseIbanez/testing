@@ -50,3 +50,7 @@ bin/
 ehthumbs.db
 Thumbs.db
 
+#Terraform
+terraform.tfstate*
+.terraform/
+

@@ -2,7 +2,7 @@
 
 curl -O https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
 sudo dpkg -i puppetlabs-release-pc1-xenial.deb
-sudo apt-get update
+sudo apt-get -y update
 
 sudo apt-get install -y puppetserver
 
@@ -28,4 +28,7 @@ cp -r puppet/modules/* $MODULE_HOME
 tree $MODULE_HOME
 
 
-lxc exec u10 -- sh -c "/opt/puppetlabs/bin/puppet agent --test"
+wget https://raw.githubusercontent.com/JoseIbanez/testing/master/consul/Proj02/deploy-puppet-agent.sh | sh
+
+lxc exec u11 -- sh -c "wget -qO- https://raw.githubusercontent.com/JoseIbanez/testing/master/consul/Proj02/deploy-puppet-agent.sh | sh"
+lxc exec u11 -- sh -c "/opt/puppetlabs/bin/puppet agent --test"

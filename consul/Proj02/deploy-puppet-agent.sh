@@ -9,3 +9,8 @@ sudo apt-get install -y puppet-agent
 sudo systemctl start puppet
 sudo systemctl enable puppet
 
+hostname=puppet
+ip=10.0.3.1
+cat /etc/hosts | grep "${hostname}$" || echo "${ip}  ${hostname}" | sudo tee -a /etc/hosts
+sudo sed -i'' "s/^.* ${hostname}$/${ip}   ${hostname}/g" /etc/hosts
+

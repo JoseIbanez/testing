@@ -7,12 +7,22 @@
 lxc network create br0 ipv6.address=none ipv4.address=10.0.3.1/24 ipv4.nat=true
 lxc network attach-profile br0 default
 
-
 lxc storage create pool1 lvm source=/dev/xvdh1
+vgdisplay
+lxc profile device remove default root
+lxc profile device add default root disk path=/ pool=pool1
+lxc profile show default
 
 lxc launch ubuntu:16.04 u10 -p default 
 lxc launch ubuntu:16.04 u11 -p default
-lxc launch ubuntu:16.04 u11 -p default -s pool1
+lxc launch ubuntu:16.04 u12 -p default
+lxc launch ubuntu:16.04 u13 -p default
+lxc launch ubuntu:16.04 u14 -p default
+
+
+lxc storage list
+lxc storage volume list pool1
+
 
 
 

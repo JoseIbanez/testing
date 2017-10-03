@@ -13,12 +13,12 @@ echo "Pre configuration"
 echo "Installing deps"
 apt-get install -y lxd \
                    lvm2 \
+                   thin-provisioning-tools \
                    ansible
 
 echo "Post configuration"
 newgrp lxd
 lxd init --auto
-
 
 
 echo "Restarting"
