@@ -8,8 +8,9 @@ class consul {
         group => 'root',
     }
 
-    package { ensure => 'installed' }
-    package { 'unzip': }
+    package { 'unzip':
+	ensure => 'installed', 
+    }
 
 
     archive { 'consul_0.9.3_linux_amd64.zip':
@@ -23,13 +24,12 @@ class consul {
         #cleanup       => 'true',
         cleanup       => 'false',        
         #require       => File[$install_path],
-        require        => package['unzip']
+        require        => Package['unzip'],
     }
 
-    exec { 'consul bin':
-        command   => "cp /tmp/consul /usr/bin/consul",
-        path      => $::path,
-        subscribe => Archive['consul_0.9.3_linux_amd64.zip'],
+    file { '/usr/bin/consul':
+        ensure    => 'file',
+        source    => '/tmp/consul',
     }
 
 
@@ -54,6 +54,9 @@ class consul::server {
         source => 'puppet:///modules/consul/server.json',
     }
 
+
+
+
     file { "/etc/systemd/system/consul.service":
         mode => "0644",
         owner => 'root',
@@ -72,7 +75,16 @@ class consul::bootstrap {
         mode => '0755',
         owner => 'root',
         group => 'root',
+        require => File['/etc/consul.d'],
     }
+
+    file { '/etc/consul.d':
+        ensure => directory,
+        mode => '0755',
+        owner => 'root',
+        group => 'root',
+    }
+
 
     file { "/etc/consul.d/bootstrap/bootstrap.json":
         mode => "0644",
@@ -87,5 +99,13 @@ class consul::bootstrap {
         group => 'root',
         source => 'puppet:///modules/consul/bootstrap.service',
     }
+
+    service { 'consul':
+        ensure => 'running',
+        require => [ File['/etc/consul.d/bootstrap/bootstrap.json'],
+                     File['/etc/systemd/system/consul.service'],
+                     Class['consul'] ],
+    }
+
 
 }
