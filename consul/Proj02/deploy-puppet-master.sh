@@ -29,4 +29,4 @@ tree $MODULE_HOME/consul
 
 
 lxc exec u11 -- sh -c "wget -qO- https://raw.githubusercontent.com/JoseIbanez/testing/master/consul/Proj02/deploy-puppet-agent.sh | sh"
-lxc exec u11 -- sh -c "/opt/puppetlabs/bin/puppet agent --test"
+lxc exec u10 -- sh -c "/opt/puppetlabs/bin/puppet agent --test"

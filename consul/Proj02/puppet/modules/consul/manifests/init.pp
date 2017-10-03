@@ -8,6 +8,10 @@ class consul {
         group => 'root',
     }
 
+    package { ensure => 'installed' }
+    package { 'unzip': }
+
+
     archive { 'consul_0.9.3_linux_amd64.zip':
         path          => '/tmp/consul_0.9.3_linux_amd64.zip',
         source        => 'https://releases.hashicorp.com/consul/0.9.3/consul_0.9.3_linux_amd64.zip',
@@ -19,6 +23,7 @@ class consul {
         #cleanup       => 'true',
         cleanup       => 'false',        
         #require       => File[$install_path],
+        require        => package['unzip']
     }
 
     exec { 'consul bin':
