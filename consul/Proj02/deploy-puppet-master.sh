@@ -28,7 +28,5 @@ cp -r puppet/modules/* $MODULE_HOME
 tree $MODULE_HOME
 
 
-wget https://raw.githubusercontent.com/JoseIbanez/testing/master/consul/Proj02/deploy-puppet-agent.sh | sh
-
 lxc exec u11 -- sh -c "wget -qO- https://raw.githubusercontent.com/JoseIbanez/testing/master/consul/Proj02/deploy-puppet-agent.sh | sh"
 lxc exec u11 -- sh -c "/opt/puppetlabs/bin/puppet agent --test"
