@@ -25,7 +25,7 @@ MODULE_HOME=/etc/puppetlabs/code/environments/production/modules/
 #cp puppet/init.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
 cp puppet/site.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
 cp -r puppet/modules/* $MODULE_HOME
-tree $MODULE_HOME
+tree $MODULE_HOME/consul
 
 
 lxc exec u11 -- sh -c "wget -qO- https://raw.githubusercontent.com/JoseIbanez/testing/master/consul/Proj02/deploy-puppet-agent.sh | sh"

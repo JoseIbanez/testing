@@ -1,5 +1,6 @@
 node /^u10\.lxd$/ {
-    class { 'consul::server': }
+    class { 'consul': }
+    class { 'consul::bootstrap': }
 }
 
 

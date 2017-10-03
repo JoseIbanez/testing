@@ -14,6 +14,7 @@ echo "Installing deps"
 apt-get install -y lxd \
                    lvm2 \
                    thin-provisioning-tools \
+                   tree \
                    ansible
 
 echo "Post configuration"
