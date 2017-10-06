@@ -45,6 +45,14 @@ class consul::server {
         mode => '0755',
         owner => 'root',
         group => 'root',
+        require => File['/etc/consul.d'],
+    }
+
+    file { '/etc/consul.d':
+        ensure => directory,
+        mode => '0755',
+        owner => 'root',
+        group => 'root',
     }
 
     file { "/etc/consul.d/server/server.json":
@@ -54,14 +62,18 @@ class consul::server {
         source => 'puppet:///modules/consul/server.json',
     }
 
-
-
-
     file { "/etc/systemd/system/consul.service":
         mode => "0644",
         owner => 'root',
         group => 'root',
         source => 'puppet:///modules/consul/server.service',
+    }
+
+    service { 'consul':
+        ensure => 'running',
+        require => [ File['/etc/consul.d/bootstrap/bootstrap.json'],
+                     File['/etc/systemd/system/consul.service'],
+                     Class['consul'] ],
     }
 
 }

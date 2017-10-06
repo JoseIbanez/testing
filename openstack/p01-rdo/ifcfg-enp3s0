@@ -1,0 +1,8 @@
+NAME="enp3s0"
+DEVICE="enp3s0"
+ONBOOT=yes
+IPV6INIT=no
+BOOTPROTO=none
+DEVICETYPE=ovs
+TYPE=OVSPort
+OVS_BRIDGE=br-ex
