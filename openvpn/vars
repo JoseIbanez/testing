@@ -1,0 +1,8 @@
+export KEY_COUNTRY="ES"
+export KEY_PROVINCE="Madrid"
+export KEY_CITY="Madrid"
+export KEY_ORG="Ibanez"
+export KEY_EMAIL="vlan200@live.com"
+export KEY_OU="Networking"
+
+export KEY_NAME="openvpn-srv1"
