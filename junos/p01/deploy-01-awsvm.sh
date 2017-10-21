@@ -3,17 +3,18 @@
 #==================================================
 echo "Configure Additional Repo"
 
-apt-get update -y
+yum update -y
 
 echo "Installing deps"
-apt-get install -y \
-  ntp \
-  python-pip \
-  python-dev \
-  libxml2-dev \
-  libxslt-dev \
-  libssl-dev \
-  libffi-dev 
+
+yum install -y \
+  pip \
+  python-devel \
+  libxml2-devel \
+  libxslt-devel \
+  gcc \
+  openssl \
+  libffi-devel
 
 #workarround for "cryptography" module
 sudo pip install --upgrade setuptools
@@ -23,6 +24,7 @@ sudo apt-get install libffi-dev libssl-dev
 pip install enum34
 pip install ipaddress
 
+#pip as juniper web
 pip install awscli
 pip install Jinja2
 pip install junos-eznc
