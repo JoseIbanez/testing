@@ -1,0 +1,124 @@
+## Last changed: 2017-10-23 16:56:18 UTC
+version 15.1X49-D100.6;
+groups {
+    aws-default {
+        system {
+            root-authentication {
+                ssh-rsa "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCJkhJLzMsCNjARhI8k0xU1CqQJE6FojqacChM/proGIKeJR/M2WdkN/qBn5a0Lff1H2r4hUzLm8Hcb2xYpwPeVfVfjl1yn00oHt7uw60F5AzyqwI95FKg+ZkEKDSnY1Ag8LOwMxQy4PPZUq674rPhp5u3byfpkRqw8pLQ/+I+keOwOSBVk7JuojjA9IofozmsgRoPxOuSSDlXxATE3IqUDGIGbqUG1s9Spryk4TvKAK7hF0KRAUK8ie+2+l3M533gedbPQMTkDbUZ23qVmrTChXd3bIRzjuLFtqLF8cvIKXxkVzqJ+TBuIGBBNxC5c+4ViiM5gUrYtHxXsrFNTqMRr junos_ohio"; ## SECRET-DATA
+            }
+            services {
+                ssh {
+                    no-passwords;
+                }
+                netconf {
+                    ssh;
+                }
+                web-management {
+                    https {
+                        system-generated-certificate;
+                    }
+                }
+            }
+        }
+        interfaces {
+            fxp0 {
+                unit 0 {
+                    family inet {
+                        address 172.31.23.244/20;
+                    }
+                }
+            }
+        }
+        routing-options {
+            static {
+                route 0.0.0.0/0 next-hop 172.31.16.1;
+            }
+        }
+    }
+}
+apply-groups aws-default;
+system {
+    autoinstallation {
+        delete-upon-commit;
+        traceoptions {
+            level verbose;
+            flag {
+                all;
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+}
+security {
+    screen {
+        ids-option untrust-screen {
+            icmp {
+                ping-death;
+            }
+            ip {
+                source-route-option;
+                tear-drop;
+            }
+            tcp {
+                syn-flood {
+                    alarm-threshold 1024;
+                    attack-threshold 200;
+                    source-threshold 1024;
+                    destination-threshold 2048;
+                    timeout 20;
+                }
+                land;
+            }
+        }
+    }
+    policies {
+        from-zone trust to-zone trust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone trust to-zone untrust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+    }
+    zones {
+        security-zone trust {
+            tcp-rst;
+        }
+        security-zone untrust {
+            screen untrust-screen;
+        }
+    }
+}
