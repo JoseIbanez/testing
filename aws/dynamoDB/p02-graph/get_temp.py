@@ -57,14 +57,13 @@ print(initialDate.strftime("%Y-%m-%d"))
 print(lastDate.strftime("%Y-%m-%d"))
 
 response = table.query(
-    ProjectionExpression="probe, #date, #temp",
-    #ExpressionAttributeNames={ "#yr": "year" }, # Expression Attribute Names for Projection Expression only.
-    ExpressionAttributeNames={ "#date": "date", "#temp": "temp" },
-    KeyConditionExpression=Key('probe').eq(args.probe) & 
+    ProjectionExpression="probe, #date, #temp, humidity",
+    ExpressionAttributeNames={"#date": "date", "#temp": "temp"},
+    KeyConditionExpression=Key('probe').eq(args.probe) &
                            Key('date').between(initialDate.strftime("%Y-%m-%d"),
                                                lastDate.strftime("%Y-%m-%d"))
 )
 
 for i in response[u'Items']:
     #print(json.dumps(i, cls=DecimalEncoder))
-    print i['date']+','+i['probe']+','+str(i['temp'])
+    print i['date']+','+i['probe']+','+str(i['temp'])+','+str(i['humidity'])
