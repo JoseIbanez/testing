@@ -1,0 +1,144 @@
+multilink bundle-name authenticated
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+!
+vlan 710
+ name Management1
+vlan 730
+ name Management2
+
+vlan 1220
+ name Cust22-UC1
+!
+vlan 1221
+ name Cust22-UC2
+!
+vlan 1550
+ name Cust55-UC1
+vlan 1555
+ name Cust55-UC2
+
+
+interface Ethernet0/0
+ shutdown
+default int e0/0
+interface Ethernet0/1
+ shutdown
+default int e0/1
+
+interface Ethernet0/0
+ description 7k-to-7k
+ !duplex full
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ no shutdown
+!
+interface Ethernet0/1
+ description 7k-to-7k
+ !duplex full
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ no shutdown
+!
+
+
+
+
+
+#
+# 9k to 9k
+#
+
+
+interface Ethernet0/0
+ description 9k-to-9k
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ no shutdown
+!
+interface Ethernet0/1
+ description 9k-to-9k
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ no shutdown
+!
+
+
+
+#
+# n7 to 9k
+#
+
+
+interface Ethernet1/0
+ shutdown
+default int e1/0
+interface Ethernet1/1
+ shutdown
+default int e1/1
+
+
+interface Ethernet1/0
+ description n7k-to-n9k
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ no shutdown
+!
+
+
+
+
+vlan 1660
+ name Cust66-UC1
+
+
+spanning-tree mst configuration
+ name REGION1
+ revision 4
+ instance 1 vlan 1220, 1550, 1660
+ instance 2 vlan 1221, 1555
+!
+
+
+
+#
+# nexus to host
+#
+
+interface Ethernet0/3
+ shutdown
+default int e0/3
+
+interface Ethernet0/3
+ description nexus-to-host
+ switchport access vlan 1550
+ switchport mode access
+ no shutdown
+!
+
+
+
+#
+# Testing
+#
+
+
+vlan 1660
+ name Cust66-UC1
+
+
+spanning-tree mst configuration
+ name REGION1
+ revision 5
+ instance 1 vlan 1220, 1550, 1660
+ instance 2 vlan 1221, 1555
+!
