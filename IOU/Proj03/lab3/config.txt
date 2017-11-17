@@ -93,6 +93,13 @@ interface Ethernet1/0
  switchport mode trunk
  no shutdown
 !
+interface Ethernet1/1
+ description n7k-to-n9k
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ no shutdown
+!
 
 
 
@@ -104,7 +111,7 @@ vlan 1660
 spanning-tree mst configuration
  name REGION1
  revision 4
- instance 1 vlan 1220, 1550, 1660
+ instance 1 vlan 1220, 1550
  instance 2 vlan 1221, 1555
 !
 
@@ -135,10 +142,23 @@ interface Ethernet0/3
 vlan 1660
  name Cust66-UC1
 
+conf t
+spanning-tree mst configuration
+ name REGION1
+ revision 5
+ no instance 1 vlan 1660
+ instance 1 vlan 1220, 1550
+ instance 2 vlan 1221, 1555, 1661
+!
+end
+show spanning-tree mst 1
+show spanning-tree mst 2
 
+
+conf t
 spanning-tree mst configuration
  name REGION1
  revision 5
  instance 1 vlan 1220, 1550, 1660
- instance 2 vlan 1221, 1555
-!
+ instance 2 vlan 1221, 1555, 1661
+end
