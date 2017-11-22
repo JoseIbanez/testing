@@ -66,4 +66,8 @@ response = table.query(
 
 for i in response[u'Items']:
     #print(json.dumps(i, cls=DecimalEncoder))
-    print i['date']+','+i['probe']+','+str(i['temp'])+','+str(i['humidity'])
+    if 'humidity' in i.keys():
+        print i['date']+','+i['probe']+','+str(i['temp'])+','+str(i['humidity'])
+    else:
+        print i['date']+','+i['probe']+','+str(i['temp'])+',None'
+        
