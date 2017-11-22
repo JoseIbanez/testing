@@ -7,11 +7,11 @@ set term png
 set timefmt "%Y-%m-%dT%H:%M:%S"
 #set format x "%Y-%m-%dT%H:%M:%S"
 set xlabel "Time"
-set ylabel "Temp (C)" 
+set ylabel "Humidity %" 
 set terminal png size 1024,768
 set autoscale y  
 set datafile separator ","
 #set autoscale x
 #set xrange ["2017-08-08 00:00":"2017-08-08 23:59"]
-set output "temp.png"
-plot "sample.csv" using 1:3 title 'Last day'
+set output "humidity.png"
+plot "sample.csv" using 1:4 title 'Last day'

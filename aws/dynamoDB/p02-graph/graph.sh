@@ -12,7 +12,8 @@ gnuplot ./g1.plot
 gnuplot ./g1.plot
 ./tw_upload.py -f temp.png -t 28039
 
-./get_temp.py -probe b827eb.61eb84.c3  > ./sample.csv
+./get_temp.py -probe 28-041651bfbaff  > ./sample.csv
+#./get_temp.py -probe b827eb.61eb84.c3  > ./sample.csv
 gnuplot ./g1.plot
 ./tw_upload.py -f temp.png -t 28039-in
 
