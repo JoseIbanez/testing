@@ -24,12 +24,20 @@ pip install Jinja2
 echo "Post configuration"
 ln -s /lib/i386-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so.4
 
+# Cisco %AMDP2_FE-6-EXCESSCOLL events 
+sysctl -w net.unix.max_dgram_qlen=500
+
 
 mkdir -p $IOU/bin
 mkdir -p $IOU/scripts
 
-cp -a /home/vagrant/.aws /root/
-cp -a /home/ubuntu/.aws /root/
+if [ ! -f /home/vagrant/.aws ]; then
+  cp -a /home/vagrant/.aws /root/
+fi
+
+if [ ! -f /home/ubuntu/.aws ]; then
+  cp -a /home/ubuntu/.aws /root/
+fi
 
 aws --region eu-west-1 s3 sync \
     s3://fibratel.es/utils/Cisco-IOU-L2-L3-Collection-v4/scripts \
