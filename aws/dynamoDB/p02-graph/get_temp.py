@@ -28,6 +28,10 @@ parser.add_argument(
     type=int,
     help='Number of previous hours',
     default=24)
+parser.add_argument(
+    '-today', 
+    action='store_true')
+
 args = parser.parse_args()
 
 
@@ -35,6 +39,10 @@ try:
     lastDate = datetime.strptime(args.date, "%Y-%m-%d")
 except:
     lastDate = datetime.today() - timedelta(1)
+
+if args.today:
+    lastDate = datetime.today()
+    
 
 lastDate=lastDate + timedelta(hours=24)
 initialDate=lastDate - timedelta(hours=args.hours)
