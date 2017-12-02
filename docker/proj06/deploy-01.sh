@@ -28,5 +28,7 @@ docker run hello-world
 
 groupadd docker
 usermod -aG docker $USER
+usermod -aG docker ubuntu
+
 
 systemctl enable docker
