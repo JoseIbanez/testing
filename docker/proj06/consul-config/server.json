@@ -1,0 +1,12 @@
+{
+    "bootstrap": false,
+    "server": true,
+    "advertise_addr": "172.20.20.12",
+    "client_addr": "0.0.0.0",    
+    "datacenter": "nyc2",
+    "data_dir": "/var/consul",
+    "encrypt": "X4SYOinf2pTAcAHRhpj7dA==",
+    "log_level": "INFO",
+    "enable_syslog": true,
+    "start_join": ["172.20.20.11"]
+}
