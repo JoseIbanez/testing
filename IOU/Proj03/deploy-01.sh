@@ -58,8 +58,8 @@ ifconfig tap0 up
 brctl addbr virbr0
 brctl addif virbr0 tap0
 
-ifconfig virbr0 192.168.100.1 up
-route add  -net 192.168.101.0/24 gw 192.168.100.1
+ifconfig virbr0 192.168.100.20 up
+route add  -net 10.55.0.0/16 gw 192.168.100.1
 
 
 echo "Syslog"
