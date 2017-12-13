@@ -1,0 +1,20 @@
+version: '2'
+services:
+  wordpress:
+    image: wordpress
+    ports:
+      - "80:80"
+    logging:
+      driver: awslogs
+      options: 
+        awslogs-group: tutorial
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: wordpress
+  writer:
+    image: registry.hub.docker.com/ibanez/rabbitmq:0.5
+    logging:
+      driver: awslogs
+      options: 
+        awslogs-group: writer
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: wordpress
