@@ -1,12 +1,16 @@
 version: '2'
 services:
   wordpress:
-    image: wordpress
+    image: redis
+    command: ./mq-write.py 1
     ports:
       - "80:80"
+    extra_hosts:
+      - "rabbitmq:192.168.1.30"
     logging:
       driver: awslogs
       options: 
         awslogs-group: tutorial
         awslogs-region: us-east-1
         awslogs-stream-prefix: wordpress
+ 
