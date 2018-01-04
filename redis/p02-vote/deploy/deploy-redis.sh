@@ -9,3 +9,7 @@ sudo service redis-server start
 sudo sed -i "s/^bind .*/bind 0.0.0.0/" /etc/redis/redis.conf
 sudo service redis-server restart
 
+#update hosts file
+myIP=`ifconfig | grep -A 1 Ethernet | grep inet | sed 's/.*addr://g' | sed 's/ *Bcast:.*//g'`
+echo "$myIP  redis" | sudo tee -a /etc/hosts
+cat /etc/hosts
