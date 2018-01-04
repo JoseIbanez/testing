@@ -1,16 +1,16 @@
 version: '2'
 services:
-  wordpress:
-    image: redis
-    command: ./mq-write.py 1
+  producer:
+    image: registry.hub.docker.com/ibanez/rabbitmq:0.2
+    command: ./mq-write.py 
+    environment:
+     - DEBUG=1
     ports:
       - "80:80"
-    extra_hosts:
-      - "rabbitmq:192.168.1.30"
     logging:
       driver: awslogs
       options: 
         awslogs-group: tutorial
         awslogs-region: us-east-1
-        awslogs-stream-prefix: wordpress
+        awslogs-stream-prefix: producer
  
