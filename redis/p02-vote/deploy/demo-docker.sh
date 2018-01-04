@@ -17,7 +17,7 @@ docker run -ti -P --link redis:redis vote sh
 #lauch vote container
 docker run -d -P --link redis:redis vote
 
-export DCK_VERSION=0.1
+export DCK_VERSION=0.2
 export DCK_NAME=vote
 
 export DCK_USER=ibanez
