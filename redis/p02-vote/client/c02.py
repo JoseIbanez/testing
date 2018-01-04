@@ -48,7 +48,7 @@ while count < 100 :
 
     conn.request("GET", "/v1/vote?color="+colorList[nColor])
     r1 = conn.getresponse()
-    print(r1.read())
+    #print(r1.read())
 
 print
 

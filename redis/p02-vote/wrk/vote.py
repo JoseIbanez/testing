@@ -29,15 +29,16 @@ def vote():
 
     color = request.args.get('color')
 
-    # Add vote color to SET
-    r_server.sadd("votes", "vote:"+color)
 
     # Increase counters
     c = r_server.incr("hit_counter")
-    vc = r_server.hincrby("vote:" + color, "hit", 1)
     wc = r_server.hincrby("worker:" + worker_id, "hit", 1)
+    vc = r_server.hincrby("vote:" + color, "hit", 1)
     
     # Refresh server/vote presence
+    r_server.sadd("workers", "worker:" + worker_id)
+    r_server.sadd("votes", "vote:" + color)
+
     r_server.expire("worker:" + worker_id, 500)
     r_server.expire("vote:" + color, 500)
 
