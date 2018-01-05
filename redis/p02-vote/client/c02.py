@@ -26,7 +26,7 @@ args = parser.parse_args()
 
 #Color table
 colorList = ["blue", "orange", "red", "green", "yellow" ]
-colorSize = len(colorList)-1
+colorSize = len(colorList) - 1
 
 
 
