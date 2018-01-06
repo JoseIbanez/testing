@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-import pika
 import time
+import os
+import pika
 
+rabbitHost=os.environ['RABBITMQ']
 
 credentials = pika.credentials.PlainCredentials("writer", "writer", erase_on_connect=False)
 
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(credentials=credentials, host='rabbitmq'))
+connection = pika.BlockingConnection(pika.ConnectionParameters(credentials=credentials, host=rabbitHost))
 channel = connection.channel()
 
 channel.queue_declare(queue='hello')

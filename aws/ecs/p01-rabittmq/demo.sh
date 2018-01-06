@@ -9,10 +9,10 @@ docker run  --add-host "rabbitmq:192.168.1.174" rabbitmq ./mq-write.py
 docker images
 
 export DOCKER_ID_USER=ibanez
-docker loggin
+docker login
 
-docker tag rabbitmq $DOCKER_ID_USER/rabbitmq:0.5
-#docker push $DOCKER_ID_USER/rabbitmq
+docker tag rabbitmq $DOCKER_ID_USER/rabbitmq:0.6
+docker push $DOCKER_ID_USER/rabbitmq
 
 docker service create \
             --detach \
