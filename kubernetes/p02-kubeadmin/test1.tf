@@ -4,21 +4,10 @@ provider "aws" {
 
 
 
-resource "aws_volume_attachment" "ebs_att" {
-  device_name = "/dev/sdh"
-  volume_id   = "${aws_ebs_volume.vol1.id}"
-  instance_id = "${aws_instance.kumo.id}"
-}
-
-
-resource "aws_ebs_volume" "vol1" {
-  availability_zone = "eu-central-1a"
-  size              = 80
-}
 
 
 
-resource "aws_instance" "kumo" {
+resource "aws_instance" "kube00" {
   ami           = "ami-1e339e71"
   instance_type = "t2.large"
   key_name      = "kumo"
@@ -27,11 +16,11 @@ resource "aws_instance" "kumo" {
 
 
   tags {
-    Name = "kumo10"
+    Name = "kube00"
   }
 }
 
-resource "aws_instance" "kumo2" {
+resource "aws_instance" "kube01" {
   ami           = "ami-1e339e71"
   instance_type = "t2.large"
   key_name      = "kumo"
@@ -40,6 +29,20 @@ resource "aws_instance" "kumo2" {
 
 
   tags {
-    Name = "kumo12"
+    Name = "kube01"
   }
 }
+
+resource "aws_instance" "kube02" {
+  ami           = "ami-1e339e71"
+  instance_type = "t2.large"
+  key_name      = "kumo"
+  security_groups = ["mgmt"]
+  availability_zone = "eu-central-1a"
+
+
+  tags {
+    Name = "kube02"
+  }
+}
+
