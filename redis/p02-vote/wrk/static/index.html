@@ -21,6 +21,7 @@
         $.getJSON( 
             "v1/listVotes", 
             function( json_data ) {
+                
                 console.log(json_data);
                 drawChart (json_data); 
             }
