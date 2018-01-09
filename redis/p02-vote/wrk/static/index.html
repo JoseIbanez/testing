@@ -1,13 +1,71 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Hello World!</title>
-</head>
-<body>
-    <div>
-         <p>
-            This is a test.
-         </p>
-    </div>
-</body>
-</html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      google.charts.load("current", {packages:["corechart"]});
+      //google.charts.setOnLoadCallback(drawChart);
+      google.charts.setOnLoadCallback(dataRefresh);
+      
+      // Set timer to auto-refresh
+      var autoRefresh = setInterval(
+            dataRefresh,
+            6000
+            );
+
+
+      // Get fresh data and call to graph re-paint
+      function dataRefresh() {
+
+        $.getJSON( 
+            "v1/listVotes", 
+            function( json_data ) {
+                
+                console.log(json_data);
+                drawChart (json_data); 
+            }
+        );
+
+      }
+
+
+      // Paint/create the graph
+      function drawChart(json_data) {
+
+        //var json_data = { "green":2, "red": 3, "blue":1 };
+        //var json_data = [{"vote:red": "1"}, {"vote:green": "1"}] ;
+        //console.log(json_data)
+
+        var result = [];
+        for(var i in json_data)
+            for(var vote in json_data[i])
+                result.push( [vote, parseInt(json_data[i][vote])] );
+                console.log(result);
+
+//        for(var i in json_data)
+//            result.push([i, json_data [i]]);
+//            consol[e.log(result)
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Color');
+        data.addColumn('number', 'Votes');
+        data.addRows(result);
+
+        var options = {
+          title: 'Votes',
+          pieHole: 0.4,
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+
+  <body>
+    <h1>Hi there!</h1>
+    <div id="donutchart" style="width: 900px; height: 500px;"></div>
+  </body>
+
+  </html>
