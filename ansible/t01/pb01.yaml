@@ -1,0 +1,19 @@
+
+- hosts: web
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: ubuntu
+  become: yes  
+  tasks:
+  - name: ntp install
+    apt: name=ntp state=latest
+  - name: configuration file
+    template: src=./cfg/ntp.conf dest=/etc/ntp.conf
+    notify:
+    - restart ntp
+  - name: ensure ntp is running (and enable it at boot)
+    service: name=ntp state=started enabled=yes
+  handlers:
+    - name: restart ntp
+      service: name=ntp state=restarted
