@@ -9,11 +9,14 @@
   - name: ntp install
     apt: name=ntp state=latest
   - name: configuration file
-    template: src=./cfg/ntp.conf dest=/etc/ntp.conf
+    template: src=../etc/ntp.conf dest=/etc/ntp.conf
     notify:
     - restart ntp
   - name: ensure ntp is running (and enable it at boot)
     service: name=ntp state=started enabled=yes
+  - name: ntp check
+    shell: ntpq -n -c peers 
   handlers:
-    - name: restart ntp
-      service: name=ntp state=restarted
+  - name: restart ntp
+    service: name=ntp state=restarted
+    
