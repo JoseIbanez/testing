@@ -51,6 +51,8 @@ lxc launch ubuntu:16.04 u11 -p default
 lxc launch ubuntu:16.04 u12 -p default
 lxc launch ubuntu:16.04 u13 -p default
 
+lxc exec u11 -- sh -c "export http_proxy=http://10.74.42.22:8080 ; who ; apt-get install -y python"
+
 
 lxc list
 
