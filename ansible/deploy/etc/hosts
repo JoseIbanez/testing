@@ -1,9 +1,15 @@
 
 [web]
-10.39.1.218
-10.39.1.45
+u10 ansible_host=10.40.44.198
+u11 ansible_host=10.40.44.47
+u12 ansible_host=10.40.44.105
+u13 ansible_host=10.40.44.175
 
 [dns]
 10.39.1.204
 
+[db]
+u20 ansible_hosts=10.202.5.198
+u21 ansible_hosts=10.202.5.221
+u22 ansible_hosts=10.202.5.219
 
