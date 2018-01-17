@@ -13,6 +13,7 @@ def cmd_init():
 def cmd_add(cmd):
     cmdList.append(cmd)
 
+
 def cmd_exec():
 
     cmdMax = len(cmdList)
@@ -53,6 +54,7 @@ cmd_add("sleep 18")
 
 cmd_exec()
 
+####
 
 
 

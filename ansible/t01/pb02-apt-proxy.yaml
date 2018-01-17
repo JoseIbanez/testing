@@ -1,0 +1,17 @@
+
+- hosts: web
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: ubuntu
+  become: yes  
+  tasks:
+  - name: apt proxy file
+    template: src=../etc/apt/apt.conf.d/02proxy dest=/etc/apt/apt.conf.d/02proxy
+    notify:
+    - apt update
+  handlers:
+    - name: apt update
+      apt:
+        name: nano
+        update_cache: yes
