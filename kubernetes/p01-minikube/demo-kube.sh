@@ -29,3 +29,13 @@ kubectl scale deployment/vote --replicas 5
 kubectl get pod
 
 for i in {0..100}; do ./c02.py -host 192.168.99.100 -port 30108 ; done
+
+
+for n in $(kubectl get -o=name pvc,configmap,serviceaccount,secret,ingress,service,deployment,statefulset,hpa,job,cronjob)
+
+for n in $(kubectl get -o=name service,deployment)
+do
+    mkdir -p $(dirname $n)
+    kubectl get -o=yaml --export $n > $n.yaml
+done
+
