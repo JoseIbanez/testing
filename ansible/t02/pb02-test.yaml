@@ -1,0 +1,21 @@
+
+- hosts: junos
+  connection: local
+  gather_facts: no
+  remote_user: root
+  roles:
+  - Juniper.junos 
+  tasks:
+
+  - name: Load from a Jinja2 template.
+    juniper_junos_config:
+      load: 'merge'
+      format: 'text'
+      template: "./configs/{{ inventory_hostname  }}.j2"
+      vars:
+        host: "{{ inventory_hostname }}"
+    register: response
+  - name: Print the complete response.
+    debug:
+      var: response
+    
