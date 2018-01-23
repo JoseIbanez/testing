@@ -9,8 +9,8 @@
   - "../vars/{{ inventory_hostname }}.yaml"
 
   tasks:
-
-  - debug:
+  - name: Testing host var file
+    debug:
       msg: "{{ host.lo0.ip }}"
 
   - name: Load from a Jinja2 template.
