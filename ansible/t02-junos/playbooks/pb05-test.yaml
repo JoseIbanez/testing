@@ -1,0 +1,29 @@
+
+- hosts: junos2
+  connection: local
+  gather_facts: no
+  remote_user: root
+  roles:
+  - Juniper.junos 
+  vars_files:
+  - "../vars/{{ inventory_hostname }}.yaml"
+
+  tasks:
+
+  - debug:
+      msg: "{{ host.lo0.ip }}"
+
+  - name: Load from a Jinja2 template.
+    juniper_junos_config:
+      host: "{{ ansible_host }}"
+      load: 'merge'
+      format: 'set'
+      template: "../configs/olive-03.j2"
+      vars:
+        host: "{{ host }}"
+    register: response
+
+  - name: Print the complete response.
+    debug:
+      var: response
+    
