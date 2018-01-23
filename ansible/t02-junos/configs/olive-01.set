@@ -1,0 +1,9 @@
+set version 12.1R1.9
+set system root-authentication encrypted-password "$1$Iml9Rqdd$HacP6gtrMN/v162novGeQ/"
+set system services ssh
+set system services netconf ssh
+set system syslog user * any emergency
+set system syslog file messages any notice
+set system syslog file messages authorization info
+set system syslog file interactive-commands interactive-commands any
+set interfaces em0 unit 0 family inet address 192.168.56.80/24
