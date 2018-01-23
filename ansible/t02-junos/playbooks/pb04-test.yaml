@@ -10,15 +10,12 @@
   - name: re-read facts after adding custom fact
     setup: filter=ansible_local
 
-  - debug:
-      var: item
-  - debug:
+  - debug: 
       var: ansible_local
   - debug:
-      var: "{{ ansible_local[inventory_hostname]['ip']['em1'] }}"
+      msg: "{{ ansible_local[inventory_hostname].ip.em1 }}"
   - debug:
-      var: "{{ ansible_local.j201.ip.em1 }}"
-
+      msg: "{{ ansible_local[inventory_hostname].ip.lo1 }}"
 
   - name: Load from a Jinja2 template.
     juniper_junos_config:
@@ -28,7 +25,8 @@
       template: "../configs/olive-02.j2"
       vars:
         host: "{{ ansible_host }}"
-        em1_ip: "{{ ansible_local[item]['ip']['em1'] }}"
+        ip_em1: "{{ ansible_local[inventory_hostname].ip.em1 }}"
+        ip_lo1: "{{ ansible_local[inventory_hostname].ip.lo1 }}"
     register: response
   - name: Print the complete response.
     debug:
