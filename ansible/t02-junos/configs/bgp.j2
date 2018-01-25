@@ -1,0 +1,10 @@
+
+set routing-options autonomous-system 4445
+
+set protocols bgp group mpls type external
+set protocols bgp group mpls export exp2bgp
+set protocols bgp group mpls peer-as 23001
+set protocols bgp group mpls neighbor 10.0.1.202
+
+set policy-options policy-statement exp2bgp from protocol direct
+set policy-options policy-statement exp2bgp then accept
