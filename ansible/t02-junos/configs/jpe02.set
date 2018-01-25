@@ -1,25 +1,25 @@
 // https://www.juniper.net/documentation/en_US/junos/topics/example/l3vpn-as-override.html
-// https://juniperlabs.wordpress.com/2014/01/16/simple-juniper-mpls-core-with-l3vpn/
 
 set version 12.1R1.9
 
 // Management 
-set system host-name jpe01
+set system host-name jpe02
 set system root-authentication encrypted-password "$1$nttEmuNK$xsxSb3Af9DFZZPmypzxZ5."
 set system services ssh
 set system services netconf ssh
 set interfaces em0 unit 0 family inet address 192.168.56.80/24
 
 // CORE trunks
-// em3: 80.0.core-counter.1/29
-set groups mpls interfaces em3 unit 0 family inet address 80.0.1.1/29
+// em3: 80.0.core-counter.2/29
+set groups mpls interfaces em3 unit 0 family inet address 80.0.1.2/29
 
 // IGP - OSPF
-set groups mpls routing-options router-id 10.0.0.1
+// router-id: 10.0.0.pe-counter/32
+set groups mpls routing-options router-id 10.0.0.2
 set groups mpls protocols ospf area 0.0.0.0 interface lo0.0 passive
 set groups mpls protocols ospf area 0.0.0.0 interface em0.0 passive
-#set groups mpls protocols ospf area 0.0.0.0 interface em1.0 passive
-#set groups mpls protocols ospf area 0.0.0.0 interface em2.0 passive
+set groups mpls protocols ospf area 0.0.0.0 interface em1.0 passive
+set groups mpls protocols ospf area 0.0.0.0 interface em2.0 passive
 set groups mpls protocols ospf area 0.0.0.0 interface em3.0
 
 // LDP and MPLS
@@ -28,20 +28,24 @@ set protocols ldp interface em3.0
 set protocols mpls interface em3.0
 
 
+
 // BGP
 // as: 4555
 // loopback: 10.0.0.pe-counter/32
 // em1: 10.customer.site.mpls-counter*8+1/29
 set groups mpls routing-options autonomous-system 4555
-set groups mpls interfaces lo0 unit 0 family inet address 10.0.0.1/32
+set groups mpls routing-options router-id 10.0.0.2
+set groups mpls interfaces lo0 unit 0 family inet address 10.0.0.2/32
+
 set groups mpls policy-options policy-statement ToCust term Direct from protocol direct
 set groups mpls policy-options policy-statement ToCust term Direct then accept
 
 
-// Customer 
-//
 set groups Cust01 interfaces em1 unit 0 family inet address 10.1.1.1/29
 set groups Cust01 interfaces em2 unit 0 family inet address 10.1.2.1/29
+
+set groups Cust01 interfaces em1 unit 0 family iso
+
 
 set groups Cust01 routing-instances Cust01 instance-type vrf
 set groups Cust01 routing-instances Cust01 route-distinguisher 4555:1001
