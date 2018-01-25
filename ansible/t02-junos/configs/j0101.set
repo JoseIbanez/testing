@@ -1,0 +1,41 @@
+set version 12.1R1.9
+
+// Management 
+set system host-name j0101
+set system root-authentication encrypted-password "$1$nttEmuNK$xsxSb3Af9DFZZPmypzxZ5."
+set system services ssh
+set system services netconf ssh
+set interfaces em0 unit 0 family inet address 192.168.56.81/24
+
+
+// LAN 
+// em2: 172.customer.site.1/24
+set groups lan interfaces em2 unit 0 family inet address 172.1.1.1/24
+
+// BGP
+// as: 23 customer
+// loopback: 10.customer.0.router-counter/32
+// em1: 10.customer.site.mpls-counter/29
+set groups wan routing-options autonomous-system 23001
+set groups wan routing-options router-id 10.1.0.1
+set groups wan interfaces lo0 unit 0 family inet address 10.1.0.1/32
+set groups wan interfaces lo0 unit 0 family iso address 49.0001.0010.0000.0101.00
+
+set groups wan interfaces em1 unit 0 family inet address 10.1.1.2/29
+set groups wan interfaces em1 unit 0 family iso
+
+set groups wan protocols bgp group PE type external
+set groups wan protocols bgp group PE family inet unicast
+set groups wan protocols bgp group PE export ToBGP
+set groups wan protocols bgp group PE peer-as 4555
+set groups wan protocols bgp group PE neighbor 10.1.1.1
+
+set groups wan policy-options policy-statement ToBGP term Direct from protocol direct
+set groups wan policy-options policy-statement ToBGP term Direct then accept
+
+
+// Monitoring 
+set system syslog user * any emergency
+set system syslog file messages any notice
+set system syslog file messages authorization info
+set system syslog file interactive-commands interactive-commands any
