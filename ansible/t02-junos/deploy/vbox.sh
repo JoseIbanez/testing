@@ -30,7 +30,7 @@ function create_ce {
 
 
 function create_pe {
-    VBoxManage import "$ova" --vsys 0 --vmname $name
+    #VBoxManage import "$ova" --vsys 0 --vmname $name
 
     VBoxManage modifyvm $name \
         --nic1 hostonly --hostonlyadapter1 $mgmtInt \
@@ -40,18 +40,54 @@ function create_pe {
     VBoxManage showvminfo $name
 }
 
+function create_p {
+    #VBoxManage import "$ova" --vsys 0 --vmname $name
+
+    VBoxManage modifyvm $name \
+        --nic1 hostonly --hostonlyadapter1 $mgmtInt \
+        --uartmode1 server "$pipePrefix$name" \
+        --audio none
+
+    VBoxManage showvminfo $name
+}
+
+
+
 name="jpe-1"
 jpe1=$name
-#create_pe
-VBoxManage modifyvm $name \
+create_pe
+VBoxManage modifyvm $jpe1 \
     --nic8 intnet --intnet8 "core1" 
 
 
 name="jpe-2"
 jpe2=$name
-#create_pe
-VBoxManage modifyvm $name \
-    --nic8 intnet --intnet8 "core1" 
+create_pe
+VBoxManage modifyvm $jpe2 \
+    --nic8 intnet --intnet8 "core2" 
+
+name="jp-1"
+jp1=$name
+create_p
+VBoxManage modifyvm $jp1 \
+    --nic2 intnet --intnet2 "core1" \
+    --nic3 intnet --intnet3 "core2" 
+
+
+
+VBoxManage modifyvm $jpe1 \
+    --nic8 generic --nicgenericdrv8 UDPTunnel \
+    --nicproperty8 dest=127.0.0.1 \
+    --nicproperty8 sport=20001 \
+    --nicproperty8 dport=20002 
+
+VBoxManage modifyvm $jpe2 \
+    --nic8 generic --nicgenericdrv8 UDPTunnel \
+    --nicproperty8 dest=127.0.0.1 \
+    --nicproperty8 sport=20002 \
+    --nicproperty8 dport=20001 
+
+
 
 
 
@@ -80,7 +116,7 @@ site="0202"
 name="jce-$site"
 #create_ce
 VBoxManage modifyvm $jpe2 \
-    --nic3 intnet -intnet3 "mpls-$site" 
+    --nic3 intnet --intnet3 "mpls-$site" 
 
 
 

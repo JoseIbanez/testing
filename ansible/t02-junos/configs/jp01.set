@@ -1,0 +1,26 @@
+// Management 
+set system host-name jp01
+set system root-authentication encrypted-password "$1$nttEmuNK$xsxSb3Af9DFZZPmypzxZ5."
+set system services ssh
+set system services netconf ssh
+set interfaces em0 unit 0 family inet address 192.168.56.70/24
+
+// CORE trunks
+// em7: 80.0.core-counter.2/29
+set groups mpls interfaces em1 unit 0 family inet address 80.0.1.1/29
+set groups mpls interfaces em2 unit 0 family inet address 80.0.2.1/29
+
+set groups mpls interfaces lo0 unit 0 family inet address 10.0.0.250/32
+
+set routing-options router-id 10.0.0.250
+set protocols ospf area 0.0.0.0 interface lo0.0 passive
+set protocols ospf area 0.0.0.0 interface em1.0
+set protocols ospf area 0.0.0.0 interface em2.0
+
+set interfaces em1.0 family mpls
+set interfaces em2.0 family mpls
+set protocols ldp interface em1.0
+set protocols ldp interface em2.0
+set protocols mpls interface em1.0
+set protocols mpls interface em2.0
+show ldp database
