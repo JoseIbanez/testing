@@ -11,7 +11,8 @@ set interfaces em0 unit 0 family inet address 192.168.56.72/24
 
 // CORE trunks
 // em3: 80.0.core-counter.2/29
-set groups mpls interfaces em7 unit 0 family inet address 80.0.1.2/29
+
+set groups mpls interfaces em7 unit 0 family inet address 80.0.2.2/29
 
 // IGP - OSPF
 // router-id: 10.0.0.pe-counter/32
