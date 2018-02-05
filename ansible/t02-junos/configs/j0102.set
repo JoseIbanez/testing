@@ -19,7 +19,6 @@ set groups lan interfaces em2 unit 0 family inet address 172.1.2.1/24
 set groups wan routing-options autonomous-system 23001
 set groups wan routing-options router-id 10.1.0.2
 set groups wan interfaces lo0 unit 0 family inet address 10.1.0.2/32
-set groups wan interfaces lo0 unit 0 family iso address 49.0001.0010.0000.0101.00
 
 set groups wan interfaces em1 unit 0 family inet address 10.1.2.2/29
 set groups wan interfaces em1 unit 0 family iso
