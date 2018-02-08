@@ -1,5 +1,6 @@
 #!/bin/sh
 
+#https://www.cyberciti.biz/faq/linux-xen-vmware-kvm-intel-vt-amd-v-support/
 dmesg | grep -i kvm
 
 
