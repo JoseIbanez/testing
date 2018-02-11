@@ -1,5 +1,9 @@
 #!/bin/sh
 
+
+sudo /usr/local/opt/openvpn/sbin/openvpn --config ~/.secrets/fra1.ovpn 
+
+
 #https://www.cyberciti.biz/faq/linux-xen-vmware-kvm-intel-vt-amd-v-support/
 dmesg | grep -i kvm
 
