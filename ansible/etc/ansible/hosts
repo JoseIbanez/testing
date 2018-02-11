@@ -1,3 +1,12 @@
+[junos]
+j01 ansible_host=192.168.1.80
+192.168.1.80
+
+[junos2]
+jpe01 ansible_host=192.168.56.80
+j0101 ansible_host=192.168.56.81
+j0102 ansible_host=192.168.56.82 
+
 
 [web]
 u10 ansible_host=10.40.44.198

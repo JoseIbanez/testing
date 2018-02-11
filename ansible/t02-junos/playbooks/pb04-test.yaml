@@ -1,0 +1,34 @@
+
+- hosts: junos2
+  connection: local
+  #gather_facts: no
+  remote_user: root
+  roles:
+  - Juniper.junos 
+  tasks:
+
+  - name: re-read facts after adding custom fact
+    setup: filter=ansible_local
+
+  - debug: 
+      var: ansible_local
+  - debug:
+      msg: "{{ ansible_local[inventory_hostname].ip.em1 }}"
+  - debug:
+      msg: "{{ ansible_local[inventory_hostname].ip.lo1 }}"
+
+  - name: Load from a Jinja2 template.
+    juniper_junos_config:
+      host: "{{ ansible_host }}"
+      load: 'merge'
+      format: 'set'
+      template: "../configs/olive-02.j2"
+      vars:
+        host: "{{ ansible_host }}"
+        ip_em1: "{{ ansible_local[inventory_hostname].ip.em1 }}"
+        ip_lo1: "{{ ansible_local[inventory_hostname].ip.lo1 }}"
+    register: response
+  - name: Print the complete response.
+    debug:
+      var: response
+    

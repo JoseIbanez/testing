@@ -1,0 +1,84 @@
+// https://www.juniper.net/documentation/en_US/junos/topics/example/l3vpn-as-override.html
+// https://juniperlabs.wordpress.com/2014/01/16/simple-juniper-mpls-core-with-l3vpn/
+
+set version 12.1R1.9
+
+// Management 
+set system host-name jpe01
+set system root-authentication encrypted-password "$1$nttEmuNK$xsxSb3Af9DFZZPmypzxZ5."
+set system services ssh
+set system services netconf ssh
+set interfaces em0 unit 0 family inet address 192.168.56.71/24
+
+// CORE trunks
+// em7: 80.0.core-counter.2/29
+set groups mpls interfaces em7 unit 0 family inet address 80.0.1.2/29
+
+// IGP - OSPF
+set groups mpls routing-options router-id 10.0.0.1
+set groups mpls protocols ospf area 0.0.0.0 interface lo0.0 passive
+set groups mpls protocols ospf area 0.0.0.0 interface em0.0 passive
+#set groups mpls protocols ospf area 0.0.0.0 interface em1.0 passive
+#set groups mpls protocols ospf area 0.0.0.0 interface em2.0 passive
+set groups mpls protocols ospf area 0.0.0.0 interface em7.0
+
+// LDP and MPLS
+set interfaces em7.0 family mpls
+set protocols ldp interface em7.0
+set protocols mpls interface em7.0
+
+
+// BGP
+// as: 4555
+// loopback: 10.0.0.pe-counter/32
+// em1: 10.customer.site.mpls-counter*8+1/29
+set groups mpls routing-options autonomous-system 4555
+set groups mpls interfaces lo0 unit 0 family inet address 10.0.0.1/32
+
+set groups mpls protocols bgp group pe type internal
+set groups mpls protocols bgp group pe local-address 10.0.0.1
+set groups mpls protocols bgp group pe family inet-vpn any
+set groups mpls protocols bgp group pe local-as 4555
+set groups mpls protocols bgp group pe peer-as 4555
+set groups mpls protocols bgp group pe neighbor 10.0.0.2
+
+
+set groups mpls policy-options policy-statement ToCust term Direct from protocol direct
+set groups mpls policy-options policy-statement ToCust term Direct then accept
+
+
+
+
+// Customer 
+//
+set groups Cust01 interfaces em1 unit 0 family inet address 10.1.1.1/29
+set groups Cust01 interfaces em2 unit 0 family inet address 10.1.2.1/29
+
+set groups Cust01 routing-instances Cust01 instance-type vrf
+delete groups Cust01 routing-instances Cust01 route-distinguisher 10.0.0.1:1001
+set groups Cust01 routing-instances Cust01 route-distinguisher 4555:1001
+set groups Cust01 routing-instances Cust01 vrf-target target:4555:1001
+set groups Cust01 routing-instances Cust01 interface em1.0
+set groups Cust01 routing-instances Cust01 interface em2.0
+set groups Cust01 routing-instances Cust01 protocols bgp group CE type external
+set groups Cust01 routing-instances Cust01 protocols bgp group CE family inet unicast
+set groups Cust01 routing-instances Cust01 protocols bgp group CE export ToCust
+set groups Cust01 routing-instances Cust01 protocols bgp group CE neighbor 10.1.1.2 peer-as 23001
+set groups Cust01 routing-instances Cust01 protocols bgp group CE neighbor 10.1.1.2 as-override
+set groups Cust01 routing-instances Cust01 protocols bgp group CE neighbor 10.1.2.2 peer-as 23001
+set groups Cust01 routing-instances Cust01 protocols bgp group CE neighbor 10.1.2.2 as-override
+
+
+set groups Cust01 protocols bgp group Cust01 type external
+set groups Cust01 protocols bgp group Cust01 family inet unicast
+set groups Cust01 protocols bgp group Cust01 export ToCust
+set groups Cust01 protocols bgp group Cust01 peer-as 23001
+set groups Cust01 protocols bgp group Cust01 neighbor 10.1.1.2
+
+
+
+// Monitoring 
+set system syslog user * any emergency
+set system syslog file messages any notice
+set system syslog file messages authorization info
+set system syslog file interactive-commands interactive-commands any
