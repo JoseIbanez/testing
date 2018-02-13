@@ -70,8 +70,9 @@ virsh net-define /etc/libvirt/qemu/networks/default.xml
 virsh net-start default
 virsh net-autostart default
 
-
-
+#
+# Nat network
+#
 cat <<EOF > /etc/libvirt/qemu/networks/mgmt.xml
 <network>
 <name>mgmt</name>
@@ -88,7 +89,9 @@ cat <<EOF > /etc/libvirt/qemu/networks/mgmt.xml
 </network>
 EOF
 
-
+#
+# Route network
+#
 cat <<EOF > /etc/libvirt/qemu/networks/mgmt.xml
 <network>
 <name>mgmt</name>
@@ -102,11 +105,26 @@ cat <<EOF > /etc/libvirt/qemu/networks/mgmt.xml
 </network>
 EOF
 
-
-
 virsh net-define /etc/libvirt/qemu/networks/mgmt.xml
 virsh net-start mgmt
 virsh net-autostart mgmt
+
+
+#
+# Brigde Network
+#
+cat <<EOF > /etc/libvirt/qemu/networks/wan1101.xml
+<network>
+  <name>wan1101</name>
+  <forward mode="bridge">
+    <interface dev="enp6s0.1101"/>
+  </forward>
+</network>
+EOF
+
+virsh net-define /etc/libvirt/qemu/networks/wan1101.xml
+virsh net-start wan1101
+virsh net-autostart wan1101
 
 
 virsh list
