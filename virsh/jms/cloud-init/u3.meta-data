@@ -1,0 +1,5 @@
+instance-id: u3
+local-hostname: u3
+public-keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCd0zH8llETV+4tEPOjo4TCyiLwDl+HqsWnepb6xQgjkVY1c7d2aX7Bi7JjElQc3sl50uyEg5sSbpVnBsp3LqONWrXZQwT05vu7KSW6zq3jXR79DUtEqSe287AczSmiWaCS5+8aDyC/+Cg9YIj3rSi8zNBv+Ty5/gDCENiV2ubO1Y/MI61STlwlh4GFYcFX4xIS3MBuJItA4EXuBR7enKAfbR8WYV9mJDuHylumEoC9mvdCQSTOMqB0xRuoNHe6b8F4BlHY0mVc/Up7SLG/xAaHJIcPGMfxLgYHd0sgC7GTMtn+7bTj5xZsMTmfdi0STPs6GHxRvykWqBkAhnt6/jRl ibanez@homer.loc
+
