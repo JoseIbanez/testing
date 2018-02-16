@@ -1,0 +1,7 @@
+  <cpu mode='custom' match='exact' check='partial'>
+    <model fallback='allow'>SandyBridge</model>
+    <vendor>Intel</vendor>
+    <feature policy='require' name='vmx'/>
+    <feature policy='disable' name='x2apic'/>
+    <feature policy='disable' name='invtsc'/>
+  </cpu>

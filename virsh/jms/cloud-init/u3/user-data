@@ -1,0 +1,9 @@
+#!/bin/sh
+
+apt-get install git
+
+df
+mount
+lsblk
+cp /media/cdrom/ens*.cfg /etc/network/interfaces.d/
+
