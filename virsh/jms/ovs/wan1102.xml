@@ -1,0 +1,10 @@
+<network>
+  <name>wan1102</name>
+  <forward mode='bridge'/>
+  <bridge name='ovs0' />
+  <virtualport type='openvswitch'>
+  </virtualport>
+  <vlan>
+     <tag id='1102'/>
+ </vlan>
+</network>

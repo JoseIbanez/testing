@@ -1,5 +1,5 @@
 
-
+set system host-name j2
 set system root-authentication plain-text-password-value Junos123
 
 set interfaces fxp0 unit 0 family inet address 10.39.10.32/24
