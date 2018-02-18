@@ -38,11 +38,15 @@ ovs-vsctl del-br br0
 
 #https://www.opencloudblog.com/?p=177
 
+ovs-vsctl del-br ovs0
+
 ovs-vsctl show
+
 
 
 ovs-vsctl add-br ovs0
 ovs-vsctl add-port ovs0 enp6s0
+ovs-vsctl del-port ovs0 enp6s0
 
 ifconfig ovs0 up
 ovs-vsctl show
@@ -57,3 +61,4 @@ ovs-vsctl show
 
 virsh domiflist j2
 ovs-vsctl show
+
