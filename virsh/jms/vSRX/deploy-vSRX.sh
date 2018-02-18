@@ -57,15 +57,12 @@ virt-install --name vSRX20One --ram 4096 \
       <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
     </interface>
 
-    <interface type='direct'>
-      <mac address='52:54:00:f4:7b:b8'/>
-      <source network='wan1101' dev='enp6s0.1101' mode='bridge'/>
-      <target dev='macvtap0'/>
+    <interface type='network'>
+      <source network='wan1101'/>
+      <target dev='ge-000-j2'/>
       <model type='virtio'/>
-      <alias name='net1'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
     </interface>
-
 
 
 
