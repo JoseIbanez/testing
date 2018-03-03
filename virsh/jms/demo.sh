@@ -1,8 +1,6 @@
 #!/bin/sh
 
-
-sudo /usr/local/opt/openvpn/sbin/openvpn --config ~/.secrets/fra1.ovpn 
-
+sudo apt-get install linux-image-generic-lts-utopic
 
 #https://www.cyberciti.biz/faq/linux-xen-vmware-kvm-intel-vt-amd-v-support/
 dmesg | grep -i kvm
@@ -12,6 +10,7 @@ https://www.juniper.net/documentation/en_US/vsrx/topics/task/multi-task/security
 
 
 cat /sys/module/kvm_intel/parameters/nested 
+cat /sys/module/kvm_intel/parameters/enable_apicv
 
 sudo rmmod kvm-intel
 sudo sh -c "echo 'options kvm-intel nested=y enable_apicv=n pml=n' >> /etc/modprobe.d/dist.conf"

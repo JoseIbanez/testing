@@ -3,6 +3,8 @@ virsh undefine vSRX
 
 https://www.juniper.net/documentation/en_US/vsrx/topics/task/multi-task/security-vsrx-with-kvm-installing.html#jd0e230
 
+https://mattillingworth.wordpress.com/2016/02/04/vsrx-15-1-problems/
+
 cp /mnt/images-repo/media-srx-ffp-vsrx-vmdisk-15.1X49-D15.4.qcow2 /var/lib/libvirt/images/j2.qcow2
 
 #virt-install --name j2 --memory 4096 --cpu SandyBridge,+vmx,-invtsc --vcpus=2 ...
@@ -16,7 +18,34 @@ virt-install --name j2 --memory 4096 --cpu SandyBridge,+vmx,-invtsc,-x2apic --vc
         --network=network:wan1102,model=virtio \
         --import
 
+virt-install --name j2 --memory 4096 --cpu SandyBridge,+vmx,-invtsc --vcpus=2 \
+        --arch=x86_64 \
+        --graphics vnc,listen=0.0.0.0 --noautoconsole \
+        --disk path=/var/lib/libvirt/images/j2.qcow2,size=16,device=disk,bus=ide,format=qcow2 \
+        --os-type linux --os-variant rhel7 \
+        --network=network:vmMgmt,model=virtio \
+        --network=network:vmMgmt,model=virtio \
+        --network=network:vmMgmt,model=virtio \
+        --import
+
+
+#17.3R2
+cp /mnt/images-repo/media-vsrx-vmdisk-17.3R2.10.qcow2 /var/lib/libvirt/images/j2.qcow2
+
+
+virt-install --name j2 --memory 4096 --cpu SandyBridge,+vmx,-invtsc --vcpus=2 \
+        --arch=x86_64 \
+        --graphics vnc,listen=0.0.0.0 --noautoconsole \
+        --disk path=/var/lib/libvirt/images/j2.qcow2,size=16,device=disk,bus=ide,format=qcow2 \
+        --os-type linux --os-variant rhel7 \
+        --network=network:vmMgmt,model=virtio \
+        --network=network:vmMgmt,model=virtio \
+        --network=network:vmMgmt,model=virtio \
+        --import
+
+
 sudo virsh destroy j2
+sudo virsh undefine j2
 
 sudo virsh dumpxml --security-info  j2 | grep graphics
 sudo virsh update-device j2 ./vnc.xml 

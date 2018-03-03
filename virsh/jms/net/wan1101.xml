@@ -1,6 +1,0 @@
-<network>
-  <name>wan1101</name>
-  <forward mode="bridge">
-    <interface dev="enp6s0.1101"/>
-  </forward>
-</network>
