@@ -2,9 +2,9 @@
 <name>vmMgmt</name>
 <forward mode='route'/>
 <bridge name='vmMgmt' stp='on' delay='0' />
-<ip address='10.39.10.1' netmask='255.255.255.0'>
+<ip address='10.10.2.1' netmask='255.255.255.0'>
 <dhcp>
-<range start='10.39.10.50' end='10.39.10.254' />
+<range start='10.10.2.50' end='10.10.2.254' />
 </dhcp>
 </ip>
 </network>
