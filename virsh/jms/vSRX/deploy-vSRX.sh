@@ -29,23 +29,6 @@ virt-install --name j2 --memory 4096 --cpu SandyBridge,+vmx,-invtsc --vcpus=2 \
         --import
 
 
-#17.3R2
-cp /mnt/images-repo/media-vsrx-vmdisk-17.3R2.10.qcow2 /var/lib/libvirt/images/j2.qcow2
-
-
-virt-install --name j2 --memory 4096 --cpu SandyBridge,+vmx,-invtsc --vcpus=2 \
-        --arch=x86_64 \
-        --graphics vnc,listen=0.0.0.0 --noautoconsole \
-        --disk path=/var/lib/libvirt/images/j2.qcow2,size=16,device=disk,bus=ide,format=qcow2 \
-        --os-type linux --os-variant rhel7 \
-        --network=network:vmMgmt,model=virtio \
-        --network=network:vmMgmt,model=virtio \
-        --network=network:vmMgmt,model=virtio \
-        --import
-
-
-sudo virsh destroy j2
-sudo virsh undefine j2
 
 sudo virsh dumpxml --security-info  j2 | grep graphics
 sudo virsh update-device j2 ./vnc.xml 
@@ -93,5 +76,48 @@ virt-install --name vSRX20One --ram 4096 \
       <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
     </interface>
 
+
+
+
+#17.3R2
+cp /mnt/images-repo/media-vsrx-vmdisk-17.3R2.10.qcow2 /var/lib/libvirt/images/j2.qcow2
+
+
+virt-install --name j2 --memory 4096 --cpu SandyBridge,+vmx,-invtsc --vcpus=2 \
+        --arch=x86_64 \
+        --graphics vnc,listen=0.0.0.0 --noautoconsole \
+        --disk path=/var/lib/libvirt/images/j2.qcow2,size=16,device=disk,bus=ide,format=qcow2 \
+        --os-type linux --os-variant rhel7 \
+        --network=network:vmMgmt,model=virtio \
+        --network=network:vmMgmt,model=virtio \
+        --network=network:vmMgmt,model=virtio \
+        --import
+
+
+sudo virsh destroy j2
+sudo virsh undefine j2
+
+
+
+#####################################################33
+# vSRX01
+
+#17.3R2
+cp /mnt/images-repo/media-vsrx-vmdisk-17.3R2.10.qcow2 /var/lib/libvirt/images/vSRX01.qcow2
+
+
+virt-install --name vSRX01 --memory 4096 --cpu SandyBridge,+vmx,-invtsc --vcpus=2 \
+        --arch=x86_64 \
+        --graphics vnc,listen=0.0.0.0 --noautoconsole \
+        --disk path=/var/lib/libvirt/images/vSRX01.qcow2,size=16,device=disk,bus=ide,format=qcow2 \
+        --os-type linux --os-variant rhel7 \
+        --network=network:vmMgmt1,model=virtio \
+        --network=network:dmz,model=virtio \
+        --network=network:wan1101,model=virtio \
+        --network=network:vmMgmt1,model=virtio \
+        --network=network:vmMgmt1,model=virtio \
+        --network=network:vmMgmt1,model=virtio \
+        --network=network:vmMgmt1,model=virtio \
+        --import
 
 

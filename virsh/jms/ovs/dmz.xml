@@ -1,0 +1,10 @@
+<network>
+  <name>dmz</name>
+  <forward mode='bridge'/>
+  <bridge name='ovs0' />
+  <virtualport type='openvswitch'>
+  </virtualport>
+  <vlan>
+     <tag id='1005'/>
+ </vlan>
+</network>

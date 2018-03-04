@@ -21,3 +21,5 @@ yum -y install wget openssl-devel gcc make python-devel openssl-devel kernel-dev
   543  systemctl is-active openvswitch
   544  systemctl enable openvswitch
   545  ovs-vsctl -V
+
+  
