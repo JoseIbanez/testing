@@ -15,12 +15,12 @@ virt-install \
 --vcpus 1 \
 --os-type linux \
 --os-variant generic \
---network network=mgmt \
+--network network=vmMgmt1,model=virtio \
+--network network:dmz,model=virtio \
 --network network:wan1101,model=virtio \
---network network:wan1102,model=virtio \
 --graphics none \
 --console pty,target_type=serial \
---disk path=/tmp/u1/config.iso,device=cdrom \
+--disk path=/home/ubuntu/u1/config.iso,device=cdrom \
 --import
 
 virsh domiflist u3

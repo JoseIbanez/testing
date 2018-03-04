@@ -1,0 +1,17 @@
+
+set system host-name vSRX01
+set system root-authentication plain-text-password-value Junos123
+set system services ssh root-login allow
+
+set interfaces fxp0 unit 0 family inet address 10.10.201.10/24
+set system services ssh
+set system services netconf ssh
+
+set routing-options static route 0.0.0.0/0 next-hop 10.10.201.1
+
+
+#DMZ network
+set interfaces ge-0/0/0 unit 0 family inet address 10.10.5.10/24
+set routing-options static route 52.50.93.117/32 next-hop 10.10.5.1
+
+

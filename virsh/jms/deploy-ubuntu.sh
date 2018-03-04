@@ -16,7 +16,7 @@ virt-install \
 --vcpus 1 \
 --os-type linux \
 --os-variant generic \
---network network=mgmt \
+--network network=vmMgmt1,model=virtio \
 --network network:wan1101,model=virtio \
 --graphics none \
 --console pty,target_type=serial \
