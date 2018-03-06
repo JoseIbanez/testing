@@ -7,3 +7,6 @@ set interfaces fxp0 unit 0 family inet address 10.39.10.32/24
 set system services ssh
 set system services netconf ssh
 
+#routing management
+
+set system management-instance
