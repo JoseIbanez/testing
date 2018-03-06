@@ -62,3 +62,14 @@ ovs-vsctl show
 virsh domiflist j2
 ovs-vsctl show
 
+###############################
+
+ovs-vsctl add-br ovs0
+ovs-vsctl add-port ovs0 eno2
+ovs-vsctl del-port ovs0 eno2
+ovs-vsctl show
+
+virsh net-define ./dmz.xml
+virsh net-start dmz
+virsh net-autostart dmz
+
