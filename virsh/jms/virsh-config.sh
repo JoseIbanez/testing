@@ -1,11 +1,20 @@
 #!/bin/sh
 
+sudo apt install -y qemu-kvm libvirt-bin
+sudo apt-get install -y qemu-kvm libvirt-bin ubuntu-vm-builder bridge-utils
 
-sudo /usr/local/opt/openvpn/sbin/openvpn --config ~/.secrets/fra1.ovpn 
+sudo adduser $USER libvirtd
+sudo apt install virtinst
+
+
 
 
 #https://www.cyberciti.biz/faq/linux-xen-vmware-kvm-intel-vt-amd-v-support/
 dmesg | grep -i kvm
+
+kvm-ok 
+cat /sys/hypervisor/properties/capabilities
+
 
 
 https://www.juniper.net/documentation/en_US/vsrx/topics/task/multi-task/security-vsrx-with-kvm-installing.html#jd0e230
