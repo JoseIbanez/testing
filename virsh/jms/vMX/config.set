@@ -1,0 +1,22 @@
+root@VCP-vMX1> show configuration | display set 
+set version 17.4R1.16
+set system host-name VCP-vMX1
+set system root-authentication encrypted-password "$6$Or0WYv6N$aYn38xCyeTBNfXRtYt0FJqYar0ocjrK9UAZVcQ/TioaUcxhTVlsHkBGuzXVgk2AYTQaPFSDj/zsN.e3.eLjG60"
+set system login user juniper uid 2000
+set system login user juniper class super-user
+set system login user juniper authentication encrypted-password "$6$2exsk5gn$CnRTn4WdPYd/8XC1bgTP/gB.yXqTpkRxkEQ1VNGxSGwYteJdV/GzL4fs3exy7c3b5HCKAa7R4eEQn8YfwbTBm1"
+set system services ssh
+set system syslog user * any emergency
+set system syslog file messages any notice
+set system syslog file messages authorization info
+set system syslog file interactive-commands interactive-commands any
+set chassis fpc 0 lite-mode
+set interfaces ge-0/0/0 unit 0 description "vSRX Gateway to CSO AWS"
+set interfaces ge-0/0/0 unit 0 family inet address 10.10.4.2/29
+set interfaces ge-0/0/3 flexible-vlan-tagging
+set interfaces ge-0/0/3 encapsulation flexible-ethernet-services
+set interfaces ge-0/0/3 unit 0 description "uCPE OAM MGMT"
+set interfaces ge-0/0/3 unit 0 vlan-id 1101
+set interfaces ge-0/0/3 unit 0 family inet address 10.11.1.1/29
+set interfaces fxp0 unit 0 family inet address 10.10.1.30/24
+set routing-options static route 100.64.100.0/22 next-hop 10.10.4.1

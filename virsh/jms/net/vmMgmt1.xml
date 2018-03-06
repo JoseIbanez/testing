@@ -1,0 +1,15 @@
+52:54:00:99:2c:ea
+
+<network>
+  <name>vmMgmt1</name>
+  <uuid>6354e042-08c4-42d9-a468-149ca970a27e</uuid>
+  <forward mode='route'/>
+  <bridge name='vmMgmt1' stp='on' delay='0'/>
+  <mac address='52:54:00:72:d8:f4'/>
+  <ip address='10.10.201.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='10.10.201.100' end='10.10.201.254'/>
+      <host mac='52:54:00:99:2c:ea' name='u1' ip='10.10.201.40'/>
+    </dhcp>
+  </ip>
+</network>
