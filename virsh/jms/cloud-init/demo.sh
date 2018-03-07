@@ -47,3 +47,5 @@ virt-install \
 
 virsh domiflist u3
 
+
+ip addr add 10.11.1.3 dev ens4
