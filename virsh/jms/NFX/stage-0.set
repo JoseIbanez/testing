@@ -1,0 +1,74 @@
+set version "15.1X53-D47.4.secure [dc-builder]"
+set system host-name jdm
+set system memory hugepages page-size 1024 page-count 21
+set system root-authentication encrypted-password "$6$g1.wm$UWjbUq7VJp1KjRPViD9W0xW4NSXGSWlE/f5esQ4xyGep8.nOL4RcPEtRgr/a2zj0dl4Kn9.9CTwViGsRj8Pl81"
+set system name-server 8.8.8.8
+set system root-authentication plain-text-password-value Embe1mpls
+set system services ssh no-tcp-forwarding
+set system services ssh protocol-version v2
+set system services ssh client-alive-count-max 5
+set system services ssh client-alive-interval 60
+set system services netconf ssh
+set system services netconf rfc-compliant
+set system services enhanced-orchestration
+set system phone-home server https://100.64.102.235
+set system phone-home upgrade-image-before-configuration
+set interfaces jmgmt0 unit 0 family inet address 10.10.1.111/24
+set interfaces jsxe0 vlan-tagging
+set interfaces jsxe0 unit 0 vlan-id 1
+set interfaces jsxe0 unit 0 family inet address 10.11.1.2/29
+set routing-options static route 0.0.0.0/0 next-hop 10.11.1.1
+
+
+################################3
+
+delete system phone-home server https://redirect.juniper.net
+delete interfaces jsxe0 unit 0 family inet dhcp
+delete interfaces jmgmt0 unit 0 family inet dhcp
+
+set system memory hugepages page-size 1024 page-count 21
+set system root-authentication encrypted-password "$6$g1.wm$UWjbUq7VJp1KjRPViD9W0xW4NSXGSWlE/f5esQ4xyGep8.nOL4RcPEtRgr/a2zj0dl4Kn9.9CTwViGsRj8Pl81"
+set system services ssh no-tcp-forwarding
+set system services ssh protocol-version v2
+set system services ssh client-alive-count-max 5
+set system services ssh client-alive-interval 60
+set system services netconf ssh
+set system services netconf rfc-compliant
+set system services enhanced-orchestration
+set system phone-home server https://100.64.102.235
+set system phone-home upgrade-image-before-configuration
+set interfaces jsxe0 vlan-tagging
+set interfaces jsxe0 unit 0 vlan-id 1
+set routing-options static route 0.0.0.0/0 next-hop 10.10.1.1
+
+set interfaces jmgmt0 unit 0 family inet address 10.10.1.115/24
+set interfaces jsxe0 unit 0 family inet address 10.15.1.2/29
+
+
+###############################################################################
+#NFX3
+
+set version "15.1X53-D47.4.secure [dc-builder]"
+set system memory hugepages page-size 1024 page-count 21
+set system root-authentication encrypted-password "$6$3Dt3N$aOWTK1CyeycvjDZ.5rfRF/ddbbZQicMia0OgH8N7.ZegQ1jpHMEJ50r3/ZTPZXwiM1MqQv5hKBAB/SsycBdxF/"
+set system login idle-timeout 10
+set system services ssh no-tcp-forwarding
+set system services ssh protocol-version v2
+set system services ssh client-alive-count-max 5
+set system services ssh client-alive-interval 60
+set system services netconf ssh
+set system services netconf rfc-compliant
+set system services enhanced-orchestration
+set system services ipsec-nm
+set system phone-home server https://100.64.102.235
+set system phone-home upgrade-image-before-configuration
+set interfaces jmgmt0 unit 0 family inet address 10.10.1.113/24
+set interfaces jsxe0 vlan-tagging
+set interfaces jsxe0 unit 0 vlan-id 1
+set interfaces jsxe0 unit 0 family inet address 10.13.1.2/29
+set interfaces jsxe0 unit 1 vlan-id 2
+set interfaces jsxe0 unit 1 family inet dhcp
+set interfaces jsxe0 unit 2 vlan-id 3
+set interfaces jsxe0 unit 2 family inet dhcp
+set routing-options static route 0.0.0.0/0 next-hop 10.13.1.1
+
