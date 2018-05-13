@@ -66,7 +66,8 @@ app.use('/users', usersRouter);
 
 
 function auth (req, res, next) {
-  console.log(req.user);
+  console.log("a: "+req.user);
+  //console.log("b"+req.user._id);
 
   if (!req.user) {
     var err = new Error('You are not authenticated!');
