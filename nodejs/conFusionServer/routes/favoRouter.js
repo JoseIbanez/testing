@@ -11,9 +11,10 @@ var authenticate = require('../authenticate');
 favoRouter.use(bodyParser.json());
 
 favoRouter.route('/')
-.get((req,res,next) => {
-    Favorites.findOne({user: profile.id})
-    .populate('comments.author')
+.get(authenticate.verifyUser, (req,res,next) => {
+    Favorites.findOne({user: req.user._id})
+    .populate('user')
+    .populate('dishes')
     .then((favorites) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -22,27 +23,45 @@ favoRouter.route('/')
     .catch((err) => next(err));
 })
 .post(authenticate.verifyUser, (req, res, next) => {
-    Dishes.create(req.body)
-    .then((dish) => {
-        console.log('Dish Created ', dish);
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(dish);
-    }, (err) => next(err))
-    .catch((err) => next(err));
+    console.log("user Id:"+req.user._id)
+    Favorites.findOne({user: req.user._id})
+    .then((favorites) => {
+        if (favorites == null) {
+            console.log("Created new favorites for this user")
+            favorites = new Favorites({ user: req.user._id });
+        } else {
+            console.log("Favorites already exist");
+        }
+        console.log(req.body);
+        req.body.forEach((dish) => {
+            console.log(dish._id);
+            if (favorites.dishes.indexOf(dish._id) < 0) {
+              favorites.dishes.push(dish._id);
+            }
+        })
+        console.log(favorites);
+        favorites.save()
+        .then((favorites) => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(favorites);                
+        }, (err) => next(err));
+    })
+    .catch((err) => next(err))
 })
 .put(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /dishes');
 })
 .delete(authenticate.verifyUser, (req, res, next) => {
-    Favorites.remove({})
-    .then((resp) => {
+    Favorites.findOne({user: req.user._id})
+    .remove()
+    .then((favorites) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(resp);
+        res.json(favorites);
     }, (err) => next(err))
-    .catch((err) => next(err));    
+    .catch((err) => next(err));
 });
 
 favoRouter.route('/:favoriteId')
@@ -50,7 +69,6 @@ favoRouter.route('/:favoriteId')
     res.statusCode = 403;
     res.end('GET operation not supported on /favorites/'+ req.params.favoriteId);
 })
-
 .post(authenticate.verifyUser, (req, res, next) => {
     console.log("user Id:"+req.user._id)
     Favorites.findOne({user: req.user._id})
@@ -66,7 +84,7 @@ favoRouter.route('/:favoriteId')
         console.log(favorites);
         console.log(favorites.dishes.indexOf(req.params.favoriteId));
         
-        if (favorites.dishes.indexOf(req.params.favoriteId) <= 0) {
+        if (favorites.dishes.indexOf(req.params.favoriteId) < 0) {
             favorites.dishes.push(req.params.favoriteId);
             console.log(favorites);
             favorites.save()
@@ -88,10 +106,39 @@ favoRouter.route('/:favoriteId')
     res.statusCode = 403;
     res.end('PUT operation not supported on /favorites');
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
-    res.statusCode = 403;
-    res.end('PUT operation not supported on /favorites');
-});
+.delete(authenticate.verifyUser, (req, res, next) => {
+Favorites.findOne({user: req.user._id})
+.then((favorites) => {
+    if (favorites == null) {
+        console.log("No favorites this user")
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(favorites);
+        return;                
+    }
+
+    console.log(req.params.favoriteId);    
+    index = favorites.dishes.indexOf(req.params.favoriteId);
+    console.log("index:"+index);
+
+    if (index >= 0) {
+        favorites.dishes.splice(index, 1);
+        console.log(favorites);
+        favorites.save()
+        .then((favorites) => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(favorites);                
+        }, (err) => next(err));
+    } else {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(favorites);                
+    }
+})
+.catch((err) => next(err))
+})
+
 
 
 
