@@ -1,0 +1,9 @@
+indexes:
+
+# Copied from error sugestion
+
+- kind: Measure
+  ancestor: yes
+  properties:
+  - name: date
+    direction: desc
