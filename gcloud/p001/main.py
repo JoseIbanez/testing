@@ -14,6 +14,7 @@
 
 import webapp2
 import temp
+import niceTag
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
@@ -37,9 +38,20 @@ class NewTempPage(webapp2.RequestHandler):
         self.response.write(t)
 
 
+class Build(webapp2.RequestHandler):
+    def get(self):
+
+        nt = niceTag.Tag("hi","there")     
+        t = nt.getSVG()
+
+        self.response.headers['Content-Type'] = 'image/svg+xml'
+        self.response.write(t)
+
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/temp', TempPage),
-    ('/new', NewTempPage)
+    ('/',      MainPage),
+    ('/temp',  TempPage),
+    ('/new',   NewTempPage),
+    ('/build', Build)
 ], debug=True)

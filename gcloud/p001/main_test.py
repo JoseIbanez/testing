@@ -28,7 +28,15 @@ def test_get():
 def test_temp():
     app = webtest.TestApp(main.app)
 
-    response = app.get('/temp')
+    #response = app.get('/temp')
+    
+    assert response.status_int == 200
+    #assert response.body == 'Hello, World!'
+
+def test_build():
+    app = webtest.TestApp(main.app)
+
+    response = app.get('/build')
     
     assert response.status_int == 200
     #assert response.body == 'Hello, World!'
