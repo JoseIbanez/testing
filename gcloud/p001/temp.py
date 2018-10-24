@@ -21,3 +21,6 @@ class Measure(ndb.Model):
                     temp=10000)
         m.put()
         return m
+
+
+        

@@ -31,6 +31,12 @@ kubectl get pod
 for i in {0..100}; do ./c02.py -host 192.168.99.100 -port 30108 ; done
 
 
+for i in {0..100}
+do 
+   wget http://35.234.133.43:8000/v1/vote?color=red
+done
+
+
 for n in $(kubectl get -o=name pvc,configmap,serviceaccount,secret,ingress,service,deployment,statefulset,hpa,job,cronjob)
 
 for n in $(kubectl get -o=name service,deployment)
