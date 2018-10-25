@@ -15,6 +15,7 @@
 import webapp2
 import temp
 import niceTag
+import json
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
@@ -41,12 +42,33 @@ class NewTempPage(webapp2.RequestHandler):
 class Build(webapp2.RequestHandler):
     def get(self):
 
-        nt = niceTag.Tag("hi","there")     
+        #get params
+        id = self.request.get('id')
+
+        #ddbb query
+        r = temp.Measure.fetch(id)[0]
+        name  = str(r.name)
+        value = str(r.value)
+
+        #generate image
+        nt = niceTag.Tag(name,value)     
         t = nt.getSVG()
 
         self.response.headers['Content-Type'] = 'image/svg+xml'
         self.response.write(t)
 
+    def post(self):
+
+        body = json.loads(self.request.body)
+        id    = body.get('id')
+        name  = body.get('name')
+        value = body.get('value')
+
+        temp.Measure.update(id, name, value)
+
+        r = { "id" : id, "value": value }
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.write(r)
 
 
 app = webapp2.WSGIApplication([
