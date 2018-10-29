@@ -46,9 +46,13 @@ class Build(webapp2.RequestHandler):
         id = self.request.get('id')
 
         #ddbb query
-        r = temp.Measure.fetch(id)[0]
-        name  = str(r.name)
-        value = str(r.value)
+        try:
+            r = temp.Measure.fetch(id)[0]
+            name  = str(r.name)
+            value = str(r.value)
+        except:
+            name = "none"
+            value = "na"
 
         #generate image
         nt = niceTag.Tag(name,value)     

@@ -9,8 +9,8 @@ tagTpl = """
   </linearGradient>
 
   <rect rx="3" width="90" height="20" fill="#555"/>
-  <rect rx="3" x="37" width="53" height="20" fill="#4c1"/>
-  <path fill="#4c1" d="M37 0h4v20h-4z"/>
+  <rect rx="3" x="37" width="53" height="20" fill="{{color}}"/>
+  <path fill="{{color}}" d="M37 0h4v20h-4z"/>
   <rect rx="3" width="90" height="20" fill="url(#a)"/>
 
   <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
@@ -28,9 +28,24 @@ class Tag:
     def __init__(self, text1, text2):
         self.text1 = text1
         self.text2 = text2
+        self.color = "#4c1"
+
+
+    def selectColor(self,value):
+
+      if (value=="na"):
+        self.color = "#808080"
+
+      if (value=="failed"):
+        self.color = "#FF0000"
+
+      if (value=="fail"):
+        self.color = "#FF0000"
 
 
     def getSVG(self):
+        self.selectColor(self.text2)
         out = tagTpl.replace("{{text1}}", self.text1).replace("{{text2}}", self.text2)
+        out = out.replace("{{color}}",self.color)
         return out
 
