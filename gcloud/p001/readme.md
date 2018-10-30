@@ -15,9 +15,12 @@ curl --header "Content-Type: application/json" \
 ```
 
 
-## Get image
 
-    GET  http://localhost:8080/build?id=my.tag003
+## Get image
+![tag](http://p001.com.com.es/build?id=my.tag001)
+
+    GET  http://p001.com.com.es/build?id=my.tag001
+
 
 
 ## Upload app
