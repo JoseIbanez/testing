@@ -7,10 +7,13 @@
 
 ## Post a new value
 
+```bash
 curl --header "Content-Type: application/json" \
   --request POST \
-  --data '{"id":"my.tag003", "name":"ver","value":"1.1.1"}' \
+  --data '{"id":"my.tag001", "name":"ver","value":"1.1.1"}' \
   http://localhost:8080/build
+```
+
 
 ## Get image
 
