@@ -1,0 +1,6 @@
+host: "a1o7eza7uxtx5n-ats.iot.eu-west-1.amazonaws.com"
+rootCAPath: "~/.secrets/iot/AmazonRootCA1.pem"
+certificatePath: "~/.secrets/iot/1c7e71bb92-certificate.pem.crt"
+privateKeyPath: "~/.secrets/iot/1c7e71bb92-private.pem.key"
+thingName: "v01"
+clientId: "v01"
