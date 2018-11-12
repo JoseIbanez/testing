@@ -31,9 +31,9 @@ def customShadowCallback_Delta(payload, responseStatus, token):
     # payload is a JSON string ready to be parsed using json.loads(...)
     # in both Py2.x and Py3.x
     print("++++++++DELTA++++++++++")
-    print(payload)
-    print(responseStatus)
-    print(token)
+    print("Payload: "+ str(payload))
+    print("responseStatus: "+str(responseStatus))
+    print("token: "+str(token))
     payloadDict = json.loads(payload)
     print("state: " + str(payloadDict["state"]))
     print("version: " + str(payloadDict["version"]))
@@ -41,37 +41,27 @@ def customShadowCallback_Delta(payload, responseStatus, token):
 
     try:
         property = str(payloadDict["state"]["property"])
-        time.sleep(1)
-        JSONPayload = '{"state":{"reported":{"property":'+ str(property) +'}}}'
-        deviceShadowHandler.shadowUpdate(JSONPayload, None, 5)
     except:
         print("No property received")
+        return
 
+    try:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.connect("/tmp/channel0")
+        s.send(property)
+        data = s.recv(1024)
+        s.close()
+        print("socket data: "+data)
+    except:
+        print("Socket error")
+        return
 
+    try:
+        JSONPayload = {"state":{"reported":{"property": property }}}
+        deviceShadowHandler.shadowUpdate(json.dumps(JSONPayload), None, 5)
+    except:
+        print("report error")
 
-def statusReport(socket,deviceShadowHandler):
-
-    counter = 0
-    while True:
-        try:
-            msg = socket.recv(1024)
-        except:
-            break
-
-        if len(msg) > 0:
-            cmdList.append(msg)
-
-        couter += 1
-
-        #do some checks and if msg == someWeirdSignal: break:
-        print addr, ' Rec ', msg
-
-        #status report
-        JSONPayload = '{"state":{"reported":{"property":'+ str(counter) +'}}}'
-        deviceShadowHandler.shadowUpdate(JSONPayload, customShadowCallback_Update, 5)
-        time.sleep(1)
-
-    #clientsocket.close()
 
 
 
