@@ -76,15 +76,12 @@ def statusReport(socket,deviceShadowHandler):
 
 
 # Read in config-file parameters
-
 configFile = "./iot-config.yml"
 try:
     with open(configFile, 'r') as stream:
         config = yaml.load(stream)
 except yaml.YAMLError as exc:
         print exc
-
-#print str(config)
 
 host = config.get('host')
 rootCAPath = expanduser(config.get('rootCAPath'))
@@ -93,6 +90,7 @@ privateKeyPath = expanduser(config.get('privateKeyPath'))
 thingName = config.get('thingName')
 clientId = config.get('clientId')
 port = 8883
+
 
 # Configure logging
 logger = logging.getLogger("AWSIoTPythonSDK.core")
