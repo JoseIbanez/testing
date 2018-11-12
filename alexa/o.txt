@@ -1,0 +1,1 @@
+{"state":{"desired":{"property":3}},"metadata":{"desired":{"property":{"timestamp":1541939160}}},"version":139,"timestamp":1541939160}
