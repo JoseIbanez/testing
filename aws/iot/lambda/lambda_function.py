@@ -96,8 +96,72 @@ def handle_discovery(event):
         }  
     }
     logger.info("Response: " +json.dumps(response))
+
+    ####################
+    request = event
+    
+    switchCapabilities = [
+        {
+            "type": "AlexaInterface",
+            "version": "3",
+            "interface": "Alexa"
+        },
+        {
+            "type": "AlexaInterface",
+            "version": "3",
+            "interface": "Alexa.PowerController",
+            "properties": {
+                "supported": [ { "name": "powerState" } ],
+                "proactivelyReported": True,
+                "retrievable": True
+            }
+        }
+    ]
+
+
+    header = request.directive.header
+    header.name = "Discover.Response"
+
+    sw1 = {
+        "endpointId": "your_custom_endpoint",
+        "manufacturerName": "Manufacturer 1234",
+        "friendlyName": "Your Light Name",
+        "description": "Smart Device Switch",
+        "displayCategories": [ "SWITCH" ],
+        "cookie": {
+            "key1": "arbitrary key/value pairs for skill to reference this endpoint.",
+        },
+        "capabilities": switchCapabilities
+    }
+
+    sw2 = {
+        "endpointId": "your_custom_endpoint",
+        "manufacturerName": "Manufacturer 1234",
+        "friendlyName": "Your Light Name",
+        "description": "Smart Device Switch",
+        "displayCategories": [ "SWITCH" ],
+        "cookie": {
+            "key1": "arbitrary key/value pairs for skill to reference this endpoint.",
+        },
+        "capabilities": switchCapabilities
+    }
+
+
+    response = { 
+        "event" : { 
+            "header" : header, 
+            "payload" : {
+                "endpoints" : [ sw1, sw2 ]
+            } 
+        }
+    }
+
+
     return response
  
+
+
+
 
 def handle_control(request, context):
     request_namespace = request["directive"]["header"]["namespace"]
