@@ -66,9 +66,9 @@ def customShadowCallback_Delta(payload, responseStatus, token):
 
 
 # Read in config-file parameters
-configFile = "./iot-config.yml"
+configFile = "~/.secrets/iot/iot-config.yml"
 try:
-    with open(configFile, 'r') as stream:
+    with open(expanduser(configFile), 'r') as stream:
         config = yaml.load(stream)
 except yaml.YAMLError as exc:
         print exc
