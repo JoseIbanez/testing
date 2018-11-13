@@ -1,0 +1,26 @@
+//2018-11-13T23:05:39.005Z	a2f76e97-e798-11e8-8e04-6168c3400044	DEBUG:TurnOn or TurnOff Request
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.PowerController",
+            "name": "TurnOff",
+            "payloadVersion": "3",
+            "messageId": "ce25f982-cd09-43b2-9490-bbb75423ebe9",
+            "correlationToken": "AAAAAAAAAQAf/2uw6ZYKl6q+dRJW5DO7DAIAAAAAAAC0IYEJ1H7c5EAsUVxMu9V4Y2F8MyOj0PnUOthL6urPGf5O8sbVQyI/MZQKtviuODE5ukDldQRNQn2OHV3qaWGt9cEZxmXScVsTjbsg8Z1DnFoc4jYVziHe922VR1A0ETE9iP4I2tqJ0E0TfJVVb+N8htLvWCb6lmirdPvJFf8eoO0Ygca/lZmiqL4tYvv3B666nlRXQU4aFYSCbyWHMuE2h2e2rXEuWLk40se8PmPkyqRTh4h+nwOfaIcLSitl/7tgcEE07vEouGCAf6i5qoTtulqfFIr3pMGrHMATWLV+u19w9oQOY34wQCQcz8q4+RNbEFRVwvK8dIxWuwhrZLajvTGAYdwbmx3Y9nGZCkPUxyWoWOmyvrhu79WxmaKKZ7JYaZTrwIQ3BH24wjsYpym3KAcJWUzKHkkgbFsMla4vcyx0h/yhJxxkFh3FZFEfEmKyb/X3w/62DEaQxEH4sgGQCQQ52wIQL78D2EbSlNOtWr9E9ocSPtikkdTjQ9ttOkMyAZx5t1XxckR9lZIqRHhezHgK/Q8nQsfCGQNFbpR1fyUWrjnKwk3Gan31C5O5VBHudq0K+DTXyC4wyLgp9uMxrDhQvD5/G4hgH5aKqQrTSM5BjPsODV9HziWG7MuhgSNJJ08bTb2fpY8x4GmD0KusZJDn3VXzDfbImpfT6vAOLFmlSXS9UpnFGBv9qA=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "Atza|IwEBIO3B1a6_7ywXIOCE2XCul3GtE8_0q6BnKWTHPtl5EzB1Phgmg9uZySw_EGdI19RIRICTrCSAuuRg4FZ0TTxiqdXwDnEvY2VT_NpDLwlPalpMlFCCvwaxZTlQfyTmzcMKs1fL2-XtRUApHqh5ex8rIlK5kmX8ZAAzknq6lJfg_j-9q3pS7eBlk-ifvF9fMtYqTgIqw8CU0kCQ_QTRy1OQBiUpgTcAlbs59LRaOPvhIKA6xybKNQolOVey0lqoTVVD3VowalXIAKQGrj7doeoY2WpHUSMtr-CumTCxxOvONqYtLehJfo5R2hL_YIyzz_bkVAh6TX2m8bdEd1eoMymQuIf9QKYTWTT4ipMreV7PwYUV0vLdUliHbOOw-N0qL_fZ9SZGlMED0jrRiKYPYcQvNIUq4iMH2Vx9glp41OmeXBGDCjk8YNstRjbpXeS_GbuEGi_BghJowIqqRZqkONuMBW8LLC1eDprZ50MHkMRu9sB2Tofmd9peuO6Jk8enuYvsSH4"
+            },
+            "endpointId": "demo_id",
+            "cookie": {
+                "key1": "arbitrary key/value pairs for skill to reference this endpoint.",
+                "key2": "There can be multiple entries",
+                "key3": "but they should only be used for reference purposes.",
+                "key4": "This is not a suitable place to maintain current endpoint state."
+            }
+        },
+        "payload": {}
+    }
+}
