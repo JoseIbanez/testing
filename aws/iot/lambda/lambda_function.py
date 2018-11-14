@@ -36,7 +36,6 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
 
     logger.info("Received v3 directive!")
-
     logger.info(json.dumps(event))
     
     if event['directive']['header']['name'] == "Discover":
@@ -46,59 +45,12 @@ def lambda_handler(event, context):
         logger.info("Control")
         response = handle_control(event, context)    
 
-    logger.info("response" + json.dumps(response))  
+    logger.info("response: " + json.dumps(response))  
     return response
 
 
 
-def handle_discovery(event):
-
-    response = {
-        "event" : {
-            "header" : {
-                "correlationToken": "12345692749237492",
-                "namespace": "Alexa.Discovery",
-                "name": "Discover.Response",
-                "payloadVersion": "3",
-                "messageId": event['directive']['header']['messageId']
-            },
-            "payload" : {
-                "endpoints":[
-                    {
-                        "endpointId": "your_custom_endpoint",
-                        "manufacturerName": "Manufacturer 1234",
-                        "friendlyName": "Your Light Name",
-                        "description": "Smart Device Switch",
-                        "displayCategories": [ "SWITCH" ],
-                        "cookie": {
-                            "key1": "arbitrary key/value pairs for skill to reference this endpoint.",
-                        },
-                        "capabilities": [
-                            {
-                                "type": "AlexaInterface",
-                                "interface": "Alexa",
-                                "version": "3"
-                            },
-                            {
-                                "type": "AlexaInterface",
-                                "interface": "Alexa.PowerController",
-                                "version": "3",
-                                "properties": {
-                                    "supported": [ { "name": "powerState" } ],
-                                    "proactivelyReported": True,
-                                    "retrievable": True
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        }  
-    }
-    logger.info("Response: " +json.dumps(response))
-
-    ####################
-    request = event
+def handle_discovery(request):
     
     switchCapabilities = [
         {
@@ -112,36 +64,37 @@ def handle_discovery(event):
             "interface": "Alexa.PowerController",
             "properties": {
                 "supported": [ { "name": "powerState" } ],
-                "proactivelyReported": True,
                 "retrievable": True
             }
         }
     ]
 
 
-    header = request.directive.header
-    header.name = "Discover.Response"
+    header = request['directive']['header']
+    header['name'] = "Discover.Response"
 
     sw1 = {
-        "endpointId": "your_custom_endpoint",
-        "manufacturerName": "Manufacturer 1234",
-        "friendlyName": "Your Light Name",
-        "description": "Smart Device Switch",
+        "endpointId": "h2_001_ch1",
+        "manufacturerName": "Linux",
+        "friendlyName": "Camara",
+        "description": "Mi cosa camara",
         "displayCategories": [ "SWITCH" ],
         "cookie": {
-            "key1": "arbitrary key/value pairs for skill to reference this endpoint.",
+            "key1": "h2-001",
+            "key2": "ch1"
         },
         "capabilities": switchCapabilities
     }
 
     sw2 = {
-        "endpointId": "your_custom_endpoint",
-        "manufacturerName": "Manufacturer 1234",
-        "friendlyName": "Your Light Name",
-        "description": "Smart Device Switch",
+        "endpointId": "h2_001_ch2",
+        "manufacturerName": "Linux",
+        "friendlyName": "Fuego",
+        "description": "Mi cosa fuego",
         "displayCategories": [ "SWITCH" ],
         "cookie": {
-            "key1": "arbitrary key/value pairs for skill to reference this endpoint.",
+            "key1": "h2-001",
+            "key2": "ch2"
         },
         "capabilities": switchCapabilities
     }
