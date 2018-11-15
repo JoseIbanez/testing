@@ -8,25 +8,47 @@ import boto3
 
 client = boto3.client('iot-data')
 
+
+########### AUX ###############################
+
 def get_utc_timestamp(seconds=None):
     return time.strftime("%Y-%m-%dT%H:%M:%S.00Z", time.gmtime(seconds))
 
-def light_state(state):
-    # Change topic, qos and payload
-    response = client.update_thing_shadow(
-        thingName = 'Your-Thing-Name', 
-        payload = json.dumps({
-            'state': {
-                'desired': {
-                    'light': state
-                }
-            }
-            }
-            )
-        )
-
 def get_uuid():
     return str(uuid.uuid4())
+
+
+########## IOT-DATA ###########################
+def set_thing_state(thingName, property, state):
+
+    payload = json.dumps({'state': { 'desired': { property : state } }})
+    
+    logger.info("IOT update, thingName:"+thingName+", payload:"+payload)
+
+    response = client.update_thing_shadow(
+        thingName = thingName, 
+        payload =  payload
+        )
+
+    logger.info("IOT response: " + str(response))  
+    logger.info("Body:"+response['payload'].read())
+
+
+def get_thing_state(thingName, property):
+
+    response = client.get_thing_shadow(thingName=thingName)
+    
+    streamingBody = response["payload"]
+    jsonState = json.loads(streamingBody.read())
+
+    logger.info("IOT response: " + str(jsonState))  
+
+    ret = jsonState["state"]["reported"][property]
+    return ret
+
+
+
+################################################
     
 # Setup logger
 logger = logging.getLogger()
@@ -41,6 +63,11 @@ def lambda_handler(event, context):
     if event['directive']['header']['name'] == "Discover":
         logger.info("Discover")
         response = handle_discovery(event)
+        
+    elif event['directive']['header']['name'] == "ReportState":
+        logger.info("ReportState")
+        response = handle_report(event)
+
     else:
         logger.info("Control")
         response = handle_control(event, context)    
@@ -48,6 +75,41 @@ def lambda_handler(event, context):
     logger.info("response: " + json.dumps(response))  
     return response
 
+
+def handle_report(request):
+
+    header = request['directive']['header']
+    header['name'] = "StateReport"
+    endpoint = request['directive']['endpoint']
+
+    context = {
+        "properties": [
+            {
+
+                "namespace": "Alexa.PowerController",
+                "name": "powerState",
+                "value": "ON",
+                "timeOfSample": get_utc_timestamp(),
+                "uncertaintyInMilliseconds": 500
+            }
+        ]
+    }
+
+    ###
+
+    response = { 
+        "context" : context,
+        "event" : { 
+            "header" : header, 
+            "endpoints" : endpoint,
+            "payload" : {}
+        }
+    }
+
+    return response
+
+    
+    
 
 
 def handle_discovery(request):
@@ -122,10 +184,10 @@ def handle_control(request, context):
 
     if request_namespace == "Alexa.PowerController":
         if request_name == "TurnOn":
-            light_state("on")
+            set_thing_state("h02-001","camara","on")
             value = "ON"
         else:
-            light_state("off")
+            set_thing_state("h02-001","camara","off")
             value = "OFF"
 
         response = {
