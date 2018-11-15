@@ -1,0 +1,19 @@
+
+// AWSLambdaEdgeExecutionRole-576373cd-4f7f-44e3-ac41-ce78a5e73f6a
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:logs:*:*:*"
+            ]
+        }
+    ]
+}
+
