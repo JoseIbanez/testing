@@ -63,6 +63,9 @@ def customShadowCallback_Delta(payload, responseStatus, token):
 	JSONPayload = {"state":{"reported": state }}
         print("Reporting: "+str(JSONPayload))
         deviceShadowHandler.shadowUpdate(json.dumps(JSONPayload), None, 5)
+        time.sleep(5)
+        JSONPayload = {"state":{"reported":{"property": 0 }}}
+        deviceShadowHandler.shadowUpdate(json.dumps(JSONPayload), None, 5)
     except:
         print("report error")
 
