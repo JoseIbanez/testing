@@ -24,7 +24,8 @@ from os.path import expanduser
 import yaml
 import socket               # Import socket module
 import thread
-
+import sys
+import subprocess
 
 # Custom Shadow callback
 def customShadowCallback_Delta(payload, responseStatus, token):
@@ -40,34 +41,91 @@ def customShadowCallback_Delta(payload, responseStatus, token):
     print("+++++++++++++++++++++++\n\n")
 
     try:
-        #property = str(payloadDict["state"]["property"])
-	property = "on"
-	state = payloadDict["state"]
+        state = payloadDict["state"]
     except:
         print("No property received")
         return
 
-    try:
-        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        s.connect("/tmp/channel0")
-        s.send(property)
-        data = s.recv(1024)
-        s.close()
-        print("socket data: "+data)
-    except:
-        print("Socket error")
+    ansState = controlerMapping(state)
+    if not ansState:
         return
 
     try:
-        #JSONPayload = {"state":{"reported":{"property": property }}}
-	JSONPayload = {"state":{"reported": state }}
+        JSONPayload = {"state":{"reported": state }}
         print("Reporting: "+str(JSONPayload))
         deviceShadowHandler.shadowUpdate(json.dumps(JSONPayload), None, 5)
-        time.sleep(5)
-        JSONPayload = {"state":{"reported":{"property": 0 }}}
-        deviceShadowHandler.shadowUpdate(json.dumps(JSONPayload), None, 5)
+        #time.sleep(5)
+        #JSONPayload = {"state":{"reported":{"property": 0 }}}
+        #deviceShadowHandler.shadowUpdate(json.dumps(JSONPayload), None, 5)
     except:
         print("report error")
+
+
+def controlerMapping(reqState):
+
+    myMap = {
+        "camara:on"  : { "socket": "bash",          "order" : "touch /tmp/ps.lst" },
+        "camara:off" : { "socket": "bash",          "order" : "rm /tmp/ps.lst" },
+        "fuego:on"   : { "socket": "/tmp/channel0", "order" : "camara on" },
+        "fuego:off"  : { "socket": "/tmp/channel0", "order" : "fuego on"}
+    }
+
+    retState = {}
+
+    for key in reqState:
+
+        orderId = key+":"+str(reqState[key])
+        orderObj = myMap.get(orderId)
+
+        if not orderObj:
+            print "Command not defined"
+            continue
+
+        socket = orderObj.get('socket')
+        order  = orderObj.get('order')
+
+        if socket == "bash":
+
+            print order
+            try:
+                subprocess.Popen(order.split())
+                retState[key] = reqState[key]
+            except:
+                print sys.exc_info()[0]
+                
+
+
+    return retState
+
+
+
+def controlerMapping_old(reqState):
+    try:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.connect("/tmp/channel0")
+    except:
+        print("socket error")
+        return None
+
+    for key in reqState:
+
+        orderId = key+":"+str(reqState[key])
+        orderObj = myMap.get(orderId)
+
+        if not orderObj:
+            print "Command not defined"
+            continue
+
+        s.send(orderObj.get('order'))
+        data = s.recv(1024)
+        print("socket data: "+data)
+
+    s.close()
+    return reqState
+
+
+
+
 
 
 
@@ -115,6 +173,7 @@ deviceShadowHandler = myAWSIoTMQTTShadowClient.createShadowHandlerWithName(thing
 
 # Listen on deltas
 deviceShadowHandler.shadowRegisterDeltaCallback(customShadowCallback_Delta)
+
 
 # Loop forever
 while True:
