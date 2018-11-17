@@ -40,7 +40,9 @@ def customShadowCallback_Delta(payload, responseStatus, token):
     print("+++++++++++++++++++++++\n\n")
 
     try:
-        property = str(payloadDict["state"]["property"])
+        #property = str(payloadDict["state"]["property"])
+	property = "on"
+	state = payloadDict["state"]
     except:
         print("No property received")
         return
@@ -57,7 +59,9 @@ def customShadowCallback_Delta(payload, responseStatus, token):
         return
 
     try:
-        JSONPayload = {"state":{"reported":{"property": property }}}
+        #JSONPayload = {"state":{"reported":{"property": property }}}
+	JSONPayload = {"state":{"reported": state }}
+        print("Reporting: "+str(JSONPayload))
         deviceShadowHandler.shadowUpdate(json.dumps(JSONPayload), None, 5)
         time.sleep(5)
         JSONPayload = {"state":{"reported":{"property": 0 }}}
