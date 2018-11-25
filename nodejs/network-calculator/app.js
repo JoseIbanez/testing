@@ -27,12 +27,11 @@ System.log("Pool: "+poolMin+" - "+poolMax);
 
 subnetByIp = [];
 
+// I like work in Integer for IP
 for (var i in subnets) {
     item = subnets[i];
-
     System.log(item.subnetId+", "+item.ipamRef);
     
-    //[net, cdir] = getPgInfo(item.ipamRef);
     ret = getPgInfo(item.ipamRef);
     net = ret[0]
     cdir = ret[1]
@@ -44,12 +43,14 @@ for (var i in subnets) {
     subnetByIp.push([item.ipamRef, item])
 }
 
-
+// Current Subnet list sorted for better compare (sorted by ip)
 subnetByIp.sort(function (a,b) { return a[1].netInt - b[1].netInt });
 //System.log(subnetByIp);
 
 newNet = ip2int(poolMin);
 poolMaxInt = ip2int(poolMax)
+// number of ip for this network = 2^(32-mask len)
+newNetSize = Math.pow(2, 32 - newCdir); 
 
 index = 0;
 
@@ -57,7 +58,6 @@ index = 0;
 while (newNet < poolMaxInt) {
 
     System.log("Trying ... "+int2ip(newNet));
-
 
 	if (index >= subnetByIp.length) {
         System.log("Site found "+int2ip(newNet));
@@ -67,9 +67,6 @@ while (newNet < poolMaxInt) {
     	
     curNet=subnetByIp[index][1];
     curNetSize = Math.pow(2, 32 - curNet.cdir);
-    newNetSize = Math.pow(2, 32 - newCdir);
-
-	//System.log(curNet.network);
 
     if (curNet.netInt + curNetSize - 1 < newNet) {
         System.log("Below "+curNet.network);
