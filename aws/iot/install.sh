@@ -13,5 +13,10 @@ wget https://www.amazontrust.com/repository/AmazonRootCA2.pem -P ~/.secrets/iot/
 
 
 aws iot-data get-thing-shadow    --thing-name v01 o.txt && cat o.txt
-aws iot-data update-thing-shadow --thing-name v01 --payload '{"state":{"desired":{"color":"green"}}}' o.log
+aws iot-data update-thing-shadow --thing-name v01     --payload '{"state":{"desired":{"color":"green"}}}' o.log
 aws iot-data update-thing-shadow --thing-name h02-001 --payload '{"state":{"desired":{"property":33}}}' o.log
+
+
+
+ffmpeg -i /dev/video0 -f alsa -ac 1 -i plughw:1,0 -vcodec copy -acodec aac -ab 128k -g 50 -strict experimental \
+    -f flv rtmp://a.rtmp.youtube.com/live2/$CHANNELID
