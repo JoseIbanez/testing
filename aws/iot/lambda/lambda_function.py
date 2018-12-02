@@ -34,6 +34,7 @@ def set_thing_state(thingName, property, state):
     logger.info("Body:"+response['payload'].read())
 
 
+
 def get_thing_state(thingName, property):
 
     response = client.get_thing_shadow(thingName=thingName)
@@ -82,13 +83,24 @@ def handle_report(request):
     header['name'] = "StateReport"
     endpoint = request['directive']['endpoint']
 
+    thingName = request['directive']['endpoint']['cookie']['key1']
+    property =  request['directive']['endpoint']['cookie']['key2']
+
+    iotValue = get_thing_state(thingName, property)
+
+    if iotValue == "on":
+        value = "ON"
+    else:
+        value = "OFF"
+        
+
     context = {
         "properties": [
             {
 
                 "namespace": "Alexa.PowerController",
                 "name": "powerState",
-                "value": "ON",
+                "value": value,
                 "timeOfSample": get_utc_timestamp(),
                 "uncertaintyInMilliseconds": 500
             }
@@ -142,8 +154,8 @@ def handle_discovery(request):
         "description": "Mi cosa camara",
         "displayCategories": [ "SWITCH" ],
         "cookie": {
-            "key1": "h2-001",
-            "key2": "ch1"
+            "key1": "h02-001",
+            "key2": "camara"
         },
         "capabilities": switchCapabilities
     }
@@ -155,8 +167,22 @@ def handle_discovery(request):
         "description": "Mi cosa fuego",
         "displayCategories": [ "SWITCH" ],
         "cookie": {
-            "key1": "h2-001",
-            "key2": "ch2"
+            "key1": "h02-001",
+            "key2": "fuego"
+        },
+        "capabilities": switchCapabilities
+    }
+
+
+    sw3 = {
+        "endpointId": "fra1_001_ch1",
+        "manufacturerName": "Linux",
+        "friendlyName": "Tiempo",
+        "description": "Twitter conla temperatura",
+        "displayCategories": [ "SWITCH" ],
+        "cookie": {
+            "key1": "fra1-001",
+            "key2": "tiempo"
         },
         "capabilities": switchCapabilities
     }
@@ -166,7 +192,7 @@ def handle_discovery(request):
         "event" : { 
             "header" : header, 
             "payload" : {
-                "endpoints" : [ sw1, sw2 ]
+                "endpoints" : [ sw1, sw2, sw3 ]
             } 
         }
     }
@@ -181,13 +207,17 @@ def handle_discovery(request):
 def handle_control(request, context):
     request_namespace = request["directive"]["header"]["namespace"]
     request_name = request["directive"]["header"]["name"]
+    thingName = request["directive"]["endpoint"]["cookie"]["key1"]
+    property  = request["directive"]["endpoint"]["cookie"]["key2"]
+    
 
     if request_namespace == "Alexa.PowerController":
+
         if request_name == "TurnOn":
-            set_thing_state("h02-001","camara","on")
+            set_thing_state(thingName,property,"on")
             value = "ON"
         else:
-            set_thing_state("h02-001","camara","off")
+            set_thing_state(thingName,property,"off")
             value = "OFF"
 
         response = {

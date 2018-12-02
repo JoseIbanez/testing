@@ -4,3 +4,13 @@ certificatePath: "~/.secrets/iot/certificate.pem.crt"
 privateKeyPath: "~/.secrets/iot/private.pem.key"
 thingName: "v01"
 clientId: "v01"
+actions:
+  - camara:
+      socket: "bash"
+      on:     "/home/ibanez/Projects/testing/youtube/stream2youtube.cmd"
+      off:    "killall ffmgep"
+  - foco:
+      socket: "/tmp/common0"
+      on:     "10;1111"
+      off:    "0;0000"
+  
