@@ -23,6 +23,6 @@ echo $prefix
 
 ffmpeg -r $rate \
     -f image2 -s 1920x1080 \
-    -start_number $start -i $prefix%04d.jpg  \
+    -start_number $start -i $prefix%04d.JPG  \
     -vcodec libx264 -crf 25  -pix_fmt yuv420p \
     ~/Movies/tl-$start.$rate.fps.mp4
