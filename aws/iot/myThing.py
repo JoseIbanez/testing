@@ -64,10 +64,12 @@ def customShadowCallback_Delta(payload, responseStatus, token):
 def controlerMapping(reqState):
 
     myMap = {
-        "camara:on"  : { "socket": "bash",          "order" : "touch /tmp/ps.lst" },
-        "camara:off" : { "socket": "bash",          "order" : "rm /tmp/ps.lst" },
-        "fuego:on"   : { "socket": "/tmp/channel0", "order" : "camara on" },
-        "fuego:off"  : { "socket": "/tmp/channel0", "order" : "fuego on"}
+        "camara:on"  : { "socket": "bash",          "order" : "/home/ibanez/Projects/testing/youtube/stream2youtube.sh" },
+        "camara:off" : { "socket": "bash",          "order" : "killall ffmpeg" },
+        "fuego:on"   : { "socket": "bash",          "order" : "touch /tmp/fuego.tmp" },
+        "fuego:off"  : { "socket": "bash",          "order" : "touch /tmp/fuego.tmp" },
+        ".fuego:on"  : { "socket": "/tmp/channel0", "order" : "camara on" },
+        ".fuego:off" : { "socket": "/tmp/channel0", "order" : "fuego on"}
     }
 
     retState = {}
