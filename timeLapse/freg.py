@@ -7,26 +7,38 @@ import string
 
 
 
-index = 1
+
+src = sys.argv[1]
+
+srcDir = os.path.dirname(src)
+filename = os.path.basename(src)
+print "filename", filename
 
 
-for line in sys.stdin:
-
-    src = line.strip('\n')
-
-    d0 =re.sub(r'.*/','./',src)
-
-    dn = '.S01E{:02d}.'.format(index)
-
-    dst=re.sub(r'\.\d\d\.\d\d\.\d\d\.',
-           dn,
-           d0)
+z = re.search("\.(\d\d)\.(\d\d)\.(\d\d)\.", filename)
+#z = re.match("(\d\d)", filename)
 
 
+print z.groups()
 
-    index = index + 1
+cap = None
 
-    os.symlink(src, dst)
-    print src +" -> "+ dst
+if z:
+    #print z.groups()[0]
+    #print z.groups()[1]
+    #print z.groups()[2]
+    cap = ".S%sE%s%s." % ( z.groups()[0], z.groups()[1], z.groups()[2] )
+    print cap
+
+
+if cap:
+   dst = re.sub(r'\.\d\d\.\d\d\.\d\d\.',cap, filename)
+else:
+   dst = filename
+
+
+
+os.symlink(src, dst)
+print src +" -> "+ dst
 
 
