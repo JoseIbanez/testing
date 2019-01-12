@@ -7,7 +7,7 @@
 #define RELAY4 19
 #define LED_BUILTIN 2
 
-#define DEBUG 1
+//#define DEBUG 1
 
 BluetoothSerial SerialBT;
 
@@ -15,7 +15,7 @@ BluetoothSerial SerialBT;
 static int inputParse(String input);
 static int updateGPIO(String status);
 static String btReadString();
-
+static int btPrintString(String s);
 
 // Main vars
 int curTime = 0;
@@ -64,9 +64,10 @@ void loop() {
   if (SerialBT.available()) {
     //inputParse(SerialBT.readString());
     inputParse(btReadString());
+    btPrintString(String(curTime) + ";" + relayStatus);
     //SerialBT.print(String(curTime) + ";" + relayStatus);
     //SerialBT.print((uint8_t*)"OK",2);
-    SerialBT.print("OK");
+    //SerialBT.print("OK");
     updateGPIO(relayStatus);
   }
 
@@ -86,6 +87,8 @@ void loop() {
 
 }
 
+
+
 String btReadString() {
 
   String recString = "";
@@ -100,9 +103,12 @@ String btReadString() {
   }
 
   Serial.println("BT: "+recString);
-
   return recString;
+}
 
+int btPrintString(String s) {
+  SerialBT.write((uint8_t*)s.c_str(),s.length());
+  return 0;
 }
 
 
@@ -153,7 +159,7 @@ int updateGPIO(String status) {
 
 
   #ifdef DEBUG  
-  SerialBT.print(status);
+  //SerialBT.print(status);
   Serial.println(status);
   #endif
 
