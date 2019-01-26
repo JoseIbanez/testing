@@ -2,6 +2,8 @@
 
 sudo apt-get update -y 
 sudo apt-get install -y git wget make libncurses-dev flex bison gperf python python-serial
+sudo apt-get install -y python-pip
+
 
 wget https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-73-ge28a011-5.2.0.tar.gz
 

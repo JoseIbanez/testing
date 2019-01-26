@@ -5,17 +5,20 @@
 
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "secrets.h"
 //#include <Wire.h>
 //#include <Adafruit_BME280.h>
 //#include <Adafruit_Sensor.h>
 
-// Replace the next variables with your SSID/Password combination
-const char* ssid = "REPLACE_WITH_YOUR_SSID";
-const char* password = "REPLACE_WITH_YOUR_PASSWORD";
 
 // Add your MQTT Broker IP address, example:
 //const char* mqtt_server = "192.168.1.144";
-const char* mqtt_server = "YOUR_MQTT_BROKER_IP_ADDRESS";
+//const char* mqtt_server = "YOUR_MQTT_BROKER_IP_ADDRESS";
+#define MQTT_SERVER      "myMqttServer"
+#define MQTT_CLIENT_ID   "myESP32_001"
+#define MQTT_TOPIC_OUT   "esp32/output"
+#define MQTT_TOPIC_TEMP  "esp32/temperature"
+#define MQTT_TOPIC_HUMI  "esp32/humidity"
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -30,39 +33,24 @@ int value = 0;
 #define BME_MOSI 23
 #define BME_CS 5*/
 
-Adafruit_BME280 bme; // I2C
+//Adafruit_BME280 bme; // I2C
 //Adafruit_BME280 bme(BME_CS); // hardware SPI
 //Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
 float temperature = 0;
 float humidity = 0;
 
 // LED Pin
-const int ledPin = 4;
+const int ledPin = 1;
 
-void setup() {
-  Serial.begin(115200);
-  // default settings
-  // (you can also pass in a Wire library object like &Wire2)
-  //status = bme.begin();  
-  if (!bme.begin(0x76)) {
-    Serial.println("Could not find a valid BME280 sensor, check wiring!");
-    while (1);
-  }
-  setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
-
-  pinMode(ledPin, OUTPUT);
-}
 
 void setup_wifi() {
   delay(10);
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Serial.println(WIFI_SSID);
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -74,6 +62,7 @@ void setup_wifi() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
+
 
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
@@ -91,7 +80,7 @@ void callback(char* topic, byte* message, unsigned int length) {
 
   // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
   // Changes the output state according to the message
-  if (String(topic) == "esp32/output") {
+  if (String(topic) == MQTT_TOPIC_OUT) {
     Serial.print("Changing output to ");
     if(messageTemp == "on"){
       Serial.println("on");
@@ -104,12 +93,13 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
 }
 
+
 void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect("ESP8266Client")) {
+    if (client.connect(MQTT_CLIENT_ID)) {
       Serial.println("connected");
       // Subscribe
       client.subscribe("esp32/output");
@@ -122,6 +112,16 @@ void reconnect() {
     }
   }
 }
+
+void setup() {
+  Serial.begin(9600);
+  setup_wifi();
+  client.setServer(MQTT_SERVER, 1883);
+  client.setCallback(callback);
+  pinMode(ledPin, OUTPUT);
+}
+
+
 void loop() {
   if (!client.connected()) {
     reconnect();
@@ -133,25 +133,27 @@ void loop() {
     lastMsg = now;
     
     // Temperature in Celsius
-    temperature = bme.readTemperature();   
+    // temperature = bme.readTemperature();   
     // Uncomment the next line to set temperature in Fahrenheit 
     // (and comment the previous temperature line)
     //temperature = 1.8 * bme.readTemperature() + 32; // Temperature in Fahrenheit
-    
+    temperature = 20;
+
     // Convert the value to a char array
     char tempString[8];
     dtostrf(temperature, 1, 2, tempString);
     Serial.print("Temperature: ");
     Serial.println(tempString);
-    client.publish("esp32/temperature", tempString);
+    client.publish(MQTT_TOPIC_TEMP, tempString);
 
-    humidity = bme.readHumidity();
-    
+    //humidity = bme.readHumidity();
+    humidity = 50;
+
     // Convert the value to a char array
     char humString[8];
     dtostrf(humidity, 1, 2, humString);
     Serial.print("Humidity: ");
     Serial.println(humString);
-    client.publish("esp32/humidity", humString);
+    client.publish(MQTT_TOPIC_HUMI, humString);
   }
 }
