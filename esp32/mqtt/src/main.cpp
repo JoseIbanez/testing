@@ -1,6 +1,10 @@
 /*********
   Rui Santos
-  Complete project details at https://randomnerdtutorials.com  
+  Complete project details at https://randomnerdtutorials.com
+
+  Read Mac:  
+    https://www.arduino.cc/en/Reference/WiFiMACAddress
+    
 *********/
 
 #include <WiFi.h>
