@@ -1,5 +1,15 @@
 #!/bin/bash
 
+#Setup VM OS
+
+sudo apt-get -y update
+sudo apt-get -y install python-pip
+sudo apt-get -y install linux-image-extra-virtual
+
+sudo chown vagrant /dev/ttyUSB0 
+
+
+# pio install 
 pip install -U platformio
 
 
@@ -22,5 +32,6 @@ platformio init --board esp32dev
 platformio lib list
 
 
-
+#Compile and load
+platformio run -t upload -t monitor
 
