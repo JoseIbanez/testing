@@ -18,7 +18,7 @@
 // Add your MQTT Broker IP address, example:
 //const char* mqtt_server = "192.168.1.144";
 //const char* mqtt_server = "YOUR_MQTT_BROKER_IP_ADDRESS";
-#define MQTT_SERVER      "myMqttServer"
+#define MQTT_SERVER      "192.168.1.30"
 #define MQTT_CLIENT_ID   "myESP32_001"
 #define MQTT_TOPIC_OUT   "esp32/output"
 #define MQTT_TOPIC_TEMP  "esp32/temperature"
