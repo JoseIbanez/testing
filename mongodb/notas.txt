@@ -1,0 +1,32 @@
+
+mkdir -p /mnt/mongo/db1
+mongod --port 30001 --replSet rs1 --dbpath /mnt/mongo/db1 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db1/mongo.log --fork
+
+mkdir -p /mnt/mongo/db2
+mongod --port 30002 --replSet rs1 --dbpath /mnt/mongo/db2 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db2/mongo.log --fork
+
+mkdir -p /mnt/mongo/db3
+mongod --port 30003 --replSet rs1 --dbpath /mnt/mongo/db3 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db3/mongo.log --fork
+
+
+
+
+rs.initiate( {
+    _id: "rs1",
+    members: [
+      {
+       _id: 0,
+       host: "localhost:30001",
+       arbiterOnly: false
+      },
+      {
+       _id: 1,
+       host: "localhost:30002",
+       arbiterOnly: false
+      },
+      {
+       _id: 2,
+       host: "localhost:30003",
+       arbiterOnly: false
+      }
+     ]})

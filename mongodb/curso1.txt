@@ -38,7 +38,7 @@ db.test.find({ $and: [ { "y":{$exists: true}}, {"y":null} ]})
 
 
 
-for (var i = 0; i<1000000 ; i++) {
+for (var i = 0; i<100 ; i++) {
 db.tester.insert({"foo":"bar","baz":i, "z":10-i})
 }
 
@@ -256,11 +256,13 @@ db.peeps.find()
 
 ------------------------
 
-
+mkdir -p /mnt/mongo/db1
 mongod --port 30001 --replSet rs0 --dbpath /mnt/mongo/db1 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db1/mongo.log --fork
 
+mkdir -p /mnt/mongo/db2
 mongod --port 30002 --replSet rs0 --dbpath /mnt/mongo/db2 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db2/mongo.log --fork
 
+mkdir -p /mnt/mongo/db3
 mongod --port 30003 --replSet rs0 --dbpath /mnt/mongo/db3 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db3/mongo.log --fork
 
 mongod --port 30004 --replSet rs0 --dbpath /mnt/mongo/db4 --smallfiles --oplogSize 50 --logpath /mnt/mongo/db4/mongo.log --fork
@@ -293,6 +295,11 @@ rs.initiate( {
        arbiterOnly: true
       }
      ]})
+
+
+
+
+
 
 rs.printReplicationInfo()
 
