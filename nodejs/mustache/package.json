@@ -1,0 +1,15 @@
+{
+  "name": "opsmgr",
+  "version": "1.0.0",
+  "description": "test templates for mongo opsmgr",
+  "main": "main.js",
+  "dependencies": {
+    "mustache": "^3.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
