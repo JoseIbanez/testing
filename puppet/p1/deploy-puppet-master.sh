@@ -1,6 +1,4 @@
-apt-get install joe
-
-cp /vagrant/config/locale /etc/default/locale
+#!/bin/bash
 
 #==================================================
 echo "Configure Additional Repo"
@@ -9,17 +7,24 @@ echo "Configure Additional Repo"
 #sudo cp -a /vagrant/config/sources.list /etc/apt/sources.list
 #dpkg --add-architecture i386
 
-apt-get update -y
 
-echo "Installing deps"
-sudo apt-get install -y puppet
+apt-get -y update && apt-get -y upgrade
+
+echo "Installing pkgs"
+sudo apt-get install puppetmaster-passenger
+
 
 echo "Configuration"
-#cp /vagrant/config/mongod.conf /etc/
-#sudo ln -s /lib/i386-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so.4
-cp -a /vagrant/manifests/ /etc/puppet/manifests
-cp -a /vagrant/modules/   /etc/puppet/modules
 
 
 echo "Restarting"
-sudo service puppet stop
+sudo service apache2 restart
+
+echo "tools"
+
+puppet cert list --all
+puppet cert sign --all
+
+
+puppet cert clean hostname
+
