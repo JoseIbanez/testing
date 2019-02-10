@@ -18,8 +18,8 @@
 // Add your MQTT Broker IP address, example:
 //const char* mqtt_server = "192.168.1.144";
 //const char* mqtt_server = "YOUR_MQTT_BROKER_IP_ADDRESS";
-#define MQTT_SERVER      "192.168.1.30"
-#define MQTT_CLIENT_ID   "myESP32_001"
+#define MQTT_SERVER      "192.168.1.20"
+#define MQTT_CLIENT_ID   "myESP32_002"
 #define MQTT_TOPIC_OUT   "esp32/output"
 #define MQTT_TOPIC_TEMP  "esp32/temperature"
 #define MQTT_TOPIC_HUMI  "esp32/humidity"
@@ -144,7 +144,7 @@ void loop() {
     // Uncomment the next line to set temperature in Fahrenheit 
     // (and comment the previous temperature line)
     //temperature = 1.8 * bme.readTemperature() + 32; // Temperature in Fahrenheit
-    temperature = 20;
+    temperature = 21;
 
     // Convert the value to a char array
     char tempString[8];
