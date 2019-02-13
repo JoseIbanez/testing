@@ -28,3 +28,8 @@ puppet cert sign --all
 
 puppet cert clean hostname
 
+
+puppet config print | grep module
+cd /etc/puppet/code
+ln -s /vagrant/modules/ modules
+
