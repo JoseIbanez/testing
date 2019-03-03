@@ -1,0 +1,35 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "ubuntu/bionic64"
+  #config.vm.box = "bento/centos-7.5"
+
+  config.vm.define "m1" do |m1|
+      #m1.vm.provision "shell", path: "./deploy-01.sh"
+      m1.vm.hostname = "m1"
+      #m1.vm.network "private_network", ip: "172.20.20.11"
+      #m1.vm.network "forwarded_port", guest: 8080, host: 8080
+      config.vm.network "public_network"
+      config.vm.synced_folder "/Volumes/Data/plex", "/mnt/plex"
+  end
+
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "2048"]
+    vb.customize ["modifyvm", :id, "--cpus", "4"]
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+
+    unless File.exist?('/Volumes/Data/plex/secondDisk.vdi')
+      vb.customize ['createhd', '--filename', '/Volumes/Data/plex/secondDisk.vdi', '--variant', 'Fixed', '--size', 100 * 1024]
+    end
+
+    vb.customize ['storageattach', :id,  '--storagectl', 'SCSI', '--port', 2, '--device', 0, '--type', 'hdd', '--medium', '/Volumes/Data/plex/secondDisk.vdi']
+
+  end
+
+
+end

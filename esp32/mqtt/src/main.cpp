@@ -10,9 +10,12 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "secrets.h"
+#include "sleep.h"
 //#include <Wire.h>
 //#include <Adafruit_BME280.h>
 //#include <Adafruit_Sensor.h>
+
+RTC_DATA_ATTR int bootCount1 = 0;
 
 
 // Add your MQTT Broker IP address, example:
@@ -27,6 +30,7 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
+long lastBoot = 0;
 char msg[50];
 int value = 0;
 
@@ -48,7 +52,8 @@ const int ledPin = 1;
 
 
 void setup_wifi() {
-  delay(10);
+  delay(100);
+  int count = 0;
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
@@ -62,6 +67,12 @@ void setup_wifi() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
+    count++;
+    if (count>30) {
+      Serial.println("");
+      Serial.println("WiFi setup failed");
+      return;
+    }
   }
 
   Serial.println("");
@@ -103,26 +114,30 @@ void callback(char* topic, byte* message, unsigned int length) {
 
 void reconnect() {
   // Loop until we're reconnected
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect(MQTT_CLIENT_ID)) {
-      Serial.println("connected");
-      // Subscribe
-      client.subscribe("esp32/output");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
+
+  Serial.print("Attempting MQTT connection...");
+  // Attempt to connect
+  if (client.connect(MQTT_CLIENT_ID)) {
+    Serial.println("connected");
+    // Subscribe
+    client.subscribe("esp32/output");
+  } else {
+    Serial.print("failed, rc=");
+    Serial.print(client.state());
+    Serial.println(" try again in 1 seconds");
+    delay(1000);
   }
+
 }
 
 void setup() {
   Serial.begin(9600);
+  
+  lastBoot = millis();
+  sleep_setup();
+  
   setup_wifi();
+
   client.setServer(MQTT_SERVER, 1883);
   client.setCallback(callback);
   pinMode(ledPin, OUTPUT);
@@ -130,12 +145,28 @@ void setup() {
 
 
 void loop() {
+
+  long now = millis();
+
+  if (now - lastBoot > 30000 || WiFi.status() != WL_CONNECTED) {
+    Serial.println("Going to sleep now");
+    Serial.flush(); 
+    esp_deep_sleep_start();
+    Serial.println("This will never be printed");
+  }
+
   if (!client.connected()) {
     reconnect();
   }
+
+  if (!client.connected()) {
+    sleep(1);
+    return;
+  }
+
   client.loop();
 
-  long now = millis();
+
   if (now - lastMsg > 5000) {
     lastMsg = now;
     
