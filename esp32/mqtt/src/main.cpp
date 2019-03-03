@@ -4,7 +4,6 @@
 
   Read Mac:  
     https://www.arduino.cc/en/Reference/WiFiMACAddress
-    
 *********/
 
 #include <WiFi.h>
@@ -15,13 +14,12 @@
 //#include <Adafruit_BME280.h>
 //#include <Adafruit_Sensor.h>
 
-RTC_DATA_ATTR int bootCount1 = 0;
 
 
 // Add your MQTT Broker IP address, example:
 //const char* mqtt_server = "192.168.1.144";
 //const char* mqtt_server = "YOUR_MQTT_BROKER_IP_ADDRESS";
-#define MQTT_SERVER      "192.168.1.20"
+#define MQTT_SERVER      "192.168.1.30"
 #define MQTT_CLIENT_ID   "myESP32_002"
 #define MQTT_TOPIC_OUT   "esp32/output"
 #define MQTT_TOPIC_TEMP  "esp32/temperature"
@@ -149,10 +147,7 @@ void loop() {
   long now = millis();
 
   if (now - lastBoot > 30000 || WiFi.status() != WL_CONNECTED) {
-    Serial.println("Going to sleep now");
-    Serial.flush(); 
-    esp_deep_sleep_start();
-    Serial.println("This will never be printed");
+    sleep_now();
   }
 
   if (!client.connected()) {
