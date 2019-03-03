@@ -4,5 +4,6 @@
 
 
 void sleep_setup();
+void sleep_now();
 
 #endif
