@@ -20,10 +20,11 @@
 //const char* mqtt_server = "192.168.1.144";
 //const char* mqtt_server = "YOUR_MQTT_BROKER_IP_ADDRESS";
 #define MQTT_SERVER      "192.168.1.30"
-#define MQTT_CLIENT_ID   "myESP32_002"
-#define MQTT_TOPIC_OUT   "esp32/output"
-#define MQTT_TOPIC_TEMP  "esp32/temperature"
-#define MQTT_TOPIC_HUMI  "esp32/humidity"
+#define MQTT_PORT        1883
+#define MQTT_CLIENT_ID   "ESP"
+#define MQTT_TOPIC_OUT   "output"
+#define MQTT_TOPIC_TEMP  "temperature"
+#define MQTT_TOPIC_HUMI  "humidity"
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -31,6 +32,8 @@ long lastMsg = 0;
 long lastBoot = 0;
 char msg[50];
 int value = 0;
+String mac;
+char clientId[20];
 
 //uncomment the following lines if you're using SPI
 /*#include <SPI.h>
@@ -49,7 +52,7 @@ float humidity = 0;
 const int ledPin = 1;
 
 
-void setup_wifi() {
+void wifi_setup() {
   delay(100);
   int count = 0;
   // We start by connecting to a WiFi network
@@ -75,7 +78,12 @@ void setup_wifi() {
 
   Serial.println("");
   Serial.println("WiFi connected");
-  Serial.println("IP address: ");
+
+	mac = WiFi.macAddress();
+  Serial.print("WiFi MAC: ");
+	Serial.println(mac);
+
+  Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 }
 
@@ -109,16 +117,39 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
 }
 
+void set_clientId() {
+
+  strcpy(clientId,MQTT_CLIENT_ID);
+  int length = mac.length();
+  int pos = strlen(clientId);
+
+  for (int i = 0; i < length ; i++) {
+
+    if ((char)mac[i]==':') {
+      continue;
+    }
+
+    if (pos>sizeof(clientId)-2) {
+      break;
+    }
+
+    clientId[pos] = (char)mac[i];
+    pos++;
+  }  
+
+  clientId[pos]=0;
+  Serial.print("ClientId: ");
+  Serial.println(clientId);
+}
 
 void reconnect() {
-  // Loop until we're reconnected
 
   Serial.print("Attempting MQTT connection...");
   // Attempt to connect
-  if (client.connect(MQTT_CLIENT_ID)) {
+  if (client.connect(clientId)) {
     Serial.println("connected");
     // Subscribe
-    client.subscribe("esp32/output");
+    client.subscribe(MQTT_TOPIC_OUT);
   } else {
     Serial.print("failed, rc=");
     Serial.print(client.state());
@@ -128,16 +159,21 @@ void reconnect() {
 
 }
 
+
+
 void setup() {
   Serial.begin(9600);
   
   lastBoot = millis();
   sleep_setup();
   
-  setup_wifi();
+  wifi_setup();
 
-  client.setServer(MQTT_SERVER, 1883);
+  set_clientId();
+
+  client.setServer(MQTT_SERVER, MQTT_PORT);
   client.setCallback(callback);
+
   pinMode(ledPin, OUTPUT);
 }
 
@@ -147,6 +183,7 @@ void loop() {
   long now = millis();
 
   if (now - lastBoot > 30000 || WiFi.status() != WL_CONNECTED) {
+    client.disconnect();
     sleep_now();
   }
 
@@ -164,6 +201,7 @@ void loop() {
 
   if (now - lastMsg > 5000) {
     lastMsg = now;
+    char topic[50];
     
     // Temperature in Celsius
     // temperature = bme.readTemperature();   
@@ -177,7 +215,10 @@ void loop() {
     dtostrf(temperature, 1, 2, tempString);
     Serial.print("Temperature: ");
     Serial.println(tempString);
-    client.publish(MQTT_TOPIC_TEMP, tempString);
+    strcpy(topic,clientId);
+    strcat(topic,"/");
+    strcat(topic,MQTT_TOPIC_TEMP);
+    client.publish(topic, tempString);
 
     //humidity = bme.readHumidity();
     humidity = 50;
@@ -187,6 +228,9 @@ void loop() {
     dtostrf(humidity, 1, 2, humString);
     Serial.print("Humidity: ");
     Serial.println(humString);
-    client.publish(MQTT_TOPIC_HUMI, humString);
+    strcpy(topic,clientId);
+    strcat(topic,"/");
+    strcat(topic,MQTT_TOPIC_HUMI);
+    client.publish(topic, humString);
   }
 }
