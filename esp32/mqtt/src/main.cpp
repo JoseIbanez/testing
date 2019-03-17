@@ -23,8 +23,10 @@
 #define MQTT_PORT        1883
 #define MQTT_CLIENT_ID   "ESP"
 #define MQTT_TOPIC_OUT   "output"
-#define MQTT_TOPIC_TEMP  "temperature"
-#define MQTT_TOPIC_HUMI  "humidity"
+#define MQTT_TOPIC_TEMP  "temp"
+#define MQTT_TOPIC_HUMI  "humi"
+#define MQTT_TOPIC_MOIS  "mois"
+
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -47,6 +49,8 @@ char clientId[20];
 //Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
 float temperature = 0;
 float humidity = 0;
+float moisture = 0;
+
 
 // LED Pin
 const int ledPin = 1;
@@ -207,30 +211,65 @@ void loop() {
     // temperature = bme.readTemperature();   
     // Uncomment the next line to set temperature in Fahrenheit 
     // (and comment the previous temperature line)
-    //temperature = 1.8 * bme.readTemperature() + 32; // Temperature in Fahrenheit
-    temperature = 21;
 
+    /*
+    //temperature = 1.8 * bme.readTemperature() + 32; // Temperature in Fahrenheit
+    float temperature = 21;
     // Convert the value to a char array
     char tempString[8];
     dtostrf(temperature, 1, 2, tempString);
     Serial.print("Temperature: ");
     Serial.println(tempString);
-    strcpy(topic,clientId);
+    strcpy(topic,"r/");
+    strcat(topic,clientId);
     strcat(topic,"/");
     strcat(topic,MQTT_TOPIC_TEMP);
     client.publish(topic, tempString);
+    */
 
+
+    //moisture = analogRead(A0);
+    float moisture = 0;
+    char moisString[8];
+
+    moisture = analogRead(A0);
+    // Convert the value to a char array
+    dtostrf(moisture, 1, 2, moisString);
+    Serial.print("Moisture: ");
+    Serial.println(moisString);
+    strcpy(topic,"r/");
+    strcat(topic,clientId);
+    strcat(topic,".a0/");
+    strcat(topic,MQTT_TOPIC_MOIS);
+    client.publish(topic, moisString);
+
+
+    moisture = analogRead(A3);
+    // Convert the value to a char array
+    dtostrf(moisture, 1, 2, moisString);
+    Serial.print("Moisture: ");
+    Serial.println(moisString);
+    strcpy(topic,"r/");
+    strcat(topic,clientId);
+    strcat(topic,".a3/");
+    strcat(topic,MQTT_TOPIC_MOIS);
+    client.publish(topic, moisString);
+
+
+    /*
     //humidity = bme.readHumidity();
-    humidity = 50;
+    float humidity = 50;
 
     // Convert the value to a char array
     char humString[8];
     dtostrf(humidity, 1, 2, humString);
     Serial.print("Humidity: ");
     Serial.println(humString);
-    strcpy(topic,clientId);
+    strcpy(topic,"r/");
+    strcat(topic,clientId);
     strcat(topic,"/");
     strcat(topic,MQTT_TOPIC_HUMI);
     client.publish(topic, humString);
+    */
   }
 }
