@@ -21,7 +21,9 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+#include "config.h"
 #include "setup.h"
+
 
 // Update these with values suitable for your network.
 
@@ -32,6 +34,7 @@ PubSubClient client(espClient);
 long lastMsg = 0;
 char msg[50];
 int value = 0;
+long lastBoot = 0;
 char clientId[20];
 
 
@@ -56,56 +59,66 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void reconnect() {
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
+  Serial.print("Attempting MQTT connection...");
 
-    // Attempt to connect
-    if (client.connect(clientId)) {
-      Serial.println("connected");
-      // Once connected, publish an announcement...
-      client.publish("outTopic", "hello world");
-      // ... and resubscribe
-      client.subscribe("inTopic");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
+  // Attempt to connect
+  if (client.connect(clientId)) {
+    Serial.println("connected");
+    // Once connected, publish an announcement...
+    client.publish("MQTT_TOPIC_CALLHOME", "hello world");
+    // ... and resubscribe
+    client.subscribe("MQTT_TOPIC_OUT");
+  } else {
+    Serial.print("failed, rc=");
+    Serial.print(client.state());
+    Serial.println(" try again in 5 seconds");
+    delay(5000);
   }
 }
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
   Serial.begin(115200);
+
+  lastBoot = millis();
+
   setup_wifi();
 
   set_clientId(clientId);
 
-
-  client.setServer(mqtt_server, 1883);
+  client.setServer(MQTT_SERVER, MQTT_PORT);
   client.setCallback(callback);
-
 
 }
 
 void loop() {
 
+  long now = millis();
+
+  if (now - lastBoot > 30000 || WiFi.status() != WL_CONNECTED) {
+    client.disconnect();
+    //sleep_now();
+  }
+
   if (!client.connected()) {
     reconnect();
   }
+
+  if (!client.connected()) {
+    delay(1000);
+    return;
+  }
+
+
   client.loop();
 
-  long now = millis();
   if (now - lastMsg > 2000) {
     lastMsg = now;
     ++value;
     snprintf (msg, 50, "hello world #%ld", value);
     Serial.print("Publish message: ");
     Serial.println(msg);
-    client.publish("outTopic", msg);
+    client.publish("MQTT_TOPIC_CALLHOME", msg);
   }
 }
 
