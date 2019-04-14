@@ -2,6 +2,6 @@
 #define H_GPIO
 
 void setup_gpio();
-int update_gpio(String status);
+void update_gpio(String status);
 
 #endif

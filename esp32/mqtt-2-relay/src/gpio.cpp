@@ -12,19 +12,19 @@ void setup_gpio() {
   relayList[2] = RELAY3;
   relayList[3] = RELAY4;
 
-  int lenght = (sizeof(relayList)/sizeof(*relayList))
+  int length = (sizeof(relayList)/sizeof(*relayList));
 
-  for (int i=0; i < length; i++){
+  for (int i=0; i < length; i++) {
     pinMode(relayList[i], OUTPUT);
   }
 
 }
 
 
-int update_gpio(String status) {
+void update_gpio(String status) {
 
   int pinValue = 0;
-  int lenght = (sizeof(relayList)/sizeof(*relayList))
+  int length = (sizeof(relayList)/sizeof(*relayList));
 
   Serial.println(status);
 
@@ -40,4 +40,7 @@ int update_gpio(String status) {
   }
 
 }
+
+
+
 
