@@ -12,6 +12,7 @@
 #include "sleep.h"
 #include "setup.h"
 #include "config.h"
+#include "gpio.h"
 
 
 WiFiClient espClient;
@@ -21,7 +22,8 @@ long lastBoot = 0;
 char msg[50];
 int value = 0;
 char clientId[20];
-
+int curTime;
+String relayStatus;
 
 
 // callback function
@@ -54,12 +56,13 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
 }
 
+
 ///////
 int parse_cmd(String input) {
 
   char delimiter[] = ";";
   char* ptr;
-  char buf[sizeof(sample)];
+  char buf[4];
 
   #ifdef DEBUG
   Serial.println(input);
@@ -77,14 +80,14 @@ int parse_cmd(String input) {
   ptr = strtok(buf, delimiter);
   if (ptr != NULL) {
     curTime = String(ptr).toInt();
-    //Serial.println("Uptime: " + String(curTime));
+    Serial.println("Uptime: " + String(curTime));
   }
 
   // Get Gpio Status
   ptr = strtok (NULL, delimiter);
   if (ptr != NULL) {
     relayStatus = String(ptr);
-    //Serial.println("Relay status: " + relayStatus);
+    Serial.println("Relay status: " + relayStatus);
   }
 
   // Sanity
@@ -93,7 +96,9 @@ int parse_cmd(String input) {
     relayStatus = "0000";
   }
 
+  return(0);
 }
+
 
 ////////
 int reconnect() {
