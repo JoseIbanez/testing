@@ -12,10 +12,6 @@
 #include "sleep.h"
 #include "setup.h"
 #include "config.h"
-//#include <Wire.h>
-//#include <Adafruit_BME280.h>
-//#include <Adafruit_Sensor.h>
-
 
 
 WiFiClient espClient;
@@ -26,27 +22,9 @@ char msg[50];
 int value = 0;
 char clientId[20];
 
-//uncomment the following lines if you're using SPI
-/*#include <SPI.h>
-#define BME_SCK 18
-#define BME_MISO 19
-#define BME_MOSI 23
-#define BME_CS 5*/
-
-//Adafruit_BME280 bme; // I2C
-//Adafruit_BME280 bme(BME_CS); // hardware SPI
-//Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
-float temperature = 0;
-float humidity = 0;
-float moisture = 0;
 
 
-// LED Pin
-//const int ledPin = 1;
-
-
-
-
+// callback function
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
@@ -76,9 +54,48 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
 }
 
+///////
+int parse_cmd(String input) {
 
+  char delimiter[] = ";";
+  char* ptr;
+  char buf[sizeof(sample)];
 
+  #ifdef DEBUG
+  Serial.println(input);
+  #endif
 
+  //Asking for status ?
+  if ((input == "STATUS") || (input == "S")) {
+    return 0;
+  }
+  
+  
+  input.toCharArray(buf, sizeof(buf));
+
+  // Get TimeOut
+  ptr = strtok(buf, delimiter);
+  if (ptr != NULL) {
+    curTime = String(ptr).toInt();
+    //Serial.println("Uptime: " + String(curTime));
+  }
+
+  // Get Gpio Status
+  ptr = strtok (NULL, delimiter);
+  if (ptr != NULL) {
+    relayStatus = String(ptr);
+    //Serial.println("Relay status: " + relayStatus);
+  }
+
+  // Sanity
+  if (curTime <= 0) {
+    curTime = 0;
+    relayStatus = "0000";
+  }
+
+}
+
+////////
 int reconnect() {
   char topic[50];
 
