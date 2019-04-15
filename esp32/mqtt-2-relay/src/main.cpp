@@ -14,55 +14,30 @@
 #include "config.h"
 #include "gpio.h"
 
+//Geekworm board
+//#define LED_BUILTIN 0
+
+#define DEBUG 1
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastBeacon = 0;
 long lastBoot = 0;
+long lastOrder = 0;
+
 char msg[50];
 int value = 0;
 char clientId[20];
-int curTime;
 String relayStatus;
+int curTime;
 
 
-// callback function
-void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
-  String messageTemp;
-  
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
-    messageTemp += (char)message[i];
-  }
-  Serial.println();
-
-  // Feel free to add more if statements to control more GPIOs with MQTT
-
-  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
-  // Changes the output state according to the message
-  if (String(topic) == MQTT_TOPIC_OUT) {
-    Serial.print("Changing output to ");
-    if(messageTemp == "on"){
-      Serial.println("on");
-      digitalWrite(LED_BUILTIN, HIGH);
-    }
-    else if(messageTemp == "off"){
-      Serial.println("off");
-      digitalWrite(LED_BUILTIN, LOW);
-    }
-  }
-}
-
-
-///////
+// Parse cmd
 int parse_cmd(String input) {
 
   char delimiter[] = ";";
   char* ptr;
-  char buf[4];
+  char buf[15];
 
   #ifdef DEBUG
   Serial.println(input);
@@ -73,13 +48,13 @@ int parse_cmd(String input) {
     return 0;
   }
   
-  
   input.toCharArray(buf, sizeof(buf));
 
   // Get TimeOut
   ptr = strtok(buf, delimiter);
   if (ptr != NULL) {
     curTime = String(ptr).toInt();
+    lastOrder = millis();
     Serial.println("Uptime: " + String(curTime));
   }
 
@@ -97,6 +72,40 @@ int parse_cmd(String input) {
   }
 
   return(0);
+}
+
+
+
+// callback function
+void callback(char* topic, byte* message, unsigned int length) {
+  digitalWrite(LED_BUILTIN, LOW);
+  Serial.print("Message arrived on topic: ");
+  Serial.print(topic);
+  Serial.print(". Message: ");
+  String messageOrder;
+  
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)message[i]);
+    messageOrder += (char)message[i];
+  }
+  Serial.println();
+
+  // Feel free to add more if statements to control more GPIOs with MQTT
+
+  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
+  // Changes the output state according to the message
+  //if (String(topic) == MQTT_TOPIC_OUT) {
+  parse_cmd(messageOrder);
+  update_gpio(relayStatus);
+  //}
+
+  char aTopic[50];    
+  strcpy(aTopic,"a/");
+  strcat(aTopic,clientId);
+  client.publish(aTopic, "ok");
+
+  delay(100);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 
@@ -128,14 +137,16 @@ int reconnect() {
 
 
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
   Serial.begin(9600);
   lastBoot = millis();
-  sleep_setup();  
-  setup_wifi();
-  set_clientId(clientId);
+  sleep_setup();
+  setup_wifi();  
+  set_clientId(clientId,sizeof(clientId));
   client.setServer(MQTT_SERVER, MQTT_PORT);
   client.setCallback(callback);
-  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 
@@ -149,7 +160,7 @@ void loop() {
 
   if (!client.connected()) {
     if(reconnect() < 0) {
-      sleep(1);
+      delay(1000);
       return;
     } 
   }
@@ -165,5 +176,18 @@ void loop() {
     client.publish(topic, "");
   }
 
+  if (curTime > 0) {
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(50);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    //Serial.println(".");
+  }
+
+  if ( curTime > 0   &&   (now - lastOrder) > curTime*1000 ) {
+    curTime = 0;
+    relayStatus = "0000";
+    update_gpio(relayStatus);
+  }
 
 }

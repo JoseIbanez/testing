@@ -39,19 +39,21 @@ void setup_wifi() {
 
 
 
-void set_clientId(char * clientId) {
+void set_clientId(char * clientId, int clientSize) {
 
   strcpy(clientId,MQTT_CLIENT_ID);
+  //Serial.print("Client MAC: ");
+  //Serial.println(mac);
   int length = mac.length();
   int pos = strlen(clientId);
 
   for (int i = 0; i < length ; i++) {
 
-    if ((char)mac[i]==':') {
+    if ((char)mac[i] == ':') {
       continue;
     }
 
-    if (pos>sizeof(clientId)-2) {
+    if (pos > clientSize-2) {
       break;
     }
 
@@ -61,5 +63,6 @@ void set_clientId(char * clientId) {
 
   clientId[pos]=0;
   Serial.print("ClientId: ");
-  Serial.println(clientId);
+  Serial.print(clientId);
+  Serial.println(".");
 }
