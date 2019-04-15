@@ -14,9 +14,9 @@
 
 //#define MQTT_TOPIC_CALLHOME  "callhome"
 
-#define RELAY1 4
-#define RELAY2 5
-#define RELAY3 6
-#define RELAY4 7
+#define RELAY1 13
+#define RELAY2 13
+#define RELAY3 13
+#define RELAY4 13
 
 #endif
