@@ -1,6 +1,6 @@
 /*********
   Rui Santos
-  Complete project details at https://randomnerdtutorials.com
+  Complete project details at 
 
   Read Mac:  
     https://www.arduino.cc/en/Reference/WiFiMACAddress
@@ -14,10 +14,7 @@
 #include "config.h"
 #include "gpio.h"
 
-//Geekworm board
-//#define LED_BUILTIN 0
 
-#define DEBUG 1
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -143,6 +140,7 @@ void setup() {
   lastBoot = millis();
   sleep_setup();
   setup_wifi();  
+  setup_gpio();
   set_clientId(clientId,sizeof(clientId));
   client.setServer(MQTT_SERVER, MQTT_PORT);
   client.setCallback(callback);
@@ -160,7 +158,6 @@ void loop() {
 
   if (!client.connected()) {
     if(reconnect() < 0) {
-      delay(1000);
       return;
     } 
   }
@@ -173,17 +170,18 @@ void loop() {
     char topic[50];    
     strcpy(topic,"b/");
     strcat(topic,clientId);
-    client.publish(topic, "");
+    client.publish(topic, "ok");
   }
 
+  //blink LED_BUILTIN when relays are up
   if (curTime > 0) {
     digitalWrite(LED_BUILTIN, LOW);
     delay(50);
     digitalWrite(LED_BUILTIN, HIGH);
     delay(100);
-    //Serial.println(".");
   }
 
+  // end of time
   if ( curTime > 0   &&   (now - lastOrder) > curTime*1000 ) {
     curTime = 0;
     relayStatus = "0000";
