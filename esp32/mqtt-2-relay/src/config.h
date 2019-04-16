@@ -11,12 +11,18 @@
 #define MQTT_TOPIC_HUMI  "humi"
 #define MQTT_TOPIC_MOIS  "mois"
 
+#define DEBUG 1
 
 //#define MQTT_TOPIC_CALLHOME  "callhome"
 
-#define RELAY1 13
-#define RELAY2 13
-#define RELAY3 13
-#define RELAY4 13
+//Geekworm board
+//#define LED_BUILTIN 0
+
+//relay ports
+#define RELAY1 25
+#define RELAY2 26
+#define RELAY3 27
+#define RELAY4 14
+
 
 #endif
