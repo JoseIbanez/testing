@@ -35,3 +35,6 @@ platformio lib list
 #Compile and load
 platformio run -t upload -t monitor
 
+
+#udev rules
+curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/develop/scripts/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
