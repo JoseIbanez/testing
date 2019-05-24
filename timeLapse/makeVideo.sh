@@ -1,23 +1,24 @@
 #!/bin/bash
 # 20 fps, NikonA300 folder
 
-prefix="DSCN"
+prefix="a300"
+start=1000
 rate="40"
 
 
-start=$1
+path=$1
+prefix=$2
 
-if [ -n "$2" ] ; then
-   rate=$2
-fi
-
-if [ -n "$3" ] ; then
-  prefix=$3
-fi
-
-echo $start
-echo $rate
+echo $path
 echo $prefix
+
+
+rm -rf /tmp/tl/$prefix
+mkdir -p /tmp/tl/$prefix
+cd /tmp/tl/$prefix
+
+find $path -name "$prefix*" | sort | ~/Projects/testing/timeLapse/followNumbers.py 
+
 
 #exit
 
@@ -28,10 +29,11 @@ echo $prefix
 #    ~/Movies/tl-$start.$rate.fps.mp4
 
 
+
 ffmpeg -r $rate \
     -f image2 -s 1920x1080 \
-    -start_number $start -i $prefix%04d.jpg  \
+    -start_number $start -i pic-%04d.jpg  \
     -c:v libx264 -profile:v baseline -level 3.0 \
     -pix_fmt yuv420p \
-    ~/Movies/tl-$start.$rate.fps.mp4
+    ~/Movies/tl-$prefix-$start.$rate.fps.mp4
 
