@@ -1,0 +1,22 @@
+
+# global options
+domain-needed
+bogus-priv
+no-resolv
+filterwin2k
+expand-hosts
+domain={{lab.domain}}
+local=/{{lab.domain}}/
+listen-address=127.0.0.1
+listen-address=192.168.58.10
+
+
+# static DNS assignements
+{% for item in groups['all'] %}
+address=/{{item}}.{{lab.domain}}/{{ hostvars[item].ip }}
+{% endfor %}
+
+{% for item in groups['etcds'] %}
+srv-host=_etcd-server-ssl._tcp,{{item}}.{{lab.domain}},2380
+{% endfor %}
+

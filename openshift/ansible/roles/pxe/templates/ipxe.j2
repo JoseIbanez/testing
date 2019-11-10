@@ -1,0 +1,5 @@
+#!ipxe
+
+kernel http://{{lab.http}}/rhcos-{{os.ver}}-{{os.arc}}-installer-kernel ip=dhcp rd.neednet=1 initrd=http://{{lab.http}}/rhcos-{{os.ver}}-{{os.arc}}-installer-initramfs.img console=tty0 console=ttyS0 coreos.inst=yes coreos.inst.install_dev=sda coreos.inst.image_url=http://{{lab.http}}/rhcos-{{os.ver}}-{{os.arc}}-metal-bios.raw.gz coreos.inst.ignition_url=http://{{lab.http}}/bootstrap.ign  
+initrd http://{{lab.http}}/rhcos-{{os.ver}}-{{os.arc}}-installer-initramfs.img 
+boot

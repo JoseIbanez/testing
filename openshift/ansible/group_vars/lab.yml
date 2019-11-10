@@ -1,0 +1,10 @@
+
+
+lab:
+  domain: os.lab
+  http: 192.168.58.10
+
+os:
+  ver: 4.2.0
+  arc: x86_64
+

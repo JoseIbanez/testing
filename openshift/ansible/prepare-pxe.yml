@@ -1,0 +1,41 @@
+---
+
+# file: ansible-master.yml
+
+##############################################################################
+# Security Tags
+##############################################################################
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - ./group_vars/lab.yml
+
+
+  tasks:
+
+  - name: "Build hosts file"
+    lineinfile: dest=/etc/hosts regexp=' {{ item }} ' line="{{ hostvars[item].ip }}  {{item}} {{item}}.{{lab.domain}}" state=present
+    with_items: "{{ groups['all'] }}"
+    become: True
+
+  - name: Software requirements (rpm)
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+        - redis
+        - screen 
+        - nano
+        - bind-utils
+        - tcpdump
+    become: True
+
+- hosts: localhost
+  gather_facts: no
+  become: True
+  vars_files:
+    - ./group_vars/lab.yml
+  roles:
+    - pxe
