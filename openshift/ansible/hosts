@@ -1,0 +1,31 @@
+[all]
+master1 ip=192.168.58.51
+master2 ip=192.168.58.52
+master3 ip=192.168.58.53
+worker1 ip=192.168.58.61
+worker2 ip=192.168.58.63
+bst  ip=192.168.58.40
+
+ha1  ip=192.168.58.10
+ha2  ip=192.168.58.11
+
+etcd-1  ip=192.168.58.51
+etcd-2  ip=192.168.58.52
+etcd-3  ip=192.168.58.53
+
+
+
+[masters]
+master1
+master2
+master3
+
+[workers]
+worker1
+worker2
+
+[etcds]
+etcd-1
+etcd-2
+etcd-3
+

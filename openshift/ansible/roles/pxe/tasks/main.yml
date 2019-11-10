@@ -1,0 +1,55 @@
+---
+
+- name: PXE software 
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - dnsmasq
+      - ipxe-bootimgs
+      - nginx
+  become: True
+  
+- name: Create pxe config folder
+  file:
+    path: "{{item}}"
+    owner: root
+    group: root
+    state: directory
+    mode: '755'
+  with_items:
+    - /var/lib/tftpboot
+
+- name: Copy SW to TFTP folder
+  synchronize:
+    src: /usr/share/ipxe/undionly.kpxe
+    dest: /var/lib/tftpboot/undionly.kpxe
+
+- name: Create dnsmasq dns config
+  template:
+    src: dns.conf.j2
+    dest: /etc/dnsmasq.d/dns.conf
+
+- name: Create dnsmasq dhcp config
+  template:
+    src: dhcp.conf.j2
+    dest: /etc/dnsmasq.d/dhcp.conf
+
+- name: Create dnsmasq dhcp config
+  template:
+    src: ipxe.j2
+    dest: /var/lib/tftpboot/pxelinux.0
+  register: result_pxe
+
+- name: Service dnsmasq restart
+  service:
+    name: dnsmasq
+    state: restarted
+  when: result_pxe.changed
+  
+
+- name: Service Nginx start
+  service:
+    name: nginx
+    state: start
+    

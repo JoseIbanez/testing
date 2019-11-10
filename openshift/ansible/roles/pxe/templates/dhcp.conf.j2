@@ -1,0 +1,26 @@
+# DHCP range
+dhcp-range=192.168.58.150,192.168.58.199,1h
+dhcp-lease-max=25
+
+# GW
+dhcp-option=3,192.168.58.1
+
+# DNS
+dhcp-option=6,192.168.58.10
+
+# NTP
+dhcp-option=42,192.168.58.10
+
+
+enable-tftp
+tftp-root=/var/lib/tftpboot
+#tftp-secure
+
+# Legacy PXE
+dhcp-match=set:bios,option:client-arch,0
+dhcp-boot=tag:bios,undionly.kpxe
+
+# iPXE - chainload to matchbox ipxe boot script
+dhcp-userclass=set:ipxe,iPXE
+#dhcp-boot=tag:ipxe,http://192.168.58.10:8080/boot.ipxe
+dhcp-boot=tag:ipxe,pxelinux.0
