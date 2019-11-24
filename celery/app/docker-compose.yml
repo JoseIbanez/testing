@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+
+  redis:
+    image: 'redis:4.0.1-alpine'
+    volumes:
+      - 'redis:/data'
+    networks:
+      - flask-redis-celery
+
+  rabbitmq:
+    image: 'rabbitmq'
+    networks:
+      - flask-redis-celery
+
+
+
+  worker1:
+    build: .
+    command: celery -A t1.tasks1 worker -l info
+    networks:
+      - flask-redis-celery
+  
+  worker2:
+    build: .
+    command: celery -A t2.tasks2 worker -l info
+    networks:
+      - flask-redis-celery
+
+
+
+volumes:
+  redis:
+
+networks:
+    flask-redis-celery:
