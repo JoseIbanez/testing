@@ -17,7 +17,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       m1.vm.network "private_network", type: "dhcp", bridge: "bridge0"
   end
 
-
   config.vm.define "m2" do |m2|
       m2.vm.hostname = "m2"
       m2.vm.network "private_network", type: "dhcp", bridge: "bridge0"
@@ -26,9 +25,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   config.vm.provider :virtualbox do |vb|
-    #vb.customize ["modifyvm", :id, "--memory", "2048"]
-    vb.customize ["modifyvm", :id, "--memory", "4096"]
-    vb.customize ["modifyvm", :id, "--cpus", "2"]
+    vb.customize ["modifyvm", :id, "--memory", "2048"]
+    #vb.customize ["modifyvm", :id, "--memory", "4096"]
+    vb.customize ["modifyvm", :id, "--cpus", "1"]
     #vb.customize ["modifyvm", :id, "--cpuexecutioncap", "70"]
   end
 
