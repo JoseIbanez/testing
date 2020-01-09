@@ -19,3 +19,6 @@ kubectl get services
 kubectl scale deployment/hello-node --replicas=10
 
 kubectl delete service hello-node
+
+
+wget http://172.28.128.5:8080

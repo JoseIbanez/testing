@@ -4,8 +4,8 @@ IPADDR=$(ip a show enp0s8 | grep "inet " | awk '{print $2}' | cut -d / -f1)
 IIFACE="enp0s8"
 
 export INSTALL_K3S_EXEC="  --flannel-iface=${IIFACE} --node-ip=${IPADDR}" 
-export K3S_URL=https://172.28.128.3:6443 
-export K3S_TOKEN="K100b9e88cad425ff134449ef525e8edc7189980007827559d1752844b69cacaeeb::node:4561fdc639dc878ddc00bc010e50e0e6"
+export K3S_URL=https://172.28.128.5:6443 
+export K3S_TOKEN="K10b1097610943a5dfeb54e0abc3f8e4736edad1c1359c27e8b143f8d08dd9d6c5b::server:cd652ec85f2e0457c982ce8db018f816"
 
 curl -sfL https://get.k3s.io |  sh -
 
