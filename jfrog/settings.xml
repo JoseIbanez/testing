@@ -18,8 +18,8 @@
         <profile>
             <id>packaging</id>
             <properties>
-                <keystorePassword>{keystore_password}</keystorePassword>
-                <keystoreLocation>{keystore_location}</keystoreLocation>
+                <keystorePassword>VMware1!</keystorePassword>
+                <keystoreLocation>${user.home}/.m2/package.jks</keystoreLocation>
             </properties>
         </profile>
         <profile>
@@ -35,13 +35,13 @@
                     <snapshots><enabled>false</enabled></snapshots>
                     <id>central</id>
                     <name>central</name>
-                    <url>http://{artifactory-hostname}/artifactory/{release_repository}</url>
+                    <url>http://localhost:8082/artifactory/libs-release</url>
                 </repository>
                 <repository>
                     <snapshots><enabled>true</enabled></snapshots>
                     <id>central-snapshots</id>
                     <name>central-snapshots</name>
-                    <url>http://{artifactory-hostname}/artifactory/{snapshot_repository}</url>
+                    <url>http://localhost:8082/artifactory/libs-snapshot</url>
                 </repository>
             </repositories>
             <pluginRepositories>
@@ -49,18 +49,18 @@
                     <snapshots><enabled>false</enabled></snapshots>
                     <id>central</id>
                     <name>central</name>
-                    <url>http://{artifactory-hostname}/artifactory/{release_repository}</url>
+                    <url>http://localhost:8082/artifactory/libs-release</url>
                 </pluginRepository>
                 <pluginRepository>
                     <snapshots><enabled>true</enabled></snapshots>
                     <id>central-snapshots</id>
                     <name>central-snapshots</name>
-                    <url>http://{artifactory-hostname}/artifactory/{snapshot_repository}</url>
+                    <url>http://localhost:8082/artifactory/libs-snapshot</url>
                 </pluginRepository>
             </pluginRepositories>
             <properties>
-                <releaseRepositoryUrl>http://{artifactory-hostname}/artifactory/{release_repository}</releaseRepositoryUrl>
-                <snapshotRepositoryUrl>http://{artifactory-hostname}/artifactory/{snapshot_repository}</snapshotRepositoryUrl>
+                <releaseRepositoryUrl>http://localhost:8082/artifactory/libs-release</releaseRepositoryUrl>
+                <snapshotRepositoryUrl>http://localhost:8082/artifactory/libs-snapshot</snapshotRepositoryUrl>
             </properties>
         </profile>
         <profile>
