@@ -17,3 +17,12 @@ keytool -importcert -alias _dunesrsa_alias_ -keypass 'VMware1!' -file packageCer
 
 # Export/Backup Certificate
 keytool -exportcert -alias _dunesrsa_alias_ -keystore package.jks -storepass 'VMware1!' -file packageCertExport
+
+
+----------------
+
+
+keytool -genkey -keyalg RSA -keysize 2048 -alias '_dunesrsa_alias_' -keystore package.jks \
+    -storepass 'VMware11' -validity 3650 \
+    -dname 'CN=Project,OU=Department,O=Company,L=City,ST=State,C=XX,emailAddress=administrator@vsphere.local'
+
