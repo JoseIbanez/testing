@@ -1,9 +1,13 @@
 #!/bin/bash
 
-apt install default-jre
-apt install python3.7-minimal 
+apt install -y default-jre
+apt install -y python3.7-minimal python3-pip
 python3.7 -m pip install pip
 python3.7 -m pip install tabula-py
+python3.7 -m pip install luigi
+
+PATH=$PATH:/home/vagrant/.local/bin
+
 
 url="https://www.mscbs.gob.es/profesionales/saludPublica/ccayes/alertasActual/nCov/documentos/Actualizacion_123_COVID-19.pdf"
 
