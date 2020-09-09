@@ -3,7 +3,7 @@
 
 prefix="a300"
 start=1000
-rate="40"
+rate="30"
 
 
 path=$1
@@ -33,7 +33,8 @@ find $path -name "$prefix*" | sort | ~/Projects/testing/timeLapse/followNumbers.
 ffmpeg -r $rate \
     -f image2 -s 1920x1080 \
     -start_number $start -i pic-%04d.jpg  \
-    -c:v libx264 -profile:v baseline -level 3.0 \
+    -c:v libx264 \
+    -profile:v baseline -level 3.0 \
     -pix_fmt yuv420p \
     ~/Movies/tl-$prefix-$start.$rate.fps.mp4
 

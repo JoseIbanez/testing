@@ -22,7 +22,7 @@ keytool -exportcert -alias _dunesrsa_alias_ -keystore package.jks -storepass 'VM
 ----------------
 
 
-keytool -genkey -keyalg RSA -keysize 2048 -alias '_dunesrsa_alias_' -keystore package.jks \
-    -storepass 'VMware11' -validity 3650 \
-    -dname 'CN=Project,OU=Department,O=Company,L=City,ST=State,C=XX,emailAddress=administrator@vsphere.local'
+keytool -storetype JKS -genkey -keyalg RSA -keysize 2048 -alias '_dunesrsa_alias_' -keystore package.jks \
+    -storepass 'VMware1!' -validity 3650 \
+    -dname 'CN=CI,OU=GDC,O=VF,L=Madrid,ST=Madrid,C=ES,emailAddress=administrator@vsphere.local'
 
