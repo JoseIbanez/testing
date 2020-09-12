@@ -5,6 +5,9 @@ apt install -y python3.7-minimal python3-pip
 python3.7 -m pip install pip
 python3.7 -m pip install tabula-py
 python3.7 -m pip install luigi
+python3.7 -m pip install pdfminer.six
+
+
 
 PATH=$PATH:/home/vagrant/.local/bin
 
