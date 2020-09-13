@@ -10,6 +10,7 @@ import traceback
 from datetime import datetime
 import io
 import re
+import sys
 #from six import StringIO
 #from six import BytesIO
 
@@ -22,7 +23,7 @@ from google.cloud import bigquery
 
 PROJECT_ID = 'ibanez-001'
 BQ_DATASET = 'covid19ES_dev'
-BQ_TABLE = 'cases'
+BQ_TABLE = 'cases_t01'
 #CS = storage.Client()
 BQ = bigquery.Client()
 job_config = bigquery.LoadJobConfig()
@@ -37,7 +38,7 @@ def delete_rows_by_index(index):
     results = query_job.result()  # Waits for job to complete.
 
 
-def insert_rows_into_bigquery(rows, rows_id):
+def insert_rows_into_bigquery(rows, row_ids):
      #blob = CS.get_bucket(bucket_name).blob(file_name)
      #row = json.loads(blob.download_as_string())
      print('rows: ', rows)
@@ -51,18 +52,45 @@ def insert_rows_into_bigquery(rows, rows_id):
      if errors != []:
           raise BigQueryError(errors)
 
+     return "ok"
+
+def insert_table(rows):
+
+     row_ids = []
+     for item in rows:
+          row_ids.append(item["id"])
+
+
+     #delete_rows_by_index(205)
+     ret = insert_rows_into_bigquery(rows, row_ids)
+
+     return ret
+
+
 
 if __name__ == "__main__":
 
-     rows = [
-          {"date": "2020-10-01",
-           "index": 205,
-           "region_iso":"CLM"},
-          {"date": "2020-10-01",
-           "index": 205,
-           "region_iso":"ES"},
-     ]
-     row_ids = ["205.CM", "205.ES"]
+     #rows = [
+     #     {"date": "2020-10-01",
+     #      "index": 205,
+     #      "region_iso":"CLM"},
+     #     {"date": "2020-10-01",
+     #      "index": 205,
+     #      "region_iso":"ES"},
+     #]
+     #row_ids = ["205.CM", "205.ES"]
+
+     index=sys.argv[1]
+
+
+     with open(f"./data/task-{index}.cases.format.json", "r") as f:
+          rows=json.loads(f.read())
+
+     row_ids = []
+     for item in rows:
+          row_ids.append(item["id"])
+
 
      #delete_rows_by_index(205)
-     insert_rows_into_bigquery(rows, row_ids)
+     ret = insert_rows_into_bigquery(rows, row_ids)
+

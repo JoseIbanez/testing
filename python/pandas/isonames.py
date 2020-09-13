@@ -1,27 +1,26 @@
-return {
-## In the standard, some subdivisions in which the local language (Catalan, Galician or Basque) is the sole official language
-## have the Spanish name in brackets rather than as a separate name. These Spanish names are listed as altnames here.
-  lang = "ca, es, eu, gl", ## administrative languages: es
-## Communities & cities
-  ["AN"] = {name="Andalusia",isoname="Andalucía",lang="es"},
-  ["AR"] = {name="Aragon",isoname="Aragón",lang="es"},
-  ["AS"] = {name="Asturias",isoname="Asturias, Principado de",lang="es"},
-  ["CB"] = {name="Cantabria",lang="es"},
-  ["CL"] = {name="Castile and Leon",isoname="Castilla y León",lang="es"},
-  ["CM"] = {name="Castilla-La Mancha",lang="es"},
-  ["CN"] = {name="Canary Islands",isoname="Canarias",lang="es"},
-  ["CT"] = {name="Catalonia",isoname="Catalunya",lang="ca",altnames={es="Cataluña"}}, ##ca [es]
-  ["EX"] = {name="Extremadura",lang="es"},
-  ["GA"] = {name="Galicia",lang="gl"}, ##gl [es]
-  ["IB"] = {name="Balearic Islands",isoname="Illes Balears",lang="ca",altnames={es="Islas Baleares"}}, ##ca [es]
-  ["MC"] = {name="Murcia",isoname="Murcia, Región de",lang="es",altnames={"Region of Murcia"}},
-  ["MD"] = {name="Community of Madrid",displayname="Madrid",isoname="Madrid, Comunidad de",lang="es"},
-  ["NC"] = {name="Navarre",isonames={eu="Nafarroako Foru Komunitatea",es="Navarra, Comunidad Foral de"},defaultlang="eu"},
-  ["PV"] = {name="Basque Country",isonames={eu="Euskal Herria",es="País Vasco"},defaultlang="eu"},
-  ["RI"] = {name="La Rioja",lang="es"},
-  ["VC"] = {name="Valencian Community",isonames={ca="Valenciana, Comunitat",es="Valenciana, Comunidad"},defaultlang="ca"},
-  ["CE"] = {name="Ceuta",lang="es"},
-  ["ML"] = {name="Melilla",lang="es"},
+
+regions = [
+  {id="AN", name="Andalucía", isoname="Andalucía"},
+  {id="AR", name="Aragón", isoname="Aragón"},
+  {id="AS", name="Asturias"},
+  {id="IB", name="Baleares",isoname="Illes Balears"},
+  {id="CN", name="Canarias", isoname="Canarias"},
+  {id="CB", name="Cantabria"},
+  {id="CM", name="Castilla La Mancha"},
+  {id="CL", name="Castilla y León",isoname="Castilla y León",lang="es"},
+  {id="CT", name="Cataluña"},
+  {id="CE", name="Ceuta",lang="es"},
+  {id="VC", name="C. Valenciana"},
+  {id="EX", name="Extremadura"},
+  {id="GA", name="Galicia"}, 
+  {id="MD", name="Madrid"},
+  {id="ML", name="Melilla"},
+  {id="MC", name="Murcia"},
+  {id="NC", name="Navarra"},
+  {id="PV", name="País Vasco"},
+  {id="RI", name="La Rioja"}
+]
+
 ## Provinces
   ["A"] = {name="Alicante",isonames={ca="Alacant",es="Alicante"},defaultlang="ca"},
   ["AB"] = {name="Albacete",lang="es"},
