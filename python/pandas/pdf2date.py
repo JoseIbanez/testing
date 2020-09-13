@@ -9,7 +9,7 @@ import io
 import re
 import json
 
-def pdfparser(filename):
+def pdfToken(filename):
 
     fp = open(f"./data/{filename}", 'rb')
     rsrcmgr = PDFResourceManager()
@@ -49,7 +49,7 @@ def pdfparser(filename):
     if not date:
         raise RuntimeError("Token not found in pdf. No index, no date!")
 
-    result = re.match("(\d+)\.(\d+)\.(\d+)",date)
+    result = re.match(r"(\d+)\.(\d+)\.(\d+)",date)
     isodate=f"{result.group(3)}-{result.group(2)}-{result.group(1)}"
     print(f"Result, index:{index}, isodate:{isodate}.")
 
@@ -61,5 +61,9 @@ def pdfparser(filename):
     #print(data)
 
 if __name__ == '__main__':
-    ret = pdfparser(sys.argv[1]) 
+
+    ret = pdfToken(sys.argv[1]) 
     print(json.dumps(ret))
+
+    #with open(f"./data/task-{index}.date.json", "w") as f:
+    #    f.write("Purchase Amount: %s" % TotalAmount)

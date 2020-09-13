@@ -1,6 +1,7 @@
 #!/usr/bin/python3.7
 import tabula
 import sys
+import json
 
 def processCasesTable(filename):
 
@@ -42,9 +43,9 @@ def processCasesTable(filename):
 
     conf["filename"]=filename
     print(conf)
-    result = conf.to_json(orient="records")
-    print(result)
-
+    result = json.loads(conf.to_json(orient="records"))
+    #print(result)
+    return result
 
 if __name__ == '__main__':
 
