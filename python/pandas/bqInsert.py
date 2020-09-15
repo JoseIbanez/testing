@@ -22,8 +22,8 @@ from google.cloud import bigquery
 
 
 PROJECT_ID = 'ibanez-001'
-BQ_DATASET = 'covid19ES_dev'
-BQ_TABLE = 'cases_t01'
+BQ_DATASET = 'covid19_es'
+BQ_TABLE = 'cases'
 #CS = storage.Client()
 BQ = bigquery.Client()
 job_config = bigquery.LoadJobConfig()

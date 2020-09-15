@@ -59,10 +59,14 @@ def getConfirmedCases(index,cases,date):
         item["date"]=date["isodate"]
         item["cases_total"]      = case["cases_total"]  
         item["cases_1day"]       = case["cases_1day"]   
-        item["cases_14d"]        = case["cases_14d"]  
+        item["cases_14d"]        = case.get("cases_14d")
         item["cases_14d_ai"]     = case["cases_14d_ai"]  
-        item["symptoms_14d"]     = case["symptoms_14d"]  
-        item["symptoms_14d_ai"]  = case["symptoms_14d_ai"]  
+        item["cases_7d"]        = case.get("cases_7d")
+        item["cases_7d_ai"]     = case.get("cases_7d_ai")  
+        item["symptoms_14d"]     = case.get("symptoms_14d")
+        item["symptoms_14d_ai"]  = case.get("symptoms_14d_ai")  
+        item["symptoms_7d"]     = case.get("symptoms_7d")
+        item["symptoms_7d_ai"]  = case.get("symptoms_7d_ai")  
 
         item["id"] = f"{index}.{item['region_iso']}"
 

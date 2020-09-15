@@ -23,6 +23,9 @@ class GetId(luigi.Task):
 class DownloadPdf(luigi.Task):
     index = luigi.Parameter()
 
+    retry_count = 20
+    retry_delay = 60
+
     def requires(self):
         return GetId(self.index)
 
@@ -130,6 +133,15 @@ class MasterTask(luigi.Task):
 
         with self.output().open('w') as target:
             target.write('OK')
+
+
+class M100Task(luigi.Task):
+
+    def requires(self):
+        for index in range(150,210):
+            yield MasterTask(index)
+
+
 
 if __name__ == '__main__':
     luigi.run
