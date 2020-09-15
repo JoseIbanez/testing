@@ -7,8 +7,8 @@ from google.cloud import bigquery
 client = bigquery.Client()
 
 PROJECT_ID = 'ibanez-001'
-BQ_DATASET = 'covid19ES_dev'
-BQ_TABLE = 'cases_t01'
+BQ_DATASET = 'covid19_es'
+BQ_TABLE = 'cases'
 
 
 # TODO(developer): Set table_id to the ID of the table to create.
@@ -27,9 +27,14 @@ schema = [
     bigquery.SchemaField("cases_14d",     "INTEGER" ),
     bigquery.SchemaField("cases_14d_ai",  "FLOAT" ),
 
-    bigquery.SchemaField("symptoms_14d",     "INTEGER" ),
-    bigquery.SchemaField("symptoms_14d_ai",  "FLOAT" )
+    bigquery.SchemaField("cases_7d",      "INTEGER" ),
+    bigquery.SchemaField("cases_7d_ai",   "FLOAT" ),
 
+    bigquery.SchemaField("symptoms_14d",    "INTEGER" ),
+    bigquery.SchemaField("symptoms_14d_ai", "FLOAT" ),
+
+    bigquery.SchemaField("symptoms_7d",     "INTEGER" ),
+    bigquery.SchemaField("symptoms_7d_ai",  "FLOAT" )
 ]
 
 
