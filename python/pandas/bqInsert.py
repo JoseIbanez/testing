@@ -29,24 +29,24 @@ BQ = bigquery.Client()
 job_config = bigquery.LoadJobConfig()
 
 def delete_rows_by_index(index):
-    query = f"""
+     query = f"""
             DELETE
             FROM `{PROJECT_ID}.{BQ_DATASET}.{BQ_TABLE}`
             WHERE index = {index}
             """
-    query_job = BQ.query(query)
-    results = query_job.result()  # Waits for job to complete.
+     query_job = BQ.query(query)
+     result = query_job.result()  # Waits for job to complete.
+     return result
 
-
-def insert_rows_into_bigquery(rows, row_ids):
+def insert_rows_into_bigquery(table, rows, row_ids):
      #blob = CS.get_bucket(bucket_name).blob(file_name)
      #row = json.loads(blob.download_as_string())
      print('rows: ', rows)
-     table = BQ.dataset(BQ_DATASET).table(BQ_TABLE)
-     errors = BQ.insert_rows_json(table,
-                                   json_rows=rows,
-                                   row_ids=row_ids,
-                                   retry=retry.Retry(deadline=30))
+     bqTable = BQ.dataset(BQ_DATASET).table(table)
+     errors = BQ.insert_rows_json(bqTable,
+                                  json_rows=rows,
+                                  row_ids=row_ids,
+                                  retry=retry.Retry(deadline=30))
 
      print(errors)
      if errors != []:
@@ -54,7 +54,7 @@ def insert_rows_into_bigquery(rows, row_ids):
 
      return "ok"
 
-def insert_table(rows):
+def insert_table(table, rows):
 
      row_ids = []
      for item in rows:
@@ -62,7 +62,7 @@ def insert_table(rows):
 
 
      #delete_rows_by_index(205)
-     ret = insert_rows_into_bigquery(rows, row_ids)
+     ret = insert_rows_into_bigquery(table, rows, row_ids)
 
      return ret
 

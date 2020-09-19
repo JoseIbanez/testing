@@ -3,4 +3,5 @@
 PYTHONPATH=. luigi --module workflow MasterTask  --index=$1
 
 
-#PYTHONPATH=. luigi --module workflow M100Task
+#PYTHONPATH=. luigi --module workflow M100Task --workers 10
+

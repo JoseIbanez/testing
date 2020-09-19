@@ -6,8 +6,12 @@ import json
 import getPdf
 import pdf2date
 import pdf2cases
+import pdf2hospital
 import getCases
 import bqInsert
+
+BQ_TABLE_CASES = "cases"
+BQ_TABLE_HOSPITAL = "hospital"
 
 class GetId(luigi.Task):
     index = luigi.Parameter()
@@ -56,6 +60,25 @@ class CasesProcess(luigi.Task):
         with self.output().open('w') as target:
             target.write(json.dumps(table, sort_keys=True, indent=4))
 
+class HospitalProcess(luigi.Task):
+    index = luigi.Parameter()
+
+    def requires(self):
+        return DownloadPdf(self.index)
+
+    def output(self):
+        return luigi.LocalTarget(f"./data/task-{self.index}.hospital.json")
+
+    def run(self):
+        with self.input().open('r') as infile:
+            filename = infile.read()
+        print("filename: "+filename)
+        table = pdf2hospital.processHospitalTable(filename)
+
+        with self.output().open('w') as target:
+            target.write(json.dumps(table, sort_keys=True, indent=4))
+
+
 class DateProcess(luigi.Task):
     index = luigi.Parameter()
 
@@ -99,6 +122,31 @@ class CasesJson(luigi.Task):
             target.write(json.dumps(result))
 
 
+class HospitalJson(luigi.Task):
+    index = luigi.Parameter()
+
+    def requires(self):
+        return { "hospital": HospitalProcess(self.index), "date": DateProcess(self.index) }
+
+    def output(self):
+        return luigi.LocalTarget(f"./data/task-{self.index}.hospital.format.json")
+
+    def run(self):
+        with self.input()['hospital'].open('r') as infile:
+            hospital = json.loads(infile.read())
+
+        with self.input()['date'].open('r') as infile:
+            date = json.loads(infile.read())
+
+
+        #print("filename: "+filename)
+        result = getCases.getHospital(self.index, hospital, date)
+
+        with self.output().open('w') as target:
+            target.write(json.dumps(result))
+
+
+
 class CasesUpload(luigi.Task):
     index = luigi.Parameter()
 
@@ -113,7 +161,27 @@ class CasesUpload(luigi.Task):
             cases = json.loads(infile.read())
 
         #print("filename: "+filename)
-        result = bqInsert.insert_table(cases)
+        result = bqInsert.insert_table(BQ_TABLE_CASES, cases)
+
+        with self.output().open('w') as target:
+            target.write(result)
+
+
+class HospitalUpload(luigi.Task):
+    index = luigi.Parameter()
+
+    def requires(self):
+        return HospitalJson(self.index)
+
+    def output(self):
+        return luigi.LocalTarget(f"./data/task-{self.index}.hospital.uploaded.txt")
+
+    def run(self):
+        with self.input().open('r') as infile:
+            table = json.loads(infile.read())
+
+        #print("filename: "+filename)
+        result = bqInsert.insert_table(BQ_TABLE_HOSPITAL, table)
 
         with self.output().open('w') as target:
             target.write(result)
@@ -124,7 +192,7 @@ class MasterTask(luigi.Task):
     index = luigi.Parameter()
 
     def requires(self):
-        return [ CasesUpload(self.index) ]
+        return [ CasesUpload(self.index), HospitalUpload(self.index) ]
 
     def output(self):
         return luigi.LocalTarget(f"./data/task-{self.index}.master.txt")

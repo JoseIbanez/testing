@@ -75,6 +75,33 @@ def getConfirmedCases(index,cases,date):
 
     return result
 
+
+def getHospital(index,hospital,date):
+
+    result = []
+    for h in hospital:
+        item={}
+        item["index"]=index
+        item["region_name"]= h["region_name"]
+        item["region_iso"]=searchLocation(h["region_name"])
+        item["date"]=date["isodate"]
+
+        item["hospital_total"] = h["hospital_total"]  
+        item["hospital_7d"]    = h["hospital_7d"]  
+        item["icu_total"]      = h["icu_total"]  
+        item["icu_7d"]         = h["icu_7d"]  
+        item["death_total"]    = h["death_total"]  
+        item["death_7d"]       = h["death_7d"]  
+
+        item["id"] = f"{index}.{item['region_iso']}"
+
+        print(json.dumps(item))
+        result.append(item)
+
+    return result
+
+
+
 if __name__ == '__main__':
 
     index = sys.argv[1]
