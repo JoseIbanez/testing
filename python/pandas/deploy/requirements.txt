@@ -1,0 +1,4 @@
+tabula-py
+luigi
+pdfminer.six
+google-cloud-bigquery
