@@ -3,6 +3,8 @@ import urllib.request
 import sys
 import re
 import json
+import glob
+
 
 PROVINCES = ["Toledo", "Ciudad Real", "Albacete", "Guadalajara", "Cuenca"]
 
@@ -11,12 +13,14 @@ def parseNote(filename):
     f=open(filename,"r")
     html=f.read()
     soup = BeautifulSoup(html,features="html.parser")
-    title=soup.find("div", {"class": "even titulo"}).getText()
-    intro=soup.find("div", {"class": "even entradilla"}).getText()
-    body=soup.find("div", {"class": "even contenido"}).getText()
+    titleObj=soup.find("div", {"class": "even titulo"})
+    title = titleObj.getText() if titleObj else ""
+    #intro=soup.find("div", {"class": "even entradilla"}).getText()
+    bodyObj=soup.find("div", {"class": "even contenido"})
+    body = bodyObj.getText() if bodyObj else ""
 
-    print(f"Title:{title}")
-    m = re.search("Castilla-La Mancha.*confirma.*coronavirus", title)
+    print(f"Title:{title }")
+    m = re.search("Castilla-La Mancha.*(confirma|registra).*coronavirus|(número|nuevos).* contagios", title)
 
     if not m:
         print("No match!")
@@ -42,6 +46,15 @@ def parseNote(filename):
         if len(para) < 10:
             continue
 
+        m = re.search(r". Así", para)
+        if m:
+            print("Double para")
+            newPara=para.split(". Así")
+            paras.append(newPara[0]+".")
+            paras.append("Así "+newPara[1])
+            #raise RuntimeError(f"Double para")
+            continue
+
         # if pending paragraph        
         if prePara:
             #print(f"pre:'{prePara}' para:'{para}'")
@@ -64,7 +77,7 @@ def parseNote(filename):
         #print(json.dumps(ret))
 
         type = ret.get("type")
-        for province in PROVINCES:
+        for province in PROVINCES + ["CLM"]:
             value = ret.get(province)
 
             if not data.get(province):
@@ -80,7 +93,9 @@ def parseNote(filename):
         record.append(item)
 
 
-    print(json.dumps(record))
+    print(json.dumps(record, indent=4))
+
+
 
 def parseParagraph(paraIn):
 
@@ -95,7 +110,9 @@ def parseParagraph(paraIn):
 
 
     # Remove . from numbers, From 12.000 to 12000
-    para = re.sub(r'(\d)\.(\d)', r'\1\2', paraIn)
+    para1 = re.sub(r'(\d)\.(\d)', r'\1\2', paraIn)
+    para  = re.sub("COVID[-\d]*","covid",para1)
+
     print(">"+para+"<")
 
 
@@ -130,6 +147,14 @@ def parseParagraph(paraIn):
         table["type"]="death_1d"
         table["CLM"]=m.group(1)
 
+    m = re.search(r"fin de semana.*(\d+).*fallecimientos.*, ", para)
+    if m:
+        print(f"#death 1d, provinces:{table.get('provinces')}")
+        table["type"]="death_1d"
+        table["CLM"]=m.group(1)
+
+
+
     m = re.search(r"fallecimientos.*inicio.* a (\d+)\.", para)
     if m:
         print(f"#death total, provinces:{table.get('provinces')}")
@@ -163,15 +188,26 @@ def parseParagraph(paraIn):
             table[province]=value            
         
 
-    print(json.dumps(table))
+    print(json.dumps(table, indent=4))
     return table
+
+
+def parseByDate(date):
+    filenameList = glob.glob(f"./notas/{date}*.html")
+
+    for filename in filenameList:
+        parseNote(filename) 
 
 if __name__ == '__main__':
 
     #getLastPages()
 
-    filename = sys.argv[1]
-    parseNote(filename)
+    #filename = sys.argv[1]
+    #parseNote(filename)
+
+    date = sys.argv[1]
+    parseByDate(date)
+
 
     #date = sys.argv[1]
     #getNotesFromDay(date)
