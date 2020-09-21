@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import urllib.request
 import sys
 
-LAST_PAGES = 10
+LAST_PAGES = 20
 
 
 def getLastPages():
@@ -52,7 +52,7 @@ def getNotesFromPage(page, reqDate = None):
 
 if __name__ == '__main__':
 
-    getLastPages()
+    #getLastPages()
 
     #filename = sys.argv[1]
     #getNotesFromPage(filename)
