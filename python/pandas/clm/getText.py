@@ -46,14 +46,24 @@ def parseNote(filename):
         if len(para) < 10:
             continue
 
-        m = re.search(r". Así", para)
+        m = re.search(r"\. Así", para)
         if m:
-            print("Double para")
+            print(f"Double para: >{para}<")
             newPara=para.split(". Así")
             paras.append(newPara[0]+".")
             paras.append("Así "+newPara[1])
             #raise RuntimeError(f"Double para")
             continue
+
+        m = re.search(r"\. El n.mero acumulado", para)
+        if m:
+            print(f"Double para: >{para}<")
+            newPara=para.split(". El n")
+            paras.append(newPara[0]+".")
+            paras.append("El n"+newPara[1])
+            #raise RuntimeError(f"Double para")
+            continue
+
 
         # if pending paragraph        
         if prePara:
@@ -93,19 +103,21 @@ def parseNote(filename):
         record.append(item)
 
 
-    print(json.dumps(record, indent=4))
-
+    #print(json.dumps(record, indent=4))
+    return record
 
 
 def parseParagraph(paraIn):
 
     table = {}
-
     m = re.search(r"Por provincias|en la provincia", paraIn)
     if m:
         table["provinces"] = True
-    else:
-        table["provinces"] = False
+
+    #sociosanitario
+    m = re.search(r"ociosanitario", paraIn)
+    if m:
+        return None
 
 
 
@@ -135,19 +147,26 @@ def parseParagraph(paraIn):
         table["type"]="hospital_current"
         table["CLM"]=m.group(1)
 
+    m = re.search(r"convencional.*hospital.* es (\d+)\.", para)
+    if m:
+        print(f"#pacientes, provinces:{table.get('provinces')}")
+        table["type"]="hospital_current"
+        table["CLM"]=m.group(1)
+
+
     m = re.search(r" (\d+).*Intensivos.*\.", para)
     if m:
         print(f"#uci, provinces:{table.get('provinces')}")
         table["type"]="icu_current"
         table["CLM"]=m.group(1)
 
-    m = re.search(r"24 horas.*(\d+).*fallecimientos.*, ", para)
+    m = re.search(r"24 horas.*(\d+).*fallecimiento.*, ", para)
     if m:
         print(f"#death 1d, provinces:{table.get('provinces')}")
         table["type"]="death_1d"
         table["CLM"]=m.group(1)
 
-    m = re.search(r"fin de semana.*(\d+).*fallecimientos.*, ", para)
+    m = re.search(r"fin de semana.*(\d+).*fallecimiento.*, ", para)
     if m:
         print(f"#death 1d, provinces:{table.get('provinces')}")
         table["type"]="death_1d"
@@ -161,6 +180,11 @@ def parseParagraph(paraIn):
         table["type"]="death_total"
         table["CLM"]=m.group(1)
 
+    m = re.search(r"fallecidos.*inicio.* es (\d+)\.", para)
+    if m:
+        print(f"#death total, provinces:{table.get('provinces')}")
+        table["type"]="death_total"
+        table["CLM"]=m.group(1)
 
 
     if not table.get("type"):
@@ -195,8 +219,15 @@ def parseParagraph(paraIn):
 def parseByDate(date):
     filenameList = glob.glob(f"./notas/{date}*.html")
 
+    table = []
+
     for filename in filenameList:
-        parseNote(filename) 
+        ret = parseNote(filename) 
+        if ret:
+            table = table + ret
+
+    print(json.dumps(table, indent=4))
+    return table
 
 if __name__ == '__main__':
 
