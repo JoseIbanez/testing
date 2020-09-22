@@ -2,8 +2,7 @@ from bs4 import BeautifulSoup
 import urllib.request
 import sys
 
-LAST_PAGES = 20
-
+LAST_PAGES = 3
 
 def getLastPages():
 
