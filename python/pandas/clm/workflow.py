@@ -80,7 +80,7 @@ class CasesUpload(luigi.Task):
         result = bqInsert.insert_table(BQ_TABLE_CLM, cases)
 
         with self.output().open('w') as target:
-            target.write(result)
+            target.write("OK")
 
 
 

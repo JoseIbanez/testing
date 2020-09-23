@@ -7,6 +7,11 @@ import glob
 
 
 PROVINCES = ["Toledo", "Ciudad Real", "Albacete", "Guadalajara", "Cuenca"]
+HOSPITALS = ["Hospital de Toledo",  "Hospital de Talavera de la Reina", 
+             "Hospital de Ciudad Real", "Hospital Mancha Centro", "Hospital de Puertollano", "Hospital de Tomelloso", "Hospital de Valdepeñas", "Hospital de Manzanares", 
+             "Hospital de Guadalajara", 
+             "Hospital de Albacete", "Hospital de Villarrobledo", "Hospital de Hellín",
+             "Hospital de Cuenca"]
 
 
 def parseNote(filename):
@@ -26,73 +31,67 @@ def parseNote(filename):
         print("No match!")
         return
 
-    #get date
+    #get date from file name
     m=re.search(r"(\d+-\d+-\d+)-",filename)
-    if m:
-        isodate = f"{m.group(1)}"
-    else:
-        isodate = None
+    isodate = f"{m.group(1)}" if m else None
 
-    #print(intro)
-    #print(body)
 
     data = {}
+    print(body)
+    print("------")
+    body1 = re.sub(r'(\d)\.(\d)', r'\1\2', body)
+    body2 = re.sub(r"COVID[-\d]*","covid",body1, flags=re.IGNORECASE)
+    body3 = re.sub(r"\.",".\n",body2)
+    body4 = re.sub(r"\n[\t ]+","\n",body3)
+    
+    replaceDict= { "á": "a",
+                   "é": "e",
+                   "í": "i",
+                   "ó": "o",
+                   "ú": "u"
+    }
+    for province in PROVINCES:
+        replaceDict[province] = "#"+province.replace(" ","")
 
-    prePara = None
-    paras = body.split("\n")
-    for para in paras:
-        #print(para)
+    body5 = multiple_replace(replaceDict, body4)
 
-        if len(para) < 10:
-            continue
+    tableType=None
+    tableProvince=None
 
-        m = re.search(r"\. Así", para)
+
+    sent = body5.split("\n")
+    for line in sent:
+
+        print(line)
+
+        m = re.search(r"Recomendaciones", line)
         if m:
-            print(f"Double para: >{para}<")
-            newPara=para.split(". Así")
-            paras.append(newPara[0]+".")
-            paras.append("Así "+newPara[1])
-            #raise RuntimeError(f"Double para")
-            continue
+            print("# END DATA")
+            break
 
-        m = re.search(r"\. El n.mero acumulado", para)
-        if m:
-            print(f"Double para: >{para}<")
-            newPara=para.split(". El n")
-            paras.append(newPara[0]+".")
-            paras.append("El n"+newPara[1])
-            #raise RuntimeError(f"Double para")
-            continue
+        table = parseForType(line)
+        if table:
+            tableType = table
+            tableProvince = None
 
+        table = parseForProvinces(line)
+        if table:
+            tableProvince = table
 
-        # if pending paragraph        
-        if prePara:
-            #print(f"pre:'{prePara}' para:'{para}'")
-            ret = parseParagraph(prePara+" "+para)
-        else:
-            ret = parseParagraph(para)
+        if tableType and tableProvince:
+            ret = {**tableType, **tableProvince}
+            print(json.dumps(ret, indent=4))
+            tableType=None
+            tableProvince=None
 
-        # if not match
-        if not ret:
-            prePara = None
-            continue    
+            #Transpose values
+            type = ret.get("type")
+            for province in PROVINCES + ["CLM"]:
+                value = ret.get(province)
 
-        # if not provinces, only 1st part of paragraph 
-        if ret and not ret.get("provinces"):
-            prePara = para
-            continue
-
-        # full match
-        prePara = None
-        #print(json.dumps(ret))
-
-        type = ret.get("type")
-        for province in PROVINCES + ["CLM"]:
-            value = ret.get(province)
-
-            if not data.get(province):
-                data[province]={}
-            data[province][type]=value
+                if not data.get(province):
+                    data[province]={}
+                data[province][type]=value
 
     record = []
     for province in data:
@@ -107,47 +106,67 @@ def parseNote(filename):
     return record
 
 
-def parseParagraph(paraIn):
+
+
+    return None
+
+
+
+
+def multiple_replace(dict, text):
+    # Create a regular expression  from the dictionary keys
+    regex = re.compile("(%s)" % "|".join(map(re.escape, dict.keys())))
+
+    # For each match, look-up corresponding value in dictionary
+    return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text) 
+
+
+def parseForType(para):
 
     table = {}
-    m = re.search(r"Por provincias|en la provincia", paraIn)
-    if m:
-        table["provinces"] = True
-
-    #sociosanitario
-    m = re.search(r"ociosanitario", paraIn)
-    if m:
-        return None
-
-
-
-    # Remove . from numbers, From 12.000 to 12000
-    para1 = re.sub(r'(\d)\.(\d)', r'\1\2', paraIn)
-    para  = re.sub("COVID[-\d]*","covid",para1)
-
-    print(">"+para+"<")
+    m = re.search(r"provincia", para)
+    table["provinces"] = True if m else False
 
 
     #casos
-    m = re.search(r"confirmado (\d+) nuevos contagios en las últimas 24 horas", para)
+    m = re.search(r"confirmado (\d+) nuevos.*(casos|contagios)", para)
     if m:
         print(f"#1day, provinces:{table.get('provinces')}")
         table["type"]="cases_1d"
         table["CLM"]=m.group(1)
 
-    m = re.search(r"total de casos acumulados.* es (\d+)\.", para)
+    m = re.search(r" (\d+) nuevos.*(casos|contagios).*confirmados", para)
+    if m:
+        print(f"#1day, provinces:{table.get('provinces')}")
+        table["type"]="cases_1d"
+        table["CLM"]=m.group(1)
+
+    m = re.search(r"acumulado.*casos.* (\d+)\.", para)
     if m:
         print(f"#total, provinces:{table.get('provinces')}")
         table["type"]="cases_total"
         table["CLM"]=m.group(1)
 
-    m = re.search(r"hospitalizados.*convencional es (\d+)\.", para)
+    m = re.search(r"casos.*acumulado.* (\d+)\.", para)
+    if m:
+        print(f"#total, provinces:{table.get('provinces')}")
+        table["type"]="cases_total"
+        table["CLM"]=m.group(1)
+
+
+    m = re.search(r"hospital.*convencional.* (\d+)\.", para)
     if m:
         print(f"#pacientes, provinces:{table.get('provinces')}")
         table["type"]="hospital_current"
         table["CLM"]=m.group(1)
 
-    m = re.search(r"convencional.*hospital.* es (\d+)\.", para)
+    m = re.search(r"convencional.*hospital.*(\d+)\.", para)
+    if m:
+        print(f"#pacientes, provinces:{table.get('provinces')}")
+        table["type"]="hospital_current"
+        table["CLM"]=m.group(1)
+
+    m = re.search(r" (\d+) .*hospital.*convencional(\.|,)", para)
     if m:
         print(f"#pacientes, provinces:{table.get('provinces')}")
         table["type"]="hospital_current"
@@ -160,6 +179,14 @@ def parseParagraph(paraIn):
         table["type"]="icu_current"
         table["CLM"]=m.group(1)
 
+    m = re.search(r"Intensivos.* (\d+)\.", para)
+    if m:
+        print(f"#uci, provinces:{table.get('provinces')}")
+        table["type"]="icu_current"
+        table["CLM"]=m.group(1)
+
+
+
     m = re.search(r"24 horas.*(\d+).*fallecimiento.*, ", para)
     if m:
         print(f"#death 1d, provinces:{table.get('provinces')}")
@@ -171,8 +198,6 @@ def parseParagraph(paraIn):
         print(f"#death 1d, provinces:{table.get('provinces')}")
         table["type"]="death_1d"
         table["CLM"]=m.group(1)
-
-
 
     m = re.search(r"fallecimientos.*inicio.* a (\d+)\.", para)
     if m:
@@ -190,13 +215,19 @@ def parseParagraph(paraIn):
     if not table.get("type"):
         return None
 
-    if not table.get("provinces"):
-        return table
+    return table
 
+def parseForProvinces(para):
+
+    table = {}
+
+    m = re.search(r"provincia", para)
+    if not m:
+        return None
 
     # Get provincias
     for province in PROVINCES:
-        m = re.search(province+r"[a-zA-Z ]+(\d+)[a-z ]*[,.y(]", para)
+        m = re.search(getTag(province)+r"[a-zA-Z ]+(\d+)[a-z ]*[,.y(]", para)
         if m:
             match = m.group(0)
             value = m.group(1)
@@ -204,16 +235,18 @@ def parseParagraph(paraIn):
             table[province]=value
             continue
 
-        m = re.search(r"[,y] (\d+)[a-zA-z ]+"+province+"[ ,.y(]", para)
+        m = re.search(r"[,y] (\d+)[a-zA-z ]+"+getTag(province)+"[ ,.y(]", para)
         if m:
             match = m.group(0)
             value = m.group(1)
             print(f"match '{match}', Province:{province}, value:{value}")
             table[province]=value            
         
-
-    print(json.dumps(table, indent=4))
     return table
+
+
+def getTag(text):
+    return "#"+text.replace(" ","")
 
 
 def parseByDate(date):
