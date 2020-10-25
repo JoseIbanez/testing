@@ -38,7 +38,7 @@ def processCasesTable(filename):
 
     if format == 100:
         print(f"Format: {format}")
-        print(conf)    
+        print(conf)
 
         conf.drop([0,1],inplace=True)
         conf.columns=["region_name","ct","c1","inc1","ia14"]
@@ -52,11 +52,22 @@ def processCasesTable(filename):
 
     if format == 185:
         print(f"Format: {format}")
+
+        h_counter=0
+        while (not 'Andalucía' in str(conf.iloc[0][0])):
+            conf.drop([h_counter],inplace=True)
+            h_counter+=1
+            print(conf.iloc[1][0])
+
+
         print(conf)
-        conf.drop([0,1,2,3],inplace=True)
+        #conf.drop([0,1,2,3],inplace=True)
+
+        #print(conf.iloc[0,4])
+
         conf.columns=["region_name","ct","c1","c14","c7","d14","d7"]
 
-        print(conf)        
+        print(conf)
 
         #ccaa = conf.iloc[:, 0]
         #ccaa.columns=['region_name']

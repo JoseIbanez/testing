@@ -20,16 +20,18 @@ def parseNote(filename):
     soup = BeautifulSoup(html,features="html.parser")
     titleObj=soup.find("div", {"class": "even titulo"})
     title = titleObj.getText() if titleObj else ""
-    #intro=soup.find("div", {"class": "even entradilla"}).getText()
+    #introObj=soup.find("div", {"class": "even entradilla"})
+    #intro = introObj.getText() if introObj else ""
     bodyObj=soup.find("div", {"class": "even contenido"})
     body = bodyObj.getText() if bodyObj else ""
 
     print(f"Title:{title }")
     m = re.search("Castilla-La Mancha.*(confirma|registra).*coronavirus|(número|nuevos).* contagios", title)
+    #m2 = re.search("Castilla-La Mancha.*(confirma|registra).*coronavirus|(número|nuevos).* contagios", title)
 
-    if not m:
-        print("No match!")
-        return
+    #if not m:
+    #    print("No match!")
+    #    return
 
     #get date from file name
     m=re.search(r"(\d+-\d+-\d+)-",filename)
