@@ -1,0 +1,7 @@
+
+
+docker run -p 6878:6878 blaiseio/acestream
+
+vlc "http://127.0.0.1:6878/ace/getstream?id=67d5703420b0ce91e3081f328fa3a65f122f643b"
+
+http://192.168.1.116:6878/ace/getstream?id=6a59154c4f8ab0bc2d69327176370fc61dba4827

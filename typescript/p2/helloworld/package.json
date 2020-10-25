@@ -1,0 +1,21 @@
+{
+  "name": "ibanez-helloworld",
+  "version": "1.0.1",
+  "description": "testing",
+  "scripts": {
+    "test": "ls",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com"
+  },
+  "keywords": [
+    "test"
+  ],
+  "author": "Jose Ibanez <ibanez.j@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ibanez-helloworld": "^1.0.0"
+  }
+}
