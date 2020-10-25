@@ -1,0 +1,15 @@
+{
+  "name": "test_typescript",
+  "version": "1.0.0",
+  "description": "Testing typescript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@typescript-eslint/parser": "^2.18.0",
+    "typescript": "^3.7.5"
+  }
+}
