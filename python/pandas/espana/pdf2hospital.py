@@ -3,7 +3,7 @@ import tabula
 import sys
 import json
 import getTable
-from tableMap import getTableMap
+from tableMap import getTableMap, getTableCols
 
 def processHospitalTable(filename):
 
@@ -12,6 +12,7 @@ def processHospitalTable(filename):
     index = getTable.getIdFromFilename(filename)
     tableName = "hospital"
     tableMap = getTableMap(index,tableName)
+    colInt, colFloat = getTableCols(tableName)
 
     # Read pdf into list of DataFrame
     if tableMap.get("template"):
@@ -42,9 +43,11 @@ def processHospitalTable(filename):
         conf["icu_7d"]   =icu[1]
 
 
-    colInt = [ "hospital_total", "hospital_7d", "icu_total", "icu_7d", "death_total", "death_7d" ]
+    #colInt = [ "hospital_total", "hospital_7d", "icu_total", "icu_7d", "death_total", "death_7d" ]
     #Convert to Int
     getTable.cols2int(conf,colInt)
+    #Convert to Float
+    getTable.cols2float(conf,colFloat)
 
 
     print(conf)

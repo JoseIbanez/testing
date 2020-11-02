@@ -2,10 +2,12 @@
 
 import sys
 import json
+from tableMap import getTableMap, getTableCols
 
 
 REGIONS = [
-  {"id":"ES", "name":"ESPAÑA", "isoname":"Andalucía"},  
+  {"id":"ES", "name":"ESPAÑA", "isoname":"España"},  
+  {"id":"ES", "name":"Total general", "isoname":"España"},  
   {"id":"AN", "name":"Andalucía", "isoname":"Andalucía"},
   {"id":"AR", "name":"Aragón", "isoname":"Aragón"},
   {"id":"AS", "name":"Asturias"},
@@ -38,7 +40,7 @@ def searchLocation(in_name):
 
         if name == region["name"]:
             id = region["id"]
-            print(f"Name: {name}, Id:{id}")
+            #print(f"Name: {name}, Id:{id}")
             break
 
     if not id:
@@ -76,26 +78,54 @@ def getConfirmedCases(index,cases,date):
     return result
 
 
-def getHospital(index,hospital,date):
+def prepareBedDict(beds):
+    tableName = "beds"
+    colInt, colFloat = getTableCols(tableName)
+
+    bedDict = {}
+    for b in beds:
+        region= searchLocation(b["region_name"])
+        bedDict[region]={}
+        for c in colInt + colFloat:
+            #print(f"{region} {c}")
+            bedDict[region][c] = b.get(c)
+
+    return bedDict        
+
+
+def getHospital(index,hospital,beds,date):
+
+    bedDict = prepareBedDict(beds)
+
 
     result = []
     for h in hospital:
         item={}
         item["index"]=index
+        region=searchLocation(h["region_name"])
+        item["region_iso"]=region
         item["region_name"]= h["region_name"]
-        item["region_iso"]=searchLocation(h["region_name"])
         item["date"]=date["isodate"]
+        item["id"] = f"{index}.{region}"
 
-        item["hospital_total"] = h["hospital_total"]  
-        item["hospital_7d"]    = h["hospital_7d"]  
-        item["icu_total"]      = h["icu_total"]  
-        item["icu_7d"]         = h["icu_7d"]  
-        item["death_total"]    = h.get("death_total")  
-        item["death_7d"]       = h.get("death_7d")
 
-        item["id"] = f"{index}.{item['region_iso']}"
+        count_h = 0
+        count_b = 0
 
-        print(json.dumps(item))
+        tableName = "hospital"
+        colInt, colFloat = getTableCols(tableName)
+        for c in colInt + colFloat:
+            item[c] = h.get(c)
+            count_h += 1 if not item[c] is None  else 0
+
+        tableName = "beds"
+        colInt, colFloat = getTableCols(tableName)
+        for c in colInt + colFloat:
+            item[c] = bedDict[region][c]
+            count_b += 1 if not item[c] is None else 0
+
+        print(f"{item['id']}, hospital:{count_h}, beds:{count_b}")
+        #print(json.dumps(item))
         result.append(item)
 
     return result
@@ -112,8 +142,15 @@ if __name__ == '__main__':
     with open(f"./data/task-{index}.date.json", 'r') as file:
         date = json.loads(file.read())
 
-    with open(f"./data/task-{index}.cases.json", 'r') as file:
-        cases = json.loads(file.read())
+    #with open(f"./data/task-{index}.cases.json", 'r') as file:
+    #    cases = json.loads(file.read())
 
-    t_cases = getConfirmedCases(index,cases,date)
+    #t_cases = getConfirmedCases(index,cases,date)
 
+    with open(f"./data/task-{index}.hospital.json", 'r') as file:
+        hospital = json.loads(file.read())
+
+    with open(f"./data/task-{index}.beds.json", 'r') as file:
+        beds = json.loads(file.read())
+
+    t_hospital = getHospital(index,hospital,beds,date)

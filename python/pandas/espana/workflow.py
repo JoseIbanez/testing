@@ -7,6 +7,7 @@ import getPdf
 import pdf2date
 import pdf2cases
 import pdf2hospital
+import pdf2beds
 import getCases
 import bqInsert
 
@@ -79,6 +80,26 @@ class HospitalProcess(luigi.Task):
             target.write(json.dumps(table, sort_keys=True, indent=4))
 
 
+class BedsProcess(luigi.Task):
+    index = luigi.Parameter()
+
+    def requires(self):
+        return DownloadPdf(self.index)
+
+    def output(self):
+        return luigi.LocalTarget(f"./data/task-{self.index}.beds.json")
+
+    def run(self):
+        with self.input().open('r') as infile:
+            filename = infile.read()
+        print(f"BedsProcess. Filename:{filename}")
+        table = pdf2beds.processBedsTable(filename)
+
+        with self.output().open('w') as target:
+            target.write(json.dumps(table, sort_keys=True, indent=4))
+
+
+
 class DateProcess(luigi.Task):
     index = luigi.Parameter()
 
@@ -126,7 +147,9 @@ class HospitalJson(luigi.Task):
     index = luigi.Parameter()
 
     def requires(self):
-        return { "hospital": HospitalProcess(self.index), "date": DateProcess(self.index) }
+        return { "hospital": HospitalProcess(self.index),
+                 "beds": BedsProcess(self.index), 
+                 "date": DateProcess(self.index) }
 
     def output(self):
         return luigi.LocalTarget(f"./data/task-{self.index}.hospital.format.json")
@@ -135,12 +158,15 @@ class HospitalJson(luigi.Task):
         with self.input()['hospital'].open('r') as infile:
             hospital = json.loads(infile.read())
 
+        with self.input()['beds'].open('r') as infile:
+            beds = json.loads(infile.read())
+
         with self.input()['date'].open('r') as infile:
             date = json.loads(infile.read())
 
 
         #print("filename: "+filename)
-        result = getCases.getHospital(self.index, hospital, date)
+        result = getCases.getHospital(self.index, hospital, beds, date)
 
         with self.output().open('w') as target:
             target.write(json.dumps(result))
