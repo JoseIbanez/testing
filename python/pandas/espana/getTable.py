@@ -44,6 +44,7 @@ def cols2int(conf,colInt):
     for colName in colInt:
         if (colName in conf.columns):
             print(colName)
+            conf[colName] = conf[colName].str.replace("-","0")
             conf[colName] = conf[colName].str.replace(".","").astype(int)
 
     return
@@ -54,6 +55,7 @@ def cols2float(conf,colFloat):
     for colName in colFloat:
         if (colName in conf.columns):
             print(colName)
+            conf[colName] = conf[colName].str.replace("%","")
             conf[colName] = conf[colName].str.replace(",",".").astype(float)
 
     return
