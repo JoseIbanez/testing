@@ -2,87 +2,58 @@
 import tabula
 import sys
 import json
+import getTable
+from tableMap import getTableMap
 
 def processHospitalTable(filename):
 
+
+    # Get Index & TableMap
+    index = getTable.getIdFromFilename(filename)
+    tableName = "hospital"
+    tableMap = getTableMap(index,tableName)
+
     # Read pdf into list of DataFrame
-    df = tabula.read_pdf(f"./data/{filename}", pages='2')
+    if tableMap.get("template"):
+        print(f"Using template.")
+        df = tabula.read_pdf_with_template(f"./data/{filename}", f"./templates/{tableMap['template']}")
+    else:
+        df = tabula.read_pdf(f"./data/{filename}", pages=tableMap["page"])
 
-    conf=df[0]
-    col0 = conf.columns[0]
-    print("col0:"+col0)
-    if 'SECRETARÍA' in col0 or 'SECRETARIA' in col0:
-        conf=df[1]
+    # Select table in page
+    conf = getTable.checkSize(df,18,len(tableMap["colNames"]))
 
-    conf_len = len(conf.columns)
-    row_len = len(conf.index)
-    print(f"len: {conf_len}, rows: {row_len}")
+    # Remove header
+    getTable.rmHeader(conf)
 
-    if row_len < 20:
-        conf=df[1]
-        conf_len = len(conf.columns)
-        row_len = len(conf.index)
-        print(f"len: {conf_len}, rows: {row_len}")
+    # Rename columns
+    conf.columns=tableMap["colNames"]
 
+    #print(conf)
 
-    print(conf.columns)
+    if ("hospital_g1" in tableMap["colNames"]):
+        hospital = conf["hospital_g1"].str.split(" ",n=1,expand=True)
+        conf["hospital_total"]=hospital[0]
+        conf["hospital_7d"]   =hospital[1]
 
-    format = 0
-    if conf_len == 5:
-        format = 5    
-
-    if conf_len == 7:
-        format = 7    
-
-
-    if format == 5:
-        print(f"Format: {format}")
-        print(conf)    
-
-        conf.drop([0,1,2],inplace=True)
-        conf.columns=["region_name","hospital","icu","dt","d7"]
+    if ("icu_g1" in tableMap["colNames"]):
+        icu = conf["icu_g1"].str.split(" ",n=1,expand=True)
+        conf["icu_total"]=icu[0]
+        conf["icu_7d"]   =icu[1]
 
 
-        hospital = conf["hospital"].str.split(" ",n=1,expand=True)
-        conf["hospital_total"]=hospital[0].str.replace(".","").astype(int)
-        conf["hospital_7d"] =hospital[1].str.replace(".","").astype(int)
-
-        icu = conf["icu"].str.split(" ",n=1,expand=True)
-        conf["icu_total"]=icu[0].str.replace(".","").astype(int)
-        conf["icu_7d"] =icu[1].str.replace(".","").astype(int)
-
-        conf["death_total"]=conf["dt"].str.replace(".","").astype(int)
-        conf["death_7d"]=conf["d7"].str.replace(".","").astype(int)
-
-
-    if format == 7:
-        print(f"Format: {format}")
-        print(conf)    
-
-        conf.drop([0,1,2],inplace=True)
-        conf.columns=["region_name","hospital","icu","dt","d7","pcr_cc","pcr_total"]
-
-
-        hospital = conf["hospital"].str.split(" ",n=1,expand=True)
-        conf["hospital_total"]=hospital[0].str.replace(".","").astype(int)
-        conf["hospital_7d"] =hospital[1].str.replace(".","").astype(int)
-
-        icu = conf["icu"].str.split(" ",n=1,expand=True)
-        conf["icu_total"]=icu[0].str.replace(".","").astype(int)
-        conf["icu_7d"] =icu[1].str.replace(".","").astype(int)
-
-        conf["death_total"]=conf["dt"].str.replace(".","").astype(int)
-        conf["death_7d"]=conf["d7"].str.replace(".","").astype(int)
-
-
-    if format == 0:
-        raise RuntimeError("Table format not detected!")
+    colInt = [ "hospital_total", "hospital_7d", "icu_total", "icu_7d", "death_total", "death_7d" ]
+    #Convert to Int
+    getTable.cols2int(conf,colInt)
 
 
     print(conf)
     result = json.loads(conf.to_json(orient="records"))
     #print(result)
     return result
+
+
+
 
 if __name__ == '__main__':
 

@@ -2,107 +2,66 @@
 import tabula
 import sys
 import json
+import getTable
+from tableMap import getTableMap
+
 
 def processCasesTable(filename):
 
+    # Get Index & TableMap
+    index = getTable.getIdFromFilename(filename)
+    tableName = "cases"
+    tableMap = getTableMap(index,tableName)
+
     # Read pdf into list of DataFrame
-    df = tabula.read_pdf(f"./data/{filename}", pages='1')
+    if tableMap.get("template"):
+        print(f"Using template.")
+        df = tabula.read_pdf_with_template(f"./data/{filename}", f"./templates/{tableMap['template']}")
+    else:
+        df = tabula.read_pdf(f"./data/{filename}", pages=tableMap["page"])
 
-    conf=df[0]
-    col0 = conf.columns[0]
-    print("col0:"+col0)
-    if 'SECRETARÍA' in col0 or 'SECRETARIA' in col0:
-        conf=df[1]
+    # Select table in page
+    conf = getTable.checkSize(df,18,len(tableMap["colNames"]))
 
-    conf_len = len(conf.columns)
-    row_len = len(conf.index)
-    print(f"len: {conf_len}, rows: {row_len}")
+    # Remove header
+    getTable.rmHeader(conf)
 
-    if row_len < 20:
-        conf=df[1]
-        conf_len = len(conf.columns)
-        row_len = len(conf.index)
-        print(f"len: {conf_len}, rows: {row_len}")
+    # Rename columns
+    conf.columns=tableMap["colNames"]
 
+    #print(conf)
+    #conf.columns=["region_name","cases_total","cases_1d","cases_g14","cases_g7","d14","d7"]
 
-    print(conf.columns)
+    print(conf)
 
-    format = 0
-    if conf_len == 5:
-        format = 100
+    if ("cases_g14" in tableMap["colNames"]):
+        c14 = conf["cases_g14"].str.split(" ",n=1,expand=True)
+        conf["cases_14d"]=c14[0]
+        conf["cases_14d_ai"]=c14[1]
 
-    if conf_len == 7:
-        format = 185
-    
-    
+    if ("cases_g7" in tableMap["colNames"]):
+        c7 = conf["cases_g7"].str.split(" ",n=1,expand=True)
+        conf["cases_7d"]=c7[0]
+        conf["cases_7d_ai"]=c7[1]
 
-    if format == 100:
-        print(f"Format: {format}")
-        print(conf)
+    if ("symptoms_g14" in tableMap["colNames"]):
+        s14 = conf["symptoms_g14"].str.split(" ",n=1,expand=True)
+        conf["symptoms_14d"]=s14[0]
+        conf["symptoms_14d_ai"]=s14[1]
 
-        conf.drop([0,1],inplace=True)
-        conf.columns=["region_name","ct","c1","inc1","ia14"]
-
-        conf["cases_total"]=conf["ct"].str.replace(".","").astype(int)
-        conf["cases_1day"]=conf["c1"].str.replace(".","").astype(int)
-
-        conf["cases_14d_ai"]=conf["ia14"].str.replace(",",".").astype(float)
+    if ("symptoms_g7" in tableMap["colNames"]):
+        s7 = conf["symptoms_g7"].str.split(" ",n=1,expand=True)
+        conf["symptoms_7d"]=s7[0]
+        conf["symptoms_7d_ai"]=s7[1]
 
 
+    colInt = [ "cases_total", "cases_1day", "cases_14d", "cases_7d", "symptoms_14d", "symptoms_7d" ]
+    #Convert to Int
+    getTable.cols2int(conf,colInt)
 
-    if format == 185:
-        print(f"Format: {format}")
-
-        h_counter=0
-        while (not 'Andalucía' in str(conf.iloc[0][0])):
-            conf.drop([h_counter],inplace=True)
-            h_counter+=1
-            print(conf.iloc[1][0])
-
-
-        print(conf)
-        #conf.drop([0,1,2,3],inplace=True)
-
-        #print(conf.iloc[0,4])
-
-        conf.columns=["region_name","ct","c1","c14","c7","d14","d7"]
-
-        print(conf)
-
-        #ccaa = conf.iloc[:, 0]
-        #ccaa.columns=['region_name']
-
-        casos_t = conf.iloc[:, 1].str.replace(".","").astype(int)
-        casos_1d = conf.iloc[:, 2].str.replace(".","").str.replace("-","0").astype(int)
-
-        conf["cases_total"]=casos_t
-        conf["cases_1day"]=casos_1d
-
-        c14 = conf.iloc[:, 3].str.split(" ",n=1,expand=True)
-        casos_14d = c14[0].str.replace(".","").astype(int)
-        iac_14d = c14[1].str.replace(",",".").astype(float)
-        conf["cases_14d"]=casos_14d
-        conf["cases_14d_ai"]=iac_14d
-
-
-        c7 = conf.iloc[:, 4].str.split(" ",n=1,expand=True)
-        casos_7d = c7[0].str.replace(".","").astype(int)
-        iac_7d = c7[1].str.replace(",",".").astype(float)
-        conf["cases_7d"]=casos_7d
-        conf["cases_7d_ai"]=iac_7d
-
-
-        s14 = conf.iloc[:, 5].str.split(" ",n=1,expand=True)
-        sintomas_14d = s14[0].str.replace(".","").astype(int)
-        ias_14d = s14[1].str.replace(",",".").astype(float)
-        conf["symptoms_14d"]=sintomas_14d
-        conf["symptoms_14d_ai"]=ias_14d
-
-        s7 = conf.iloc[:, 6].str.split(" ",n=1,expand=True)
-        sintomas_7d = s7[0].str.replace(".","").astype(int)
-        ias_7d = s7[1].str.replace(",",".").astype(float)
-        conf["symptoms_7d"]=sintomas_7d
-        conf["symptoms_7d_ai"]=ias_7d
+    colFloat = [ "cases_14d_ai", "cases_7d_ai", "symptoms_14d_ai", "symptoms_7d_ai" ]
+    #Convert to Float
+    getTable.cols2float(conf,colFloat)
 
 
     #conf["filename"]=filename

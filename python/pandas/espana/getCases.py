@@ -90,8 +90,8 @@ def getHospital(index,hospital,date):
         item["hospital_7d"]    = h["hospital_7d"]  
         item["icu_total"]      = h["icu_total"]  
         item["icu_7d"]         = h["icu_7d"]  
-        item["death_total"]    = h["death_total"]  
-        item["death_7d"]       = h["death_7d"]  
+        item["death_total"]    = h.get("death_total")  
+        item["death_7d"]       = h.get("death_7d")
 
         item["id"] = f"{index}.{item['region_iso']}"
 
