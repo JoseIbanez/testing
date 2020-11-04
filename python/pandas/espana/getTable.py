@@ -55,6 +55,7 @@ def cols2float(conf,colFloat):
     for colName in colFloat:
         if (colName in conf.columns):
             print(colName)
+            #if isinstance(conf[colName],str):
             conf[colName] = conf[colName].str.replace("%","")
             conf[colName] = conf[colName].str.replace(",",".").astype(float)
 
