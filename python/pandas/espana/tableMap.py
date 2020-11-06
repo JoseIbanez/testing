@@ -3,6 +3,26 @@
 
 _tableMap = [
     {
+    "id" : 243,
+    "cases": {
+        "page": 1,
+        "colNames": ["region_name","cases_total","cases_1day","cases_g14","cases_g7","symptoms_g14","symptoms_g7"]
+        },
+    "hospital": {
+        "page": 3,
+        "colNames": [ "region_name", "hospital_g1", "icu_g1", "CCAA2",  "hospital_cur", "hospital_ratio", "icu_cur", "icu_ratio", "hospital_checkin", "hospital_checkout"]
+        },
+    "beds": {
+        "page": 3,
+        "colNames": [ "region_name", "h1", "h2", "ccaa", "hospital_cur", "hospital_ratio", "icu_cur", "icu_ratio", "checkin", "checkout"]
+        },
+    "death": {
+        "page": 5,
+        "colNumber": 3,
+        "colNames": [ "region_name", "death_total", "death_7d"]
+        }
+    },
+    {
     "id" : 242,
     "cases": {
         "page": 1,
