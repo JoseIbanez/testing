@@ -72,7 +72,7 @@ def getConfirmedCases(index,cases,date):
 
         item["id"] = f"{index}.{item['region_iso']}"
 
-        print(json.dumps(item))
+        #print(json.dumps(item))
         result.append(item)
 
     return result
