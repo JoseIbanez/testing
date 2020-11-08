@@ -16,6 +16,8 @@ import sys
 
 from google.api_core import retry
 from google.cloud import bigquery
+
+
 # from google.cloud import firestore
 # from google.cloud import pubsub_v1
 #from google.cloud import storage
@@ -41,14 +43,14 @@ def delete_rows_by_index(index):
 def insert_rows_into_bigquery(table, rows, row_ids):
      #blob = CS.get_bucket(bucket_name).blob(file_name)
      #row = json.loads(blob.download_as_string())
-     print('rows: ', rows)
+     print(f"Insert rows: {len(rows)}")
      bqTable = BQ.dataset(BQ_DATASET).table(table)
      errors = BQ.insert_rows_json(bqTable,
                                   json_rows=rows,
                                   row_ids=row_ids,
                                   retry=retry.Retry(deadline=30))
 
-     print(errors)
+     print(f"BigQuery Errors: {errors}")
      if errors != []:
           raise BigQueryError(errors)
 
