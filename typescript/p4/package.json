@@ -5,15 +5,19 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "ts-node-dev": "^1.0.0",
     "typescript": "^4.0.5"
   },
   "dependencies": {
-    "ibanez-p3": "^1.0.0"
+    "ibanez-p3": "^1.0.0",
+    "ts-node": "^9.0.0"
   }
 }

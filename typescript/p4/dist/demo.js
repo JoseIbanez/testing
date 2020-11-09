@@ -1,9 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = require("ibanez-p3/index");
+import { Greeter } from 'ibanez-p3';
+import { Employee } from 'ibanez-p3';
 /////////////
-//let empObj = new Employee("Steve Jobs", 1);
-//empObj.displayEmployee();
+let empObj = new Employee("Steve Jobs", 1);
+empObj.displayEmployee();
 //empObj.empName="Peter P."
 //empObj.displayEmployee();
-console.log(index_1.Greeter('Carl'));
+console.log(Greeter('Carl & Luis'));
