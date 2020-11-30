@@ -1,5 +1,6 @@
 {
-  "name": "rest",
+  "name": "@jibanezvela/rest",
+  "repository": "git://github.com/jibanezvela/rest.git",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
