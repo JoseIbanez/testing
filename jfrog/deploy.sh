@@ -12,6 +12,7 @@ docker rm artifactory
 
 ## Enterprise version
 
+sudo 
 docker run  -d -p 8081:8081 -p 8082:8082 \
    --name artifactory \
    -v /jfrog/artifactory:/var/opt/jfrog/artifactory \
