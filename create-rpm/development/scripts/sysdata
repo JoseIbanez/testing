@@ -1,0 +1,666 @@
+#!/bin/bash
+################################################################################
+#                                sysdata                                       #
+#                                                                              #
+# Script to collect data about a Linux computer                                #
+#                                                                              #
+# All output of this program is to STDOUT for ease of use in the "Linux Way."  #
+#                                                                              #
+# Change History                                                               #
+# Date        By            Description                                        #
+# 08/04/2006  David Both    Original code.                                     #
+# 08/22/2006  David Both    Added Perormance mode to display only certain      #
+#                           performance data and not configuration data.       #
+# 08/28/2006  David Both    Added code to discriminate /dev/sdx devices for    #
+#                           SATA and SAS.                                      #
+# 08/29/2006  David Both    Modified to look for multiple <vendor>-release     #
+#                           files when getting distribution data.              #
+# 01/16/2008  David Both    Print config files with -a option.                 #
+# 01/16/2008  David Both    Add output for dmidecode.                          #
+# 01/19/2008  David Both    Simplified verbose vs all modes.                   #
+# 05/22/2008  David Both    Added a check for different dmidecode output in    #
+#                           earlier versions of RHEL.                          #
+# 04/01/2010  David Both    Added code to check for HP Fibre Channel HBA and   #
+#                           print useful data.                                 #
+# 04/02/2010  David Both    Minor changes to clean up some things and to add   #
+#                           a few more configuration files to the output.      #
+# 04/03/2010  David Both    Added checks for Physical vs VM under VMWare and   #
+#                           VirtualBox.                                        #
+#                                                                              #
+################################################################################
+################################################################################
+################################################################################
+#  Copyright (C) 2007, 2010  David Both                                        #
+#                                                                              #
+#  This program is free software; you can redistribute it and/or modify        #
+#  it under the terms of the GNU General Public License as published by        #
+#  the Free Software Foundation; either version 2 of the License, or           #
+#  (at your option) any later version.                                         #
+#                                                                              #
+#  This program is distributed in the hope that it will be useful,             #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+#  GNU General Public License for more details.                                #
+#                                                                              #
+#  You should have received a copy of the GNU General Public License           #
+#  along with this program; if not, write to the Free Software                 #
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA   #
+################################################################################
+################################################################################
+################################################################################
+# Functions MUST go here to be "registered"                                    #
+################################################################################
+################################################################################
+
+################################################################################
+# Help                                                                         #
+################################################################################
+help()
+{
+   # Display help
+   echo "sysdata: Collects a great deal of information about a Linux computer."
+   echo "         Collects even more data with options below and -a which"
+   echo "         collects all the data collectible by this program."
+   echo "         Licensed under the GPLV2."
+   echo
+   echo "Syntax: sysdata -[h]|[acdmrv]|[p]"
+   echo "options:"
+   echo "h     Print this help."
+   echo "a     Dump ALL data in verbose mode including selected config files."
+   echo "      This option creates huge amounts of data - it can be three to"
+   echo "      four hundred pages or more depending upon the disk size."
+   echo "c     Print many config files."
+   echo "d     Display detailed disk dump data."
+   echo "m     Display details of kernel modules."
+   echo "p     Display performance and sensor data only. Useful for running"
+   echo "      during performance testing to obtain data during running of."
+   echo "      test cases. Mutually exclusive with most other options."
+   echo "r     Print a list of the installed RPM packages."
+   echo "v     Verbose mode. Displays everything except certain config files,"
+   echo "      kernel module details, some DMI data and disk dump data."
+}
+
+################################################################################
+# Quit nicely with messages as appropriate                                     #
+################################################################################
+Quit()
+{
+   if [ $verbose = 1 ] 
+      then
+      if [ $error = 0 ]
+         then
+         echo "Program terminated normally"
+      else
+         echo "Program terminated with error $error";
+      fi
+   fi
+   exit
+}
+
+################################################################################
+# Gets simple (Y)es (N)o (Q)uit response from user. Loops until                #
+# one of those responses is detected.                                          #
+################################################################################
+ynq()
+{
+   # set the loop test variable. Must be 1 to leave the loop
+   OK=0
+   # loop until we get a good answer and break out
+   while [ $OK = 0 ]
+   do
+      # Print the message
+      echo -n "$message (ynq) "
+      # Now get some input
+      read input
+      # Test the input
+      if [ $input = "yes" ] || [ $input = "y" ]
+         then
+         response="y"
+         OK=1
+      elif [ $input = "no" ] || [ $input = "n" ]
+         then
+         response="n"
+         OK=1
+      elif [ $input = "help" ] || [ $input = "h" ]
+         then
+         help
+      elif [ $input = "q" ] || [ $input = "quit" ]
+         then
+         Quit
+      else
+         # Invalid input
+         echo "INPUT ERROR: Must be y or n or q in lowercase. Please try again."
+      fi
+   done
+}
+
+################################################################################
+# Cat a file to STDOUT if it exists                                            #
+################################################################################
+catfile()
+{
+   if [ -e $1 ] 
+      then
+      # cat the file if it exists
+      cat $1
+   else
+      # indicate the file does not exist
+      echo "No data available. File $1 does not exist."
+   fi
+}
+
+################################################################################
+################################################################################
+# Main program                                                                 #
+################################################################################
+################################################################################
+# Set initial variables
+all=0
+verbose=0
+somethingelse=0
+list=0
+error=0
+badoption=0
+nooption=1 			# No options selected
+ModuleDetails=0			# Print details for each of the kernel modules if 1
+perf=0				# Collect only performance and sensor data for test cases
+config=0			# Print many config files if 1
+rpms=0				# Print the list of installed RPMs
+dump=0				# Print detailed disk dump data
+
+################################################################################
+# Some sanity checks                                                           #
+################################################################################
+if [ $UID != 0 ]; then
+  echo "You must be root to use this utility"
+  exit 1
+fi
+
+################################################################################
+# Process the input options                                                    #
+################################################################################
+# Get the options
+while getopts ":acdhmprv" option; do
+   case $option in
+      h) # display help
+         nooption=0
+         help
+         Quit;;
+      a) # Dump ALL data in verbose mode
+         nooption=0
+         all=1
+         verbose=1;;
+      c) # Display most config files
+         nooption=0
+         config=1;;
+      d) # Display detailed disk dump data
+         nooption=0
+         dump=1;;
+      m) # Display details of the loaded kernel modules
+         nooption=0
+         ModuleDetails=1;;
+      p) # Display only performance and sensor data
+         nooption=0
+         perf=1;;
+      r) # Display list of installed RPM packages
+         nooption=0
+         rpms=1;;
+      v) # Set verbose mode
+         nooption=0
+         verbose=1;;
+     \?) # incorrect option
+         nooption=0
+         badoption=1;;
+   esac
+done
+
+if [ $badoption = 1 ]
+   then
+   echo "ERROR: Invalid option" 
+   help
+   verbose=1
+   error="ID10T"
+   Quit
+fi
+
+################################################################################
+# More sanity checks                                                           #
+################################################################################
+if [ $perf = 1 ]
+then
+   if [ $config = 1 ] || [ $dump = 1 ] || [ $ModuleDetails = 1 ] || [ $rpms = 1 ] || [ $verbose = 1 ] || [ $all = 1 ]
+   then 
+      echo "ERROR: Invalid option combination. Options a, c, d, m, r and v are mutually exclusive" 
+      echo "       with option p." 
+      help
+      verbose=1
+      error="ID10T"
+      Quit
+   fi
+fi
+
+################################################################################
+################################################################################
+# OK here is the meat of this program                                          #
+################################################################################
+################################################################################
+################################################################################
+# Print a header, the date and the hostname for this computer.                 #
+################################################################################
+echo "################################################################################"
+echo "#                              sysdata - System data                           #"
+echo "################################################################################"
+echo -n "Today's date is "
+date
+echo -n "Data is for host $HOSTNAME which is a "
+################################################################################
+# Is this a VirtualBox, VMWare, or Physical Machine.                           #
+# Will need to add checks for other Virtual environments as I can.             #
+################################################################################
+if dmesg | grep -i "VBOX HARDDISK" > /dev/null
+then
+   echo "VM running under VirtualBox."
+elif dmesg | grep -i "vmware" > /dev/null
+then 
+   echo "VM running under VMWare."
+else
+   echo "physical machine."
+fi
+echo
+echo "################################################################################"
+echo "#                         Host System Hardware Data                            #"
+echo "################################################################################"
+echo "################################################################################"
+echo "#                               DMI Information                                #"
+echo "################################################################################"
+# Lets check the dmeidecode capability for -t option 
+dmidecode -t 1 > /dev/null 
+if [ $? = 1 ]
+   then 
+   echo "This version of dmidecode does not support the -t option."
+   echo "Data may not be in type-code sequential order."
+   dmidecode
+else
+   if [ $all = 1 ]
+      then
+      echo "Printing all DMI information in type-code sequential order."
+      # The expression between `` gets a list of all the DMI type codes used on this machine
+      for I in `dmidecode | grep "DMI type" | awk -F "type " '{print $2}'| awk -F \, '{print $1}' | sort -n | uniq`;do 
+         dmidecode -t $I
+      done
+   else 
+   echo "Printing only selected DMI information."
+   for I in 0 1 2 3 4 5 17;do 
+      dmidecode -t $I
+   done
+   fi
+fi
+
+# do not display CPU  and dmesg data if performance option selected 
+if [ $perf = 0 ] 
+   then 
+   echo "################################################################################"
+   echo "#                                 CPU Data                                     #"
+   echo "################################################################################"
+   # Cat the cpuinfo file 
+   catfile "/proc/cpuinfo"
+   echo
+   # only show dmesg log file if in a or v modes
+   if [ $verbose = 1 ] || [ $all = 1 ]
+   then
+      echo "################################################################################"
+      echo "#                              DMESG Log File                                  #"
+      echo "################################################################################"
+      # Cat the dmesg file 
+      catfile "/var/log/dmesg"
+      echo
+   fi
+fi
+
+# Show free memory with totals
+echo "################################################################################"
+echo "#                                Memory Data                                   #"
+echo "################################################################################"
+free -t
+# If verbose, all or performance mode selected, show more memory info from the meminfo file 
+if [ $verbose = 1 ] || [ $perf = 1 ] || [ $all = 1 ] 
+then
+   echo
+   echo "================================================================================"
+   catfile "/proc/meminfo"
+fi
+echo
+
+# Display much data about the hard drives 
+echo "################################################################################"
+echo "#                            Disk Subsystem Data                               #"
+echo "#                                                                              #"
+echo "# The following sections display data pertaining to the local disk subsystems. #"
+echo "#                                                                              #"
+echo "################################################################################"
+echo "################################################################################"
+echo "#                                fdisk data                                    #"
+echo "################################################################################"
+fdisk -l 2>/dev/null
+echo
+echo "################################################################################"
+echo "#                                SMART Data                                    #"
+echo "################################################################################"
+# List the partitions after getting only the real, physical partitions from fdisk 
+for Device in `fdisk -l 2>/dev/null | grep "^Disk" | grep /dev/[sh]d | cut -d " " -f 2 | cut -d ":" -f 1 | sort`
+do
+   echo "################################################################################"
+   echo "                           ******** $Device ********"
+   fdisk -l $Device
+   echo "============================== SMART Data for Disk ============================="
+   # If this is a standard IDE device
+   if [ $Device == "/dev/hd[a-z]" ]
+   then
+      # Get smartctl data
+      smartctl -a $Device
+   # if this is /dev/sdx device and is SAS protocol and therefore is probably SCSI rather than SATA
+   elif smartctl -a $Device | grep SAS 
+   then
+      # Get smartctl data
+      smartctl -a $Device -d scsi
+   # otherwise assume SATA
+   else
+      # Get smartctl data
+      smartctl -a $Device -d ata
+   fi
+done
+echo
+# if there is a return from lvs command, look at logical volume data 
+if lvs 2>/dev/null | grep "LV" >/dev/null
+then
+   # print data about physical volumes, volume groups, and etc.
+   echo "################################################################################"
+   echo "#                           Logical Volume Data                                #"
+   echo "################################################################################"
+   # List physical volume data
+   pvs
+   echo "================================================================================"
+   # List volume group data
+   vgdisplay
+   echo "================================================================================"
+   # List logical volume data
+   lvdisplay
+   
+else
+   echo "Volume Groups NOT Found"
+fi
+echo
+echo "################################################################################"
+echo "#                         Disk Partition Usage Data                            #"
+echo "################################################################################"
+df -hP
+echo
+echo "################################################################################"
+echo "#                           Disk inode Usage Data                              #"
+echo "################################################################################"
+df -iP
+echo
+if [ $all = 1 ]
+then
+   echo "################################################################################"
+   echo "#                         Disk Partition Dump Data                             #"
+   echo "################################################################################"
+   # Identify each disk partition, determine what type it is and display appropriate data
+   for Device in `df -hP | sort`
+   do 
+      if echo $Device | grep ^/dev/
+      then
+         if [ $Device != "/dev/shm" ]
+         then
+            dumpe2fs 2>/dev/null $Device
+            echo "================================================================================"
+         fi
+      fi
+   done
+fi
+echo
+if [ $all = 1 ]
+then
+   # print Fiber Channel HBA info
+   echo "################################################################################"
+   echo "#                         Fiber Channel HBA Data                               #"
+   echo "################################################################################"
+   find /sys -name fwrev -exec echo -n {}": " \; -exec cat {} \;
+   find /sys -name port_name -exec echo -n {}": " \; -exec cat {} \;
+   echo
+fi
+#I/O port data print I/O port data
+echo "################################################################################"
+echo "#                                 I/O Data                                     #"
+echo "################################################################################"
+iostat
+echo
+# print i/o port data if verbose or all mode 
+if [ $verbose = 1 ] || [ $all = 1 ] 
+then
+   echo "================================================================================"
+   echo "I/O Port Data"
+   echo
+   catfile "/proc/ioports"
+   echo
+fi
+# print USB device data if verbose mode
+if [ $verbose = 1 ] || [ $all = 1 ]
+then
+   echo "################################################################################"
+   echo "#                              USB Device Data                                 #"
+   echo "################################################################################"
+   catfile "/proc/bus/usb/devices"
+   echo
+fi
+
+echo "################################################################################"
+echo "#                         Host System Software Data                            #"
+echo "################################################################################"
+echo "################################################################################"
+echo "#                             Linux Release Data                               #"
+echo "################################################################################"
+
+# Be sure we get any and all release files so we can be as generic as possible for different 
+# distributions such as Red Hat, fedora and CentOS.
+for File in `ls /etc/*release`
+do 
+   echo "File name = $File"
+   echo
+   cat $File
+   echo "================================================================================"
+   echo
+done
+uname -a
+echo
+echo "################################################################################"
+echo "#                            Kernel Module Data                                #"
+echo "#                                                                              #"
+echo "# Lists only the currently loaded kernel modules.                              #"
+echo "#                                                                              #"
+echo "################################################################################"
+echo
+for x  in $(/sbin/lsmod | /bin/cut -f1 -d" " 2>/dev/null | /bin/grep -v Module 2>/dev/null | sort -f)
+do
+   if [ $ModuleDetails = 1 ] || [ $all = 1 ]
+   then
+      echo "================================================================================"
+      /sbin/modinfo $x
+   else
+      echo -n "Module name = $x"
+   fi
+   echo
+done
+echo "================================================================================"
+echo
+# Don't do the following items if this is Perf mode 
+if [ $perf = 0 ]
+   then
+   echo "################################################################################"
+   echo "#                            Boot Loader Data                                  #"
+   echo "################################################################################"
+   if [ -f /etc/lilo.conf ]; 
+      then
+      catfile "/etc/lilo.conf"
+   fi
+   if [ -d /boot/grub -a -f /boot/grub/grub.conf -a -f /boot/grub/device.map ]
+   then
+     echo "============================= grub.conf ========================================"
+     catfile "/boot/grub/grub.conf"
+     echo
+     echo "============================= device.map ======================================="
+     catfile "/boot/grub/device.map"
+   fi
+   echo
+   echo "################################################################################"
+   echo "#                        Contents of /etc/sysctl.conf                          #"
+   echo "################################################################################"
+   catfile "/etc/sysctl.conf"
+   echo
+fi
+echo "################################################################################"
+echo "#                         Uptime and Logged on Users                           #"
+echo "################################################################################"
+w
+echo
+echo "################################################################################"
+echo "#                                Process Data                                  #"
+echo "################################################################################"
+ps -ef
+echo
+# Display chkconfig and network configuration data if this is not Performance mode 
+if [ $perf = 0 ]
+then
+   echo "################################################################################"
+   echo "#                    Run Level Script Data from chkconfig                      #"
+   echo "################################################################################"
+   chkconfig --list | sort -f
+   echo
+   echo "################################################################################"
+   echo "#                             Network Interface Data                           #"
+   echo "################################################################################"
+   ifconfig
+   echo
+   echo "################################################################################"
+   echo "#                   Contents of ifcfg network config files                     #"
+   echo "################################################################################"
+   for File in `ls /etc/sysconfig/network-scripts/ifcfg* | sort`
+   do
+      echo "Network config file $File"
+      cat $File
+      echo "================================================================================"
+      echo
+   done
+   echo "################################################################################"
+   echo "#                        Contents of /etc/resolv.conf                          #"
+   echo "################################################################################"
+   catfile "/etc/resolv.conf"
+   echo
+   echo "################################################################################"
+   echo "#                          Contents of /etc/hosts                              #"
+   echo "################################################################################"
+   catfile "/etc/hosts"
+   echo
+   echo "################################################################################"
+   echo "#                    Contents of /etc/sysconfig/network                        #"
+   echo "################################################################################"
+   catfile "/etc/sysconfig/network"
+   echo
+   echo "################################################################################"
+   echo "#                           Routing Information                                #"
+   echo "################################################################################"
+   route
+   echo "================================================================================"
+   route -n
+   echo
+   echo "################################################################################"
+   echo "#                                ARP Table                                     #"
+   echo "################################################################################"
+   arp -v
+   echo "================================================================================"
+   arp -vn
+   echo
+   echo "################################################################################"
+   echo "#                              IPTABLES Data                                   #"
+   echo "################################################################################"
+   echo "#                              Filter Table                                    #"
+   echo "################################################################################"
+   iptables -t filter -nvL
+   echo
+   echo "################################################################################"
+   echo "#                                NAT Table                                     #"
+   echo "################################################################################"
+   iptables -t nat -nvL
+   echo
+   echo "################################################################################"
+   echo "#                               Mangle Table                                   #"
+   echo "################################################################################"
+   iptables -t mangle -nvL
+   echo
+   echo "################################################################################"
+   echo "#                    Contents of /etc/sysconfig/iptables                       #"
+   echo "################################################################################"
+   catfile /etc/sysconfig/iptables
+   echo
+   echo "################################################################################"
+   echo "#                     Contents of /etc/selinux/config                          #"
+   echo "################################################################################"
+   catfile /etc/selinux/config
+   echo
+fi
+if [ $config = 1 ] || [ $all = 1 ]
+then
+   echo "################################################################################"
+   echo "#                           User Accounts and Groups                           #"
+   echo "################################################################################"
+   echo "################################################################################"
+   echo "#                           Contents of /etc/passwd                            #"
+   echo "################################################################################"
+   catfile "/etc/passwd"
+   echo
+   echo "################################################################################"
+   echo "#                           Contents of /etc/group                             #"
+   echo "################################################################################"
+   catfile "/etc/group"
+   echo
+   echo "################################################################################"
+   echo "#                           Contents of /etc/sudoers                           #"
+   echo "################################################################################"
+   catfile "/etc/sudoers"
+   echo
+   echo "################################################################################"
+   echo "#              Contents of Other Miscellaneous Configuration Files             #"
+   echo "################################################################################"
+   echo "################################################################################"
+   echo "#                          Contents of /etc/ntp.conf                           #"
+   echo "################################################################################"
+   catfile "/etc/ntp.conf"
+   echo
+   echo "################################################################################"
+   echo "#                       ssh client and server information                      #"
+   echo "################################################################################"
+   echo "#                        Contents of /etc/ssh/ssh_config                       #"
+   echo "################################################################################"
+   catfile "/etc/ssh/ssh_config"
+   echo
+   echo "################################################################################"
+   echo "#                        Contents of /etc/ssh/sshd_config                      #"
+   echo "################################################################################"
+   catfile "/etc/ssh/sshd_config"
+   echo
+fi
+if [ $rpms = 1 ] || [ $all = 1 ]
+then
+   echo "################################################################################"
+   echo "#                        List of Installed RPM Packages                        #"
+   echo "################################################################################"
+   rpm -qa | tee /tmp/rpmpkgs | sort -f
+   echo "================================================================================"
+   echo -n "Total RPM packages installed = "
+   wc -l "/tmp/rpmpkgs"
+   echo
+fi
+Quit
+exit
+
+
