@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import asyncio
 import time
 import producer
@@ -25,20 +27,22 @@ async def fun2(a,b,result):
 
 
 async def funGen(name,time,value,result):
+
+    if result.get(name+".state") == "done":
+        return
+
     p1.publish(f"{name} running")
+    result[name+".state"] = "running"
     await asyncio.sleep(time)
     result[name] = value
+    result[name+".state"] = "done"
     p1.publish(f"{name} done")
     p1.publish(json.dumps(result))
 
 
-async def main():
-    result = { "c": 0, "d":0 }
-    print('Hello ...')
-    tasks = []
-    tasks.append(fun1(1,2,result))
-    tasks.append(fun2(1,2,result))
-    await asyncio.wait(tasks)
+async def deploy(deployment):
+
+    result = deployment
 
     tasks = []
     tasks.append(funGen("name",1,"es000yr",result))
@@ -59,7 +63,16 @@ async def main():
     await asyncio.wait(tasks)
 
 
-    print('... World!')
+
+
+
+async def main():
+    result1 = { "id":1 }
+    result2 = { "id":2 }
+
+    await deploy(result1)
+    await deploy(result2)
+    await deploy(result1)
 
 
 
