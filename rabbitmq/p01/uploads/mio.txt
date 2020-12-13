@@ -1,0 +1,102 @@
+UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 18:05 ?        00:00:03 /sbin/init
+root         2     0  0 18:05 ?        00:00:00 [kthreadd]
+root         4     2  0 18:05 ?        00:00:00 [kworker/0:0H]
+root         6     2  0 18:05 ?        00:00:00 [mm_percpu_wq]
+root         7     2  0 18:05 ?        00:00:00 [ksoftirqd/0]
+root         8     2  0 18:05 ?        00:00:00 [rcu_sched]
+root         9     2  0 18:05 ?        00:00:00 [rcu_bh]
+root        10     2  0 18:05 ?        00:00:00 [migration/0]
+root        11     2  0 18:05 ?        00:00:00 [watchdog/0]
+root        12     2  0 18:05 ?        00:00:00 [cpuhp/0]
+root        13     2  0 18:05 ?        00:00:00 [cpuhp/1]
+root        14     2  0 18:05 ?        00:00:00 [watchdog/1]
+root        15     2  0 18:05 ?        00:00:00 [migration/1]
+root        16     2  0 18:05 ?        00:00:00 [ksoftirqd/1]
+root        18     2  0 18:05 ?        00:00:00 [kworker/1:0H]
+root        19     2  0 18:05 ?        00:00:00 [kdevtmpfs]
+root        20     2  0 18:05 ?        00:00:00 [netns]
+root        21     2  0 18:05 ?        00:00:00 [rcu_tasks_kthre]
+root        22     2  0 18:05 ?        00:00:00 [kauditd]
+root        24     2  0 18:05 ?        00:00:00 [khungtaskd]
+root        25     2  0 18:05 ?        00:00:00 [oom_reaper]
+root        26     2  0 18:05 ?        00:00:00 [writeback]
+root        27     2  0 18:05 ?        00:00:00 [kcompactd0]
+root        28     2  0 18:05 ?        00:00:00 [ksmd]
+root        29     2  0 18:05 ?        00:00:00 [khugepaged]
+root        30     2  0 18:05 ?        00:00:00 [crypto]
+root        31     2  0 18:05 ?        00:00:00 [kintegrityd]
+root        32     2  0 18:05 ?        00:00:00 [kblockd]
+root        33     2  0 18:05 ?        00:00:00 [ata_sff]
+root        34     2  0 18:05 ?        00:00:00 [md]
+root        35     2  0 18:05 ?        00:00:00 [edac-poller]
+root        36     2  0 18:05 ?        00:00:00 [devfreq_wq]
+root        37     2  0 18:05 ?        00:00:00 [watchdogd]
+root        40     2  0 18:05 ?        00:00:00 [kswapd0]
+root        41     2  0 18:05 ?        00:00:00 [kworker/u5:0]
+root        42     2  0 18:05 ?        00:00:00 [ecryptfs-kthrea]
+root        45     2  0 18:05 ?        00:00:01 [kworker/1:1]
+root        85     2  0 18:05 ?        00:00:00 [kthrotld]
+root        86     2  0 18:05 ?        00:00:00 [acpi_thermal_pm]
+root        87     2  0 18:05 ?        00:00:00 [scsi_eh_0]
+root        88     2  0 18:05 ?        00:00:00 [scsi_tmf_0]
+root        89     2  0 18:05 ?        00:00:00 [scsi_eh_1]
+root        90     2  0 18:05 ?        00:00:00 [scsi_tmf_1]
+root        96     2  0 18:05 ?        00:00:00 [ipv6_addrconf]
+root       105     2  0 18:05 ?        00:00:00 [kstrp]
+root       122     2  0 18:05 ?        00:00:00 [charger_manager]
+root       206     2  0 18:05 ?        00:00:00 [mpt_poll_0]
+root       207     2  0 18:05 ?        00:00:00 [mpt/0]
+root       209     2  0 18:05 ?        00:00:00 [scsi_eh_2]
+root       210     2  0 18:05 ?        00:00:00 [scsi_tmf_2]
+root       213     2  0 18:05 ?        00:00:00 [kworker/1:1H]
+root       214     2  0 18:05 ?        00:00:00 [kworker/0:1H]
+root       290     2  0 18:05 ?        00:00:00 [raid5wq]
+root       342     2  0 18:05 ?        00:00:00 [jbd2/sda1-8]
+root       343     2  0 18:05 ?        00:00:00 [ext4-rsv-conver]
+root       409     1  0 18:05 ?        00:00:00 /lib/systemd/systemd-journald
+root       424     1  0 18:05 ?        00:00:00 /sbin/lvmetad -f
+root       431     2  0 18:05 ?        00:00:00 [iscsi_eh]
+root       432     2  0 18:05 ?        00:00:00 [ib-comp-wq]
+root       433     2  0 18:05 ?        00:00:00 [ib-comp-unb-wq]
+root       434     2  0 18:05 ?        00:00:00 [ib_mcast]
+root       435     2  0 18:05 ?        00:00:00 [ib_nl_sa_wq]
+root       437     2  0 18:05 ?        00:00:00 [rdma_cm]
+root       443     1  0 18:05 ?        00:00:00 /lib/systemd/systemd-udevd
+root       468     2  0 18:05 ?        00:00:00 [iprt-VBoxWQueue]
+systemd+   634     1  0 18:05 ?        00:00:00 /lib/systemd/systemd-networkd
+systemd+   651     1  0 18:05 ?        00:00:00 /lib/systemd/systemd-resolved
+root       771     1  0 18:05 ?        00:00:00 /usr/sbin/cron -f
+syslog     772     1  0 18:05 ?        00:00:00 /usr/sbin/rsyslogd -n
+root       775     1  0 18:05 ?        00:00:00 /usr/bin/lxcfs /var/lib/lxcfs/
+root       789     1  0 18:05 ?        00:00:00 /usr/sbin/irqbalance --foreground
+root       793     1  0 18:05 ?        00:00:00 /lib/systemd/systemd-logind
+root       860     1  0 18:05 ?        00:00:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root       861     1  0 18:05 ?        00:00:00 /usr/lib/accountsservice/accounts-daemon
+daemon     905     1  0 18:05 ?        00:00:00 /usr/sbin/atd -f
+message+   957     1  0 18:05 ?        00:00:00 /usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+root       988     1  0 18:05 ?        00:00:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root      1033     1  0 18:05 ?        00:00:00 /usr/sbin/sshd -D
+root      1152     1  0 18:05 ?        00:00:00 /usr/lib/policykit-1/polkitd --no-debug
+root      1169     1  0 18:05 ttyS0    00:00:00 /sbin/agetty -o -p -- \u --keep-baud 115200,38400,9600 ttyS0 vt220
+root      1212     1  0 18:05 tty1     00:00:00 /sbin/agetty -o -p -- \u --noclear tty1 linux
+root      1238     1  0 18:05 ?        00:00:01 /usr/sbin/VBoxService
+root      2355     2  0 18:05 ?        00:00:00 [kworker/0:4]
+root      2423     1  0 18:05 ?        00:00:20 /usr/bin/containerd
+vagrant   2608     1  0 18:05 ?        00:00:00 /lib/systemd/systemd --user
+vagrant   2609  2608  0 18:05 ?        00:00:00 (sd-pam)
+root      3551     2  0 18:39 ?        00:00:00 [kworker/u4:3]
+root      3646     1  0 18:39 ?        00:00:00 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+www-data  3647  3646  0 18:39 ?        00:00:00 nginx: worker process
+www-data  3648  3646  0 18:39 ?        00:00:00 nginx: worker process
+root      3712     2  0 20:29 ?        00:00:00 [kworker/1:2]
+root      3715  1033  0 20:38 ?        00:00:00 sshd: vagrant [priv]
+vagrant   3805  3715  0 20:38 ?        00:00:00 sshd: vagrant@pts/0
+vagrant   3806  3805  0 20:38 pts/0    00:00:00 -bash
+root      3844     2  0 20:40 ?        00:00:00 [kworker/u4:0]
+root      3845     2  0 20:40 ?        00:00:00 [kworker/0:1]
+vagrant   3858  3806  0 20:44 pts/0    00:00:00 python ./upload.py
+root      3859  1033  0 20:45 ?        00:00:00 sshd: vagrant [priv]
+vagrant   3927  3859  0 20:45 ?        00:00:00 sshd: vagrant@pts/1
+vagrant   3928  3927  0 20:45 pts/1    00:00:00 -bash
+vagrant   3983  3928  0 20:47 pts/1    00:00:00 ps -ef
