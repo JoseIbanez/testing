@@ -7,13 +7,20 @@ import logging
 import time
 import pika
 import sys
+import config
 
 LOGGER = logging.getLogger(__name__)
 
 
 class MyProducter(object):
 
-    def __init__(self, host="localhost", exchange="logs" ):
+    def __init__(self, host=None, exchange="logs" ):
+
+        if not host:
+            host = config.getConfig("rabbitmq.host")
+        
+        print(host)
+
         self.host = host
         self.exchange = exchange
         self.connection = None
@@ -33,7 +40,6 @@ class MyProducter(object):
 
     def disconnect(self):
         self.connection.close()
-
 
     def __del__(self):
         print("Close connection")
