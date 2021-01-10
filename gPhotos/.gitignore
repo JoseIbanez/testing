@@ -1,0 +1,4 @@
+config/
+gphoto_oauth.json
+*.token
+config.json
