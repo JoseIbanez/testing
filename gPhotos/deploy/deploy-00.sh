@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 sudo apt-get -y update
 sudo apt-get install -y screen nano
@@ -15,3 +15,6 @@ source ~/py36-venv/bin/activate
 
 
 pip install gphotospy
+pip install Pillow
+pip install instabot
+
