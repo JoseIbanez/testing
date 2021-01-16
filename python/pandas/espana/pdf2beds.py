@@ -22,10 +22,10 @@ def processBedsTable(filename):
     #    df = tabula.read_pdf(f"./data/{filename}", pages=tableMap["page"])
 
     pos = pdf2pos.pdfBedCoordinates(f"./data/{filename}")
-    print(pos)
+    #print(pos)
     col2str = {'dtype': str}
     df = tabula.read_pdf(f"./data/{filename}", pages=pos["page"], area = pos['area'], pandas_options=col2str)
-    print(df)
+    #print(df)
 
     # Select table in page
     conf = getTable.checkSize(df,18,len(tableMap["colNames"]))
