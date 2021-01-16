@@ -3,7 +3,7 @@
 
 _tableMap = [
      {
-    "id" : 283,
+    "id" : 240,
     "cases": {
         "page": 1,
         "colNames": ["region_name","cases_total","cases_1day","cases_g14","cases_g7","symptoms_g14","symptoms_g7"]
