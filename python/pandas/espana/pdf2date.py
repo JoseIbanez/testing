@@ -14,9 +14,10 @@ def pdfToken(filename):
     fp = open(f"./data/{filename}", 'rb')
     rsrcmgr = PDFResourceManager()
     retstr = io.StringIO()
-    codec = 'utf-8'
+    #codec = 'utf-8'
     laparams = LAParams()
-    device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
+    #device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
+    device = TextConverter(rsrcmgr, retstr, laparams=laparams)
 
     # Create a PDF interpreter object.
     interpreter = PDFPageInterpreter(rsrcmgr, device)
