@@ -9,11 +9,15 @@ sudo apt-get install -y python3.7-venv python3.7-dev libpq-dev
 
 python3.7 -m venv $HOME/py-venv37
 source $HOME/py-venv37/bin/activate
+ls $HOME
 
 pip install --upgrade pip 
 pip install --upgrade setuptools wheel twine
 pip install --upgrade --ignore-installed PyYAML
 
+pip install -r requirements.txt
+
+
 #postgres
 #pip install psycopg2
-pip install psycopg2-binary
+#pip install psycopg2-binary
