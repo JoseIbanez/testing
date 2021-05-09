@@ -6,6 +6,7 @@ import time
 
 from deployments import wrk_deployment
 
+# https://stackoverflow.com/questions/14526249/celery-worker-database-connection-pooling
 
 def post_deployment(type,request,requestor):
 
