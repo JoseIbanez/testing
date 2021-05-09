@@ -4,6 +4,7 @@ import sys
 import json
 import getTable
 from tableMap import getTableMap, getTableCols
+import pdf2pos
 
 def processHospitalTable(filename):
 
@@ -15,11 +16,18 @@ def processHospitalTable(filename):
     colInt, colFloat = getTableCols(tableName)
 
     # Read pdf into list of DataFrame
-    if tableMap.get("template"):
-        print(f"Using template.")
-        df = tabula.read_pdf_with_template(f"./data/{filename}", f"./templates/{tableMap['template']}")
-    else:
-        df = tabula.read_pdf(f"./data/{filename}", pages=tableMap["page"])
+    #if tableMap.get("template"):
+    #    print(f"Using template.")
+    #    df = tabula.read_pdf_with_template(f"./data/{filename}", f"./templates/{tableMap['template']}")
+    #else:
+    #    df = tabula.read_pdf(f"./data/{filename}", pages=tableMap["page"])
+
+    pos = pdf2pos.pdfHospitalCoordinates(f"./data/{filename}")
+    print(pos)
+    col2str = {'dtype': str}
+    df = tabula.read_pdf(f"./data/{filename}", pages=pos["page"], area = pos['area'], pandas_options=col2str)
+    print(df)
+
 
     # Select table in page
     conf = getTable.checkSize(df,18,len(tableMap["colNames"]))

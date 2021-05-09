@@ -26,9 +26,12 @@ def checkSize(df,rows,cols):
     If wrong cols, then stop
     """
 
-    for i in range(0,3):
+    numberTables=len(df)
+
+    for i in range(0,numberTables):
         conf=df[i]
-        print(f"table:{i}, shape:{conf.shape}")
+        print(f"table:{i}/{numberTables}, shape:{conf.shape}")
+        print(conf)
         if (conf.shape[0] >= rows):
             break
 
