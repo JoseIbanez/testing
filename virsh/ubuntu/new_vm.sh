@@ -2,6 +2,9 @@
 
 VMNAME=u04
 IP_ADDR=192.168.122.84
+RAM=2048
+CORES=2
+
 
 
 mkdir -p $HOME/kvm/$VMNAME
@@ -51,7 +54,7 @@ cloud-localds -v --network-config=network-config ./$VMNAME-seed.qcow2 user-data 
 
 virt-install --connect qemu:///system --virt-type kvm \
     --name $VMNAME \
-    --ram 2048 --vcpus=2 \
+    --ram $RAM --vcpus=$CORES \
     --os-type linux --os-variant ubuntu20.04 \
     --disk path=$HOME/kvm/$VMNAME/$VMNAME.qcow2,device=disk \
     --disk path=$HOME/kvm/$VMNAME/$VMNAME-seed.qcow2,device=disk \
