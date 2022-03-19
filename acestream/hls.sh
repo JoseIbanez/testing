@@ -7,7 +7,7 @@ if [ -n "$1" ]; then
   ID=`echo $1 | sed 's@.*//@@'`
 fi
 
-cd /mnt/d1/hls/3231
+cd /mnt/d1/hls/3231/
 rm -f *.ts
 rm -f *.m3u8
 
@@ -21,3 +21,4 @@ ffmpeg \
  -hls_list_size 20 -hls_delete_threshold 3 -hls_flags delete_segments \
  -hls_init_time 4 -hls_time 4 \
  stream.m3u8
+
