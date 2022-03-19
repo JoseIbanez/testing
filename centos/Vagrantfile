@@ -14,22 +14,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #m1.vm.provision "shell", path: "./deploy-01.sh"
       m1.vm.hostname = "m1"
       m1.vm.synced_folder ".", "/vagrant", type: 'virtualbox'
-      m1.vm.network "private_network", ip: "192.168.58.10", virtualbox__intnet: "vboxnet2"
+      m1.vm.network "public_network"
+      #m1.vm.network "private_network", ip: "192.168.58.10", virtualbox__intnet: "vboxnet2"
   end
 
-  config.vm.define "m2" do |m2|
-    #m2.vm.provision "shell", path: "./deploy-01.sh"
-    m2.vm.hostname = "m2"
-    m2.vm.synced_folder ".", "/vagrant", type: 'virtualbox'
-    m2.vm.network "private_network", ip: "192.168.58.20", virtualbox__intnet: "vboxnet2"
-  end
-
-  config.vm.define "m3" do |m3|
-    #m2.vm.provision "shell", path: "./deploy-01.sh"
-    m3.vm.hostname = "m3"
-    m3.vm.synced_folder ".", "/vagrant", type: 'virtualbox'
-    m3.vm.network "private_network", ip: "192.168.58.30", virtualbox__intnet: "vboxnet2"
-  end
 
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", "2048"]
