@@ -1,6 +1,14 @@
 #!/bin/bash
 
-set -e
+
+
+# Check docker image
+DCKID=`docker ps | grep acelink`
+echo "Docker $DCKID"
+if [ -z "$DCKID" ]; then
+  docker run -d --name acelink -p 6878:6878 blaiseio/acelink
+  sleep 5
+fi
 
 
 if [ -n "$1" ]; then
