@@ -1,19 +1,15 @@
 #!/bin/bash
 
 # Check ffmpeg process get PID
-ps -ef | grep ffmpeg.*hls | grep -v grep
-HLSPID=`ps -ef | grep ffmpeg.*hls | grep -v grep | awk '{print $2}'`
-
-# Kill ffmpeg
-echo "kill -9 $HLSPID"
-kill -9 $HLSPID
+screen -ls | grep acelink | cut -d. -f1 | xargs kill
 
 # Kill and rm acelink
+docker ps -aq -f "name=acelink" | xargs -n 1 docker kill
+docker ps -aq -f "name=acelink" | xargs -n 1 docker rm
+
+#Docker
 docker ps
-docker kill acelink
-docker rm   acelink
 
-docker ps
-
-
+#Screen
+screen -ls
 
