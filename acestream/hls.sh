@@ -48,3 +48,7 @@ ffmpeg \
  stream.m3u8
 
 screen -ls
+sleep 1
+ls -l *
+
+test-acestream --port $PORT --duration 5
