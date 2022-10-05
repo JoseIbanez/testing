@@ -37,6 +37,7 @@ def get_stat(stat_url):
     if not resp:
         return None
 
+    print(resp)
     stat = {
         'status': resp.get('status'),
         'peers': resp.get('peers'),
