@@ -31,6 +31,8 @@ cd /mnt/d1/hls/$FOLDER/
 rm -f *.ts
 rm -f *.m3u8
 
+echo $ID  > id
+
 #export ACE_URL="http://127.0.0.1:6878/ace/manifest.m3u8?id=$ID"
 export ACE_URL="http://127.0.0.1:$PORT/ace/getstream?id=$ID"
 
