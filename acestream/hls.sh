@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Client port
 if [ -n "$2" ]; then
   PORT=$2
   FOLDER=$2
@@ -7,8 +8,15 @@ else
   PORT=6878
   FOLDER=3231
 fi
+echo "Client Port: $PORT"
 
-echo "Port: $PORT"
+# Peer port
+if [ -n "$3" ]; then
+  PEERPORT=8621
+else
+  PEERPORT=
+fi
+
 
 # Check screen
 
@@ -16,7 +24,11 @@ echo "Port: $PORT"
 # Check docker image
 DCKID=`docker ps | grep "acelink.$PORT"`
 echo "Docker $DCKID"
-if [ -z "$DCKID" ]; then
+if [ -z "$DCKID" ]&&[ -n "$PEERPORT" ]; then
+  docker run -d --name "acelink.$PORT" -p $PORT:6878 -p $PEERPORT:8621 blaiseio/acelink
+  sleep 5
+
+elif [ -z "$DCKID" ]; then
   docker run -d --name "acelink.$PORT" -p $PORT:6878 blaiseio/acelink
   sleep 5
 fi
