@@ -1,6 +1,15 @@
 
     server {
         listen 8800;
+        port_in_redirect off;
+
+        rewrite ^/l1$ /3231/stream.m3u8 redirect;
+        rewrite ^/l2$ /3232/stream.m3u8 redirect;
+        rewrite ^/p1$ /3241/stream.m3u8 redirect;
+        rewrite ^/p2$ /3242/stream.m3u8 redirect;
+        rewrite ^/p3$ /3243/stream.m3u8 redirect;
+        rewrite ^/f1$ /3251/stream.m3u8 redirect;
+
 
         location / {
             # Cache
@@ -27,6 +36,13 @@
 
             root /mnt/d1/hls/;
         }
+
+        location  ~ \.(html)$ {
+            include /etc/nginx/mime.types;
+            default_type  application/octet-stream;
+            root /mnt/d1/hls/;
+        }
+
 
         location ~ \.(m3u8)$ {
             # Disable cache

@@ -67,7 +67,7 @@ def get_id_from_folder(port):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--id", help="acestream id", default=None)
-    parser.add_argument("--port", help="acestream port", default=6878, type=int)
+    parser.add_argument("-p","--port", help="acestream port", default=6878, type=int)
     parser.add_argument("--duration", help="acestream port", default=1000, type=int)
     args = parser.parse_args()
 
