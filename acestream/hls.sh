@@ -25,11 +25,14 @@ fi
 DCKID=`docker ps | grep "acelink.$PORT"`
 echo "Docker $DCKID"
 if [ -z "$DCKID" ]&&[ -n "$PEERPORT" ]; then
-  docker run -d --name "acelink.$PORT" -p $PORT:6878 -p $PEERPORT:8621 blaiseio/acelink
+  docker run -d --rm --name "acelink.$PORT" -p $PORT:6878 -p $PEERPORT:8621 --cap-add=NET_ADMIN blaiseio/acelink
+  docker exec -t acelink.6878 sh -c "apt-get update; apt-get install -y iproute2" 
+  docker exec -t acelink.6878 sh -c "tc qdisc add dev eth0 root tbf rate 100mbit burst 40mbit latency 400ms"
+  docker exec -t acelink.6878 sh -c "tc qdisc show dev eth0"
   sleep 5
 
 elif [ -z "$DCKID" ]; then
-  docker run -d --name "acelink.$PORT" -p $PORT:6878 blaiseio/acelink
+  docker run -d --rm --name "acelink.$PORT" -p $PORT:6878 blaiseio/acelink
   sleep 5
 fi
 
