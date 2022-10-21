@@ -26,9 +26,9 @@ DCKID=`docker ps | grep "acelink.$PORT"`
 echo "Docker $DCKID"
 if [ -z "$DCKID" ]&&[ -n "$PEERPORT" ]; then
   docker run -d --rm --name "acelink.$PORT" -p $PORT:6878 -p $PEERPORT:8621 --cap-add=NET_ADMIN blaiseio/acelink
-  docker exec -t acelink.6878 sh -c "apt-get update; apt-get install -y iproute2" 
-  docker exec -t acelink.6878 sh -c "tc qdisc add dev eth0 root tbf rate 100mbit burst 40mbit latency 400ms"
-  docker exec -t acelink.6878 sh -c "tc qdisc show dev eth0"
+  docker exec -t acelink.$PORT sh -c "apt-get update; apt-get install -y iproute2" 
+  docker exec -t acelink.$PORT sh -c "tc qdisc add dev eth0 root tbf rate 100mbit burst 40mbit latency 400ms"
+  docker exec -t acelink.$PORT sh -c "tc qdisc show dev eth0"
   sleep 5
 
 elif [ -z "$DCKID" ]; then
@@ -56,7 +56,8 @@ screen -ls | grep "acelink.$PORT" | cut -d. -f1 | xargs -n 1 -r kill
 screen -dm -S "acelink.$PORT" \
 ffmpeg \
  -i $ACE_URL \
- -c copy -map 0 \
+ -map 0 -c copy \
+ -c:a ac3 \
  -f hls \
  -hls_list_size 20 -hls_delete_threshold 3 -hls_flags delete_segments \
  -hls_init_time 4 -hls_time 4 \
