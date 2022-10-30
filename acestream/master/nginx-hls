@@ -11,6 +11,9 @@
         rewrite ^/f1$ /3251/stream.m3u8 redirect;
 
 
+	rewrite ^/(\d+)$ /$1/stream.m3u8 redirect;
+
+
         location / {
             # Cache
             expires 60s;
@@ -70,7 +73,11 @@
             root /mnt/d1/hls/;
         }
 
-
+        error_page 404 /error/custom_404.html;
+        location = /error/ {
+                root /mnt/d1/hls/;
+                internal;
+        }
 
 
     }
