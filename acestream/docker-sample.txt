@@ -1,0 +1,29 @@
+Input #0, mpegts, from 'http://127.0.0.1:6878/ace/getstream?id=75a56863b6fe0407ad4305b4d7ee5643c3923565':
+  Duration: N/A, start: 82210.075733, bitrate: N/A
+  Program 1 
+    Metadata:
+      service_name    : Premier Sports 1 HD UK
+      service_provider: FFmpeg
+  Stream #0:0[0x100]: Video: h264 (High) ([27][0][0][0] / 0x001B), yuv420p(tv, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 90k tbn, 50 tbc
+  Stream #0:1[0x101](eng): Audio: aac (LC) ([15][0][0][0] / 0x000F), 44100 Hz, stereo, fltp, 127 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (copy)
+  Stream #0:1 -> #0:1 (aac (native) -> ac3 (native))
+Press [q] to stop, [?] for help
+Output #0, hls, to 'stream.m3u8':
+  Metadata:
+    encoder         : Lavf58.76.100
+  Stream #0:0: Video: h264 (High) ([27][0][0][0] / 0x001B), yuv420p(tv, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], q=2-31, 25 fps, 25 tbr, 90k tbn, 25 tbc
+  Stream #0:1(eng): Audio: ac3, 44100 Hz, stereo, fltp, 192 kb/s
+    Metadata:
+      encoder         : Lavc58.134.100 ac3
+[hls @ 0x55dccfb83400] Opening 'stream0.ts' for writingtrate=N/A speed=1.66x    
+[hls @ 0x55dccfb83400] Opening 'stream.m3u8.tmp' for writing
+[hls @ 0x55dccfb83400] Opening 'stream1.ts' for writingtrate=N/A speed= 1.3x    
+[hls @ 0x55dccfb83400] Opening 'stream.m3u8.tmp' for writing
+[hls @ 0x55dccfb83400] Opening 'stream2.ts' for writingtrate=N/A speed=1.18x    
+[hls @ 0x55dccfb83400] Opening 'stream.m3u8.tmp' for writing
+[hls @ 0x55dccfb83400] Opening 'stream3.ts' for writingtrate=N/A speed=1.12x    
+[hls @ 0x55dccfb83400] Opening 'stream.m3u8.tmp' for writing
+[hls @ 0x55dccfb83400] Opening 'stream4.ts' for writingtrate=N/A speed=1.11x    
+[hls @ 0x55dccfb83400] Opening 'stream.m3u8.tmp' for writing

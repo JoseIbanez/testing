@@ -6,6 +6,7 @@ import time
 import os.path
 import re
 from pathlib import Path
+import subprocess
 
 
 def get_stat_url(port,id):
@@ -61,19 +62,15 @@ def get_stat(stat_url,port):
 
 def get_id_from_folder(port):
 
-    if port == 6878:
-        port = 3231
 
     with open(f"/mnt/d1/hls/{port}/id", 'r') as file:
         id = file.read().rstrip()
 
     return id
 
+
 def get_age_m3u8(port):
 
-
-    if port == 6878:
-        port = 3231
 
     path=f"/mnt/d1/hls/{port}/stream.m3u8"
 
@@ -83,6 +80,34 @@ def get_age_m3u8(port):
         age = None
 
     return age
+
+
+def check_docker_logs(port):
+
+    process = subprocess.Popen(['docker', 'logs', '--tail' ,'10', f'acelink.{port}'],
+                        stdout=subprocess.PIPE, 
+                        stderr=subprocess.PIPE)
+
+    stdout, stderr = process.communicate()
+
+    ts=None
+    speed=None
+
+    #print(stdout)
+    #print(stderr)
+    result_lines = stderr.decode('utf-8').split('\n')
+
+    for line in result_lines:
+
+        m = re.search(r"stream(\d+)\.ts",line)
+        if m:
+            ts=m.group(1)
+
+        m = re.search(r"speed= *([\d\.]+)x",line)
+        if m:
+            speed=m.group(1) 
+
+    return ts,speed
 
 
 
@@ -99,6 +124,7 @@ def main():
         check_all()
         return
 
+
     check_port(port,duration)
 
 
@@ -112,13 +138,20 @@ def check_port(port,duration):
     for i in range(duration):
         stat = get_stat(stat_url,port)
         age = get_age_m3u8(port)
+        ts,speed = check_docker_logs(port)
 
         if stat:
             stat['age']=age
+            stat['ts']=ts
+            stat['speed']=speed
+
 
         print(stat)
         time.sleep(2)
     
+
+
+
 
 def check_all():
 
@@ -128,18 +161,17 @@ def check_all():
         port = int(m.group(1)) if m else None
 
 
-        if port == 3231:
-            port = 6878
-
-
         id = get_id_from_folder(port)
         stat_url = get_stat_url(port,id)
 
         stat = get_stat(stat_url,port)
         age = get_age_m3u8(port)
+        ts,speed = check_docker_logs(port)
 
         if stat:
             stat['age']=age
+            stat['ts']=ts
+            stat['speed']=speed
 
         print(stat)
 
