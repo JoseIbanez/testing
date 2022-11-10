@@ -25,4 +25,4 @@
         {"path":"dist/p2.cjs.production.min.js",
             "limit":"10 KB"},
         {"path":"dist/p2.esm.js","limit":"10 KB"}],
-    "devDependencies":{"@size-limit/preset-small-lib":"^4.6.2","husky":"^4.3.0","size-limit":"^4.6.2","tsdx":"^0.14.1","tslib":"^2.0.3","typescript":"^4.0.3"}}
+    "devDependencies":{"@size-limit/preset-small-lib":"^4.6.2","husky":"^4.3.8","size-limit":"^4.6.2","tsdx":"^0.14.1","tslib":"^2.0.3","typescript":"^4.0.3"}}
