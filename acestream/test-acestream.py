@@ -62,9 +62,12 @@ def get_stat(stat_url,port):
 
 def get_id_from_folder(port):
 
+    try:
+        with open(f"/mnt/d1/hls/{port}/id", 'r') as file:
+            id = file.read().rstrip()
 
-    with open(f"/mnt/d1/hls/{port}/id", 'r') as file:
-        id = file.read().rstrip()
+    except:
+        id = None
 
     return id
 
