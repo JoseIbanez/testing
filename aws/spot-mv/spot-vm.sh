@@ -1,14 +1,41 @@
 #!/bin/bash
 
-aws ec2 import-key-pair \
-  --key-name "$AWS_KEY_PAIR_NAME" \
-  --public-key-material "fileb://${AWS_KEY_PAIR_FILE}.pub"
+###############################
 
 
-aws ec2 request-spot-instances \
-  --instance-count 1 \
-  --block-duration-minutes 120 \
-  --type "one-time" \
-  --launch-specification file://specification.json
+aws ec2 describe-subnets \
+    --query 'Subnets[0]' \
+    --filter Name=availability-zone,Values=$AWS_ZONE \
+    > out/subnet.json
 
 
+export VPCID=`jq -r '.VpcId' out/subnet.json`
+export SUBNETID=`jq -r '.SubnetId' out/subnet.json`
+
+echo "VPCID: $VPCID"
+echo "SUBNETID: $SUBNETID"
+
+
+##############################
+
+aws ec2 describe-security-groups \
+  --filters Name=group-name,Values=default \
+  > out/spot-sg.json
+
+export SG=`jq -r '.SecurityGroups[0].GroupId' out/spot-sg.json`
+echo "SG: $SG"
+
+
+########################
+aws ec2 run-instances \
+    --image-id $AMI \
+    --count 1 \
+    --instance-market-options '{ "MarketType": "spot" }' \
+    --instance-type $TSIZE \
+    --key-name $SSHKEY \
+    --iam-instance-profile "Name=MySessionManagerRole" \
+    --security-group-ids $SG \
+    --subnet-id $SUBNETID \
+    --block-device-mappings "[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"VolumeSize\":30,\"DeleteOnTermination\":true}}]" \
+    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$VMNAME}]"  \
+    > out/$VMNAME-ec2.json
