@@ -1,5 +1,15 @@
 #!/bin/bash
 
+set -e
+###############################
+
+if [ -z "$1" ]; then
+    echo "Usage $0 <vmname>"
+    exit
+fi
+export VMNAME=$1
+
+
 ###############################
 
 
@@ -25,6 +35,7 @@ aws ec2 describe-security-groups \
 export SG=`jq -r '.SecurityGroups[0].GroupId' out/spot-sg.json`
 echo "SG: $SG"
 
+echo "VMNAME: $VMNAME"
 
 ########################
 aws ec2 run-instances \
