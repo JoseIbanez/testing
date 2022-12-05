@@ -9,7 +9,7 @@
 
 export AWS_ZONE="eu-west-1a"
 export AMI="ami-096800910c1b781ba"
-export SSHKEY="spot-key"
+export SSHKEY="spot-key-02"
 export TSIZE="t3a.large"
 #export TSIZE="t3a.small"
 export VMNAME="spot01"

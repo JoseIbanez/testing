@@ -11,8 +11,9 @@ wget --user=LFtraining --password=Penguin2014 \
 
 tar -xvf LFD259_V2022-11-23_SOLUTIONS.tar.xz 
 
-
+####################
 # Control Plane node
+####################
 cp LFD259/SOLUTIONS/s_02/k8scp.sh .
 bash k8scp.sh | tee $HOME/cp.out
 
@@ -21,6 +22,10 @@ sudo apt-get install bash-completion vim -y
 
 source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> $HOME/.bashrc
+
+####################
+# Worker node
+####################
 
 cp LFD259/SOLUTIONS/s_02/k8sWorker.sh .
 
@@ -42,7 +47,11 @@ https://github.com/containerd/containerd/issues/6009
 sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
 
-vim...
+grep SystemdCgroup /etc/containerd/config.toml 
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+
 
 sudo systemctl restart containerd
 sudo systemctl restart kubelet
+
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export SSHKEY="spot-key"
+export SSHKEY="spot-key-02"
 
 aws ec2 create-key-pair \
    --key-name $SSHKEY \

@@ -47,6 +47,6 @@ aws ec2 run-instances \
     --iam-instance-profile "Name=MySessionManagerRole" \
     --security-group-ids $SG \
     --subnet-id $SUBNETID \
-    --block-device-mappings "[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"VolumeSize\":30,\"DeleteOnTermination\":true}}]" \
+    --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":30,\"DeleteOnTermination\":true}}]" \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$VMNAME}]"  \
     > out/$VMNAME-ec2.json
