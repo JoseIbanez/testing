@@ -16,3 +16,12 @@ compinit
 source <(kubectl completion zsh)
 
 
+
+# Add load to control panel node
+kubectl describe nodes | grep -i taint
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+kubectl taint nodes --all node-role.kubernetes.io/master-
+kubectl describe nodes | grep -i taint
+
+
+
