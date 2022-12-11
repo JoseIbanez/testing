@@ -1,18 +1,31 @@
 #!/bin/bash
 
-export VMNAME=n01
-export IP_ADDR=10.39.122.84
-export RAM=2048
+set -e
+
+export VMNAME=cp
+export IP_ADDR=10.39.122.85
+export RAM=8192
 export CORES=2
 export NETWORK=vlan-nodes
-
+export DISK=30G
 
 sudo mkdir -p $HOME/kvm/$VMNAME
 sudo chown $USER:$USER $HOME/kvm/$VMNAME
 cd $HOME/kvm/$VMNAME
 
+#Ubuntu 20.04
+#export IMAGE=focal-server-cloudimg-amd64.img 
+export IMAGE=focal-server-cloudimg-amd64-disk-kvm.img
+#Ubuntu 22.04
+#export IMAGE=jammy-server-cloudimg-amd64.img 
+#More
+#download from: https://cloud-images.ubuntu.com/focal/current/
+
+
+
+
 #Create root disk
-qemu-img create -F qcow2 -b ~/kvm/base/focal-server-cloudimg-amd64.img -f qcow2 ./$VMNAME.qcow2 10G
+qemu-img create -F qcow2 -b ~/kvm/base/$IMAGE -f qcow2 ./$VMNAME.qcow2 $DISK
 
 export INTERFACE=enp1s0
 
