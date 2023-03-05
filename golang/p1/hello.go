@@ -62,7 +62,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	msg2, err := greetings.Hello("")
+	msg2, err := greetings.Hello("Go")
 	if err != nil {
 		log.Println(err)
 		log.Fatalln(err)
