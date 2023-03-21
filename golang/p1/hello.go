@@ -14,6 +14,32 @@ import (
 	"rsc.io/quote"
 )
 
+type User struct {
+	id   string
+	name string
+}
+
+func (u User) description() string {
+	return u.name
+}
+
+type Device struct {
+	id       string
+	hostname string
+}
+
+func (d Device) description() string {
+	return d.hostname
+}
+
+type MyItem interface {
+	description() string
+}
+
+func print_this(i MyItem) {
+	fmt.Println(i.description())
+}
+
 func loadJson(filename string) (string, error) {
 	jsonFile, err := os.Open("users.json")
 	// if we os.Open returns an error then handle it
