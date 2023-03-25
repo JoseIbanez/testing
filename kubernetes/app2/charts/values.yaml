@@ -1,0 +1,179 @@
+replicaCount: 1
+
+image:
+  repository: docker.elastic.co/logstash/logstash
+  command: ['sh'] 
+  args: ['/usr/share/logstash/config/entrypoint.sh']
+  pullPolicy: IfNotPresent
+  tag: '8.6.2'
+
+image_2:
+  repository: alxrem/prometheus-logstash-exporter
+  pullPolicy: IfNotPresent
+  tag: 'latest'
+
+image_3:
+  repository: docker.elastic.co/beats/metricbeat
+  command: ['metricbeat']
+  pullPolicy: IfNotPresent
+  tag: '8.6.2'
+
+
+doc:
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+
+_serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::010657612649:role/vgsl-sdwan-jms-dev-eks-global-iam-rl.otel-msk-collector-sa
+  name: otel-msk-collector-sa
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+
+#PSP
+podSecurityPolicy:
+  create: true
+  name: "otel-msk-collector-psp"
+  spec:
+    privileged: false
+    fsGroup:
+      rule: RunAsAny
+    runAsUser:
+      rule: RunAsAny
+    seLinux:
+      rule: RunAsAny
+    supplementalGroups:
+      rule: RunAsAny
+    volumes:
+      - secret
+      - configMap
+
+rbac:
+  create: true
+
+
+service:
+  type: "ClusterIP"
+  port: 80
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "512Mi"
+  limits:
+    memory: "1Gi"
+
+env:
+  RN_ENV: develop-eks
+  MSK_BOOTSTRAP: b-2.vgslsdwanjmsdeveksdeve.yzdz4v.c6.kafka.eu-west-1.amazonaws.com:9096,b-1.vgslsdwanjmsdeveksdeve.yzdz4v.c6.kafka.eu-west-1.amazonaws.com:9096
+  ES_URL: http://es.dev.com:9342
+  MSK_SECURITY_PROTOCOL: SASL_SSL
+  MSK_SASL_MECHANISM: SCRAM-SHA-512
+  MSK_JAAS_PATH: /usr/share/logstash/config/jaas.config
+
+env_3:
+  RN_ENV: develop-eks
+  ES_URL: http://es.dev.com:9342
+
+
+fileConfigMap:
+  - name: entrypoint.sh
+    source: config/entrypoint.sh
+    mountPath: /usr/share/logstash/config/entrypoint.sh
+  - name: jvm.options
+    source: config/jvm.options
+    mountPath: /usr/share/logstash/config/jvm.options
+  - name: logstash.yml
+    source: config/logstash.yml
+    mountPath: /usr/share/logstash/config/logstash.yml
+  - name: pipelines.yml
+    source: config/pipelines.yml
+    mountPath: /usr/share/logstash/config/pipelines.yml
+  - name: jaas.config
+    source: config/jaas.config
+    mountPath: /usr/share/logstash/config/jaas.config
+
+fileConfigMap_3:
+  - name: metricbeat.yml
+    source: metricbeat/metricbeat.yml
+    mountPath: /usr/share/metricbeat/metricbeat.yml
+
+
+autoscaling: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+#RN_INFRA
+awsRegion: eu-west-1
+
+secretsMountPath: /var/secrets
+_secrets: |
+  - objectName: AmazonMSK_vgsl-sdwan-jms-dev-eks-development-euwest1-workload.otel-msk-collector
+    objectType: "secretsmanager"
+    objectAlias: kafka
+    jmesPath:
+      - path: "username"
+        objectAlias: "MSKSecretUsername"
+      - path: "password"
+        objectAlias: "MSKSecretPassword"
+  - objectName: vgsl-sdwan-jms-dev-eks-development-euwest1-workload-secret.readynetworks.otel-apm
+    objectType: "secretsmanager"
+    objectAlias: apm
+    jmesPath:
+      - path: "apiKey"
+        objectAlias: "APMSecretAPIKey"
+      - path: "endpoint"
+        objectAlias: "APMSecretEndpoint"
+
+
+
+enableSecretObjects: true
+secretObjects:
+- secret:
+    env_var_name: "MSK_USERNAME"
+    key: "MSK_USERNAME"
+    name: "otel-msk-collector-msk-username"
+    objectName: "MSKSecretUsername"
+- secret:
+    env_var_name: "MSK_PASSWORD"
+    key: "MSK_PASSWORD"
+    name: "otel-msk-collector-msk-password"
+    objectName: "MSKSecretPassword"
+- secret:
+    env_var_name: "ES_USERNAME"
+    key: "ES_USERNAME"
+    name: "otel-msk-collector-es-username"
+    objectName: "ESSecretUsername"
+- secret:
+    env_var_name: "ES_PASSWORD"
+    key: "ES_PASSWORD"
+    name: "otel-msk-collector-es-password"
+    objectName: "ESSecretPassword"
+
+secretObjects_3:
+- secret:
+    env_var_name: "ES_USERNAME"
+    key: "ES_USERNAME"
+    name: "otel-msk-collector-es-username"
+    objectName: "ESSecretUsername"
+- secret:
+    env_var_name: "ES_PASSWORD"
+    key: "ES_PASSWORD"
+    name: "otel-msk-collector-es-password"
+    objectName: "ESSecretPassword"
+

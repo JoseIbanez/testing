@@ -2,15 +2,7 @@
 # on local server
 
 
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: default-token
-  annotations:
-    kubernetes.io/service-account.name: default
-type: kubernetes.io/service-account-token
-EOF
+kubectl apply -f ./roles.yaml
 
 while ! kubectl describe secret default-token | grep -E '^token' >/dev/null; do
   echo "waiting for token..." >&2
