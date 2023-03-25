@@ -1,0 +1,5 @@
+api.http.host: 0.0.0.0
+# dead_letter_queue.enable: true
+# path.dead_letter_queue: "/usr/share/logstash/data/dead_letter_queue"
+#log.level: debug
+#log.format: json
