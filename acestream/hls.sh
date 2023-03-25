@@ -1,7 +1,18 @@
 #!/bin/bash
 
+set -e
+
+LIST="/home/ibanez/Projects/testing/zeronet/listas/ramses.m3u8"
+
 # Acelink ID
-ID=`echo $1 | sed 's@.*//@@'`
+ID=`echo ${1} | sed 's@.*//@@'`
+if [ "${#ID}" -lt "40" ]; then
+  grep -A1 "Lucas.*${1}" ${LIST} | head -n2
+
+  FULLID=`grep -A1 "Lucas.*${1}" ${LIST} | grep -v EXTINF | head -n1 | tr -d '\r'`
+  ID=`echo $FULLID | sed 's@.*//@@'`
+fi
+echo "$1:$ID:"
 
 
 # Client port

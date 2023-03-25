@@ -15,6 +15,8 @@ export ACE_URL="http://127.0.0.1:6878/ace/getstream?id=$ID"
 
 while true; do
 
+    tsprefix=`date +%d%H%M`
+
     ffmpeg \
     -i $ACE_URL \
     -map 0:v:0 -map 0:a:0 \
@@ -22,6 +24,7 @@ while true; do
     -c:a ac3 \
     -f hls \
     -hls_list_size 20 -hls_delete_threshold 3 -hls_flags delete_segments \
+    -hls_segment_filename "d${tsprefix}stream%d.ts" \
     -hls_init_time 4 -hls_time 4 \
     stream.m3u8
 
