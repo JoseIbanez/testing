@@ -1,0 +1,14 @@
+{{- if .Values.fileConfigMap }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "charts.fullname" . }}-configfiles-3
+  labels:
+    {{- include "charts.labels" . | nindent 4 }}
+data:
+{{- range .Values.fileConfigMap_3 }}
+  {{ .name }}: |
+{{ printf "%s" .source | $.Files.Get | indent 4 }}
+{{- end -}}
+{{- end -}}

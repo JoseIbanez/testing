@@ -1,0 +1,21 @@
+logging.to_stderr: true
+logging.level: info
+logging.metrics.enabled: true
+
+logging.metrics.namespaces:
+  - prometheus.collector
+  - stats
+
+metricbeat.modules:
+
+- module: prometheus
+  period: 10s
+  metricsets: ["collector"]
+  hosts: ["localhost:9304"]
+
+
+output.elasticsearch:
+  hosts: ["${ES_URL}"]
+  username: "${ES_USERNAME}"
+  password: "${ES_PASSWORD}"
+
