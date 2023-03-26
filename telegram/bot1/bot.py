@@ -47,6 +47,33 @@ async def hls(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
 
 
+async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id=update.effective_chat.id
+    cmd = shlex.split(update.message.text, posix=False)
+
+    if len(cmd) < 2:
+        await context.bot.send_message(chat_id, text="wrong cmd, try /kill <port>")
+        return
+
+    port=cmd[1]
+    user=update.message.from_user.first_name
+
+    await context.bot.send_message(chat_id, text=f"{user}, wait a second for docker Port:{port}")
+
+    try:
+        result = subprocess.run(["docker", "kill", f"acelink.{port}"], stderr=subprocess.PIPE, text=True)
+    except FileNotFoundError as e:
+        await context.bot.send_message(chat_id, text=f"Something was wrong:\n{e}")
+        return
+
+    if result.stderr:
+        await context.bot.send_message(chat_id, text=f"Something was wrong:\n{result.stderr}")
+        return
+
+    await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
+
+
+
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
 
@@ -55,9 +82,11 @@ if __name__ == '__main__':
     
     start_handler = CommandHandler('start', start)
     hls_handler = CommandHandler('hls', hls)
+    kill_handler = CommandHandler('kill', kill)
     echo_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
     application.add_handler(start_handler)
     application.add_handler(hls_handler)
+    application.add_handler(kill_handler)
     application.add_handler(echo_handler)
     
     application.run_polling()
