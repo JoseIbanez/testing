@@ -1,0 +1,6 @@
+apiVersion: v2
+name: test-lgst
+description: Testing helm char
+type: application
+version: 1.0.4
+appVersion: 1.0.4
