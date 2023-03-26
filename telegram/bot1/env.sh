@@ -1,0 +1,1 @@
+export TELEGRAM_BOT_TOKEN=`pass telegram/BOTLICHE_TOKEN`
