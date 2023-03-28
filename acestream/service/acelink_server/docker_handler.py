@@ -5,31 +5,69 @@ import os
 import docker
 import time
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+#from acelink_server.common import getLogger
+
 logger = logging.getLogger(__name__)
 
 
-def del_container(port:int):
+def get_container(port:int):
     client = docker.from_env()
     docker_name = f"acelink.{port}"
 
+    container_id = None
+    ace_id = None
+    description = None
+
     try:
         container = client.containers.get(docker_name)
-        logger.info("Found old container, removing it, wait a second...")
-        container.kill()
-        time.sleep(5)
+        container_id = container.id
 
     except docker.errors.NotFound as e:
         pass
 
     client.close()
-    return
+
+    try:
+        with open(f"/mnt/d1/hls/{port}/description","r") as f:
+            description = f.readline().rstrip()
+
+        with open(f"/mnt/d1/hls/{port}/id","r") as f:
+            ace_id = f.readline().rstrip()
+
+    except OSError as e:
+        logger.info(e)
+        pass
+
+    result = {
+        'port': port,
+        'ace_id': ace_id,
+        'container_id': container_id,
+        'description': description
+    }
+
+    return result
 
 
-def run_acelink(ace_id:str,port:int):
+def del_container(port:int):
+    client = docker.from_env()
+    docker_name = f"acelink.{port}"
+    container_id = None
+
+    try:
+        container = client.containers.get(docker_name)
+        container_id = container.id
+        logger.info("Found a container:%s,removing it, wait a second...",container_id)
+        container.kill()
+
+    except docker.errors.NotFound as e:
+        container_id = "0"
+        pass
+
+    client.close()
+    return container_id
+
+
+def run_acelink(ace_id:str,port:int,description=""):
 
 
     logger.info("Preparing folders")
@@ -46,6 +84,8 @@ def run_acelink(ace_id:str,port:int):
         logger.error(e)
         return
 
+    with open(f"/mnt/d1/hls/{port}/description","w") as f:
+        f.write(description)
 
 
     client = docker.from_env()
@@ -83,7 +123,7 @@ def run_acelink(ace_id:str,port:int):
     logger.info("Acelink container created: %s %s", container.name, container.id)
     client.close()
 
-    return
+    return container.id
 
 
 def main():
