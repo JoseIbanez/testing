@@ -15,7 +15,7 @@ def get_stat_url(port,ace_id):
     try:
         response = requests.get(api_url)
         result = response.json()
-        resp = result.get('response')
+        resp = result.get('response') or {}
         stat_url = resp.get('stat_url')
 
     except ( HTTPError, ConnectionError ) as e:

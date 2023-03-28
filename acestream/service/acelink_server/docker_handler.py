@@ -28,11 +28,11 @@ def get_container(port:int):
     client.close()
 
     try:
-        with open(f"/mnt/d1/hls/{port}/description","r") as f:
-            description = f.readline().rstrip()
-
         with open(f"/mnt/d1/hls/{port}/id","r") as f:
             ace_id = f.readline().rstrip()
+
+        with open(f"/mnt/d1/hls/{port}/description","r") as f:
+            description = f.readline().rstrip()
 
     except OSError as e:
         logger.info(e)

@@ -48,15 +48,8 @@ run-demo:
 run:
 	gunicorn -b 0.0.0.0:8008 acelink_server.app:app	
 
-version:
-	git pull
-	git pull --tags
-	semantic-release changelog
-	semantic-release version
-	git push --tags
+deploy-service:
+	cd setup ;  ./deploy-service.sh
 
-branch-cleanup:
-	git fetch -p
-	git branch -v | grep '\[gone\]' | awk '{print $$1}' | xargs -n 1 git branch -D
 
 .PHONY: init testcd ${PROJECT_FOLDER}
