@@ -1,0 +1,18 @@
+[Unit]
+Description=ACE Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=${USER}
+PIDFile=/var/spool/${SERVICE_NAME}/pid/${SERVICE_NAME}.pid
+WorkingDirectory=/usr/local/bin/${SERVICE_NAME}
+ExecStart=/usr/local/bin/${SERVICE_NAME}/venv/bin/gunicorn  -b 0.0.0.0:8008 acelink_server.app:app   
+
+SyslogIdentifier=${SERVICE_NAME}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+PROJECT_ID=999
+MODULE_NAME=acelink-server
+DOCKER_IMAGE_NAME=acelink-server
+CHART_NAME=acelink-server
+PROJECT_FOLDER=acelink_server
