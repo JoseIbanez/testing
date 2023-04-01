@@ -11,25 +11,43 @@ from telegram.ext import filters, MessageHandler, ApplicationBuilder, CommandHan
 import requests
 from requests.exceptions import HTTPError,ConnectionError
 
+from botliche.m3u8 import M3u8List
+from botliche.common import configure_loger
+
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 ACELINKHOST = os.environ.get("ACELINKHOST","http://localhost:8008")
 ACELINKTOKEN = os.environ.get("ACELINKTOKEN","MAGIC")
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+configure_loger()
+
+aceList = M3u8List()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a super bot, please talk to me!")
 
 
+async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id=update.effective_chat.id
+    cmd = shlex.split(update.message.text)
+
+    if len(cmd) < 2:
+        await context.bot.send_message(chat_id, text="wrong cmd, try /search <filter>")
+        return
+
+    filter=cmd[1]
+    result = aceList.search(filter)
+
+    for item in result:
+        await context.bot.send_message(chat_id, text=f"{item}")
+
+    await send_promnt(context,chat_id)
+
 
 async def hls(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
-    cmd = shlex.split(update.message.text, posix=False)
+    cmd = shlex.split(update.message.text)
 
     if len(cmd) < 2:
         await context.bot.send_message(chat_id, text="wrong cmd, try /hls <aceid> [port]")
@@ -65,9 +83,11 @@ async def hls(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
 
 
+
+
 async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
-    cmd = shlex.split(update.message.text, posix=False)
+    cmd = shlex.split(update.message.text)
 
     if len(cmd) < 2:
         await context.bot.send_message(chat_id, text="wrong cmd, try /check <port>")
@@ -95,14 +115,14 @@ async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await context.bot.send_message(chat_id, text=json.dumps(result.json(),indent=2))
+    await send_promnt(context,chat_id)
 
-    await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
 
 
 
 async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
-    cmd = shlex.split(update.message.text, posix=False)
+    cmd = shlex.split(update.message.text)
 
     if len(cmd) < 2:
         await context.bot.send_message(chat_id, text="wrong cmd, try /kill <port>")
@@ -138,18 +158,28 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
 
+
+async def send_promnt(context,chat_id):
+    await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
+
+
+
 if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
-    
-    start_handler = CommandHandler('start', start)
-    hls_handler = CommandHandler('hls', hls)
-    check_handler = CommandHandler('check', check)
-    kill_handler = CommandHandler('kill', kill)
-    echo_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
-    application.add_handler(start_handler)
-    application.add_handler(hls_handler)
-    application.add_handler(check_handler)
-    application.add_handler(kill_handler)
-    application.add_handler(echo_handler)
-    
+
+    handler_list = [
+        CommandHandler('start', start),
+        CommandHandler('search', search),
+        CommandHandler('hls', hls),
+        CommandHandler('check', check),
+        CommandHandler('kill', kill),
+        MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
+    ]
+
+    for handler in handler_list:
+        application.add_handler(handler)
+
+    aceList.load()
+
+
     application.run_polling()
