@@ -14,6 +14,9 @@ class M3u8Channel:
     name = None
     group_title = None
 
+    def __repr__(self):
+        return f"{self.tvg_id}:{self.name} ({self.ace_id})"
+
 
 class M3u8List:
 
@@ -59,6 +62,45 @@ class M3u8List:
             self.list.append(tmp_entry)
             tmp_entry = None
 
+    def seach(self,query):
+
+        ace_id_list = []
+        count = 0 
+        result = []
+
+        for item in self.list:
+
+            if not item.owner or not "@Lucas" in item.owner: 
+                continue
+
+            if item.ace_id in ace_id_list:
+                continue
+
+            if (re.search(query, str(item.tvg_id) + str(item.name) )):
+                result.append(item)
+                ace_id_list.append(item.ace_id)
+
+            if len(result) > 20:
+                break
+
+
+
+        for item in self.list:
+
+            if len(result) > 20:
+                break
+
+            if item.ace_id in ace_id_list:
+                continue
+
+            if (re.search(query, str(item.tvg_id) + str(item.name) )):
+                result.append(item)
+                ace_id_list.append(item.ace_id)
+
+
+
+        return result
+
 
 def parse_extinf_line(line:str): 
 
@@ -75,7 +117,7 @@ def parse_extinf_line(line:str):
         result.group_title = m.group(1)
 
     ### owner
-    m = re.search(r'(@[\w]+)', line)     if result.group_title else None
+    m = re.search(r'(@[\w]+)', line)  if result.group_title else None
     if m:
         result.owner = m.group(1)
 
@@ -91,6 +133,8 @@ def parse_extinf_line(line:str):
 
 def parse_acestream_link(line:str):
 
+    ace_id = None
+
     ### get ace_id
     m = re.search(r'acestream://([\w]+)', line)
     if m:
@@ -99,6 +143,8 @@ def parse_acestream_link(line:str):
     return ace_id
 
 def parse_http_link(line:str):
+
+    ace_id = None
 
     ### get ace_id
     m = re.search(r'http://.*getstream.*id=([\w]+)', line)
@@ -114,7 +160,11 @@ def main():
     parse_http_link('http://127.0.0.1:6878/ace/getstream?id=37d42d2b5d2278e6bb5810329a5f220867b3cf0c')
 
     lista = M3u8List()
+    lista.parse_m3u8("/home/ibanez/Projects/testing/zeronet/listas/ramses.m3u8")
     lista.parse_m3u8("/home/ibanez/Projects/testing/zeronet/listas/electroperra.m3u8")
+    result = lista.seach("DAZN La")
+
+    print(result)
 
 
 if __name__ == "__main__":
