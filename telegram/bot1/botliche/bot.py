@@ -13,6 +13,7 @@ from requests.exceptions import HTTPError,ConnectionError
 
 from botliche.m3u8 import M3u8List
 from botliche.common import configure_loger
+from botliche.scrape_fetv import EventTVList
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 ACELINKHOST = os.environ.get("ACELINKHOST","http://localhost:8008")
@@ -22,11 +23,18 @@ ACELINKTOKEN = os.environ.get("ACELINKTOKEN","MAGIC")
 configure_loger()
 
 aceList = M3u8List()
+eventList = EventTVList()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a super bot, please talk to me!")
 
+
+async def fetv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    result = "\n".join(eventList.get_events())
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=result)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a super bot, please talk to me!")
 
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
@@ -173,6 +181,7 @@ if __name__ == '__main__':
         CommandHandler('hls', hls),
         CommandHandler('check', check),
         CommandHandler('kill', kill),
+        CommandHandler('ftv', fetv),
         MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
     ]
 
