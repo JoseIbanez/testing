@@ -36,7 +36,7 @@ fi
 mkdir -p /mnt/d1/hls/$PORT
 mkdir -p /mnt/d1/hls-log/$PORT
 
-docker kill "acelink.$PORT" | echo ""
+docker ps -q -f name="acelink.$PORT" | grep . && docker kill "acelink.$PORT" 
 sleep 3
 
 docker run -d --rm  \
@@ -47,4 +47,4 @@ docker run -d --rm  \
     --cap-add=NET_ADMIN \
     acelink-ffmpeg
 
-./test-acestream.py --duration 5 -p $PORT
+#./test-acestream.py --duration 5 -p $PORT
