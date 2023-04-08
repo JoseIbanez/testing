@@ -1,0 +1,4 @@
+yfinance
+requests-cache
+requests-ratelimiter
+pyrate-limiter
