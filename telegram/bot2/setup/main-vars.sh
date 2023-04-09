@@ -1,0 +1,5 @@
+PROJECT_ID=999
+MODULE_NAME=botliche
+DOCKER_IMAGE_NAME=botliche
+CHART_NAME=botliche
+PROJECT_FOLDER=botliche
