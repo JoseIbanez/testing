@@ -1,0 +1,1 @@
+export TELEGRAM_BOT_TOKEN=`pass telegram/STOCK_PRICE_BOT`
