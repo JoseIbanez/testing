@@ -30,7 +30,8 @@ FOLLOW_COMPETITIONS = [ "Fórmula 1", "MotoGP", "Masters Miami" ]
 BANNED_CHANNELS = [ "DAZN (Regístrate)", 'MotoGP Videopass', 'ATP Tennis TV' ] 
 
 FETV_URL = "https://www.futbolenlatv.es/deporte"
-LOCAL_FILE = "/home/ibanez/Projects/testing/telegram/bot1/sample-data/fetv.txt" 
+DATA_PATH =  os.environ.get("DATA_PATH", "/home/ibanez/Projects/testing/telegram/bot1/sample-data")
+LOCAL_FILE = f"{DATA_PATH}/fetv.txt" 
 
 
 class EventTVList:
@@ -127,12 +128,28 @@ def parse_date(cols):
     date = m.group(1) if m else ""
     return date
 
+def parse_datetime(date:str,hour:str):
+
+    try:
+        e_datetime = datetime.strptime(f"{date} {hour}", '%d/%m/%Y %H:%M')
+    except ValueError:
+        e_datetime = None
+        pass
+
+    if not e_datetime:
+        try:
+            e_datetime = datetime.strptime(f"{date}", '%d/%m/%Y')
+        except ValueError:
+            e_datetime = datetime.now()
+
+    return e_datetime
+    
 
 def parse_4_cols(cols,date):
 
     e = EventTV()
     hour   =  cols[0].string.rstrip().lstrip()
-    e.date = datetime.strptime(f"{date} {hour}", '%d/%m/%Y %H:%M')
+    e.date = parse_datetime(date,hour)
     e.competition = cols[1].findChildren('span')[0].string.rstrip().lstrip()
     e.local  = cols[2].text.rstrip().lstrip()
     e.away  =  None
@@ -144,7 +161,7 @@ def parse_5_cols(cols,date):
 
     e = EventTV()
     hour   =  cols[0].string.rstrip().lstrip()
-    e.date = datetime.strptime(f"{date} {hour}", '%d/%m/%Y %H:%M')
+    e.date = parse_datetime(date,hour)
     e.competition = cols[1].findChildren('label')[0].string.rstrip().lstrip()
     e.local  = cols[2].findChild('span').string
     e.away  =  cols[3].findChild('span').string

@@ -24,32 +24,11 @@ bandit:
 flake8:
 	flake8 || echo "Error"
 
-
-pkg:
-	./setup/make_whl.sh
-
-pkg-publish:
-	./setup/make_whl.sh upload
-
-docker:
-	./setup/docker-build.sh
-
-docker-publish:
-	./setup/docker-build.sh publish-aws
-
-helm-install:
-	helm delete ${CHART_NAME} || echo "delete error"
-	sleep 1
-	helm install ${CHART_NAME} ./helm-chart/${CHART_NAME}
+run-docker:
+	cd setup ; ./run-docker-compose.sh
 
 run-demo:
-	cd acelink_server; python app.py
-
-run:
-	gunicorn -b 0.0.0.0:8008 acelink_server.app:app	
-
-deploy-service:
-	cd setup ;  ./deploy-service.sh
+	python bot.py
 
 
 .PHONY: init testcd ${PROJECT_FOLDER}
