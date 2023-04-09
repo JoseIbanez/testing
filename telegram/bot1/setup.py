@@ -29,7 +29,7 @@ setuptools.setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'get_netconf = netconf_gatherer.netconf_controller:main'
+            'botliched = botliche.bot:main'
             ],
     }
 )

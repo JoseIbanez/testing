@@ -10,6 +10,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+DATA_PATH = os.environ.get("DATA_PATH", "/home/ibanez/Projects/testing/telegram/bot1/sample-data")
+
+
 class M3u8Channel:
     ace_id = None
     tvg_id = None
@@ -27,8 +30,8 @@ class M3u8List:
         self.list:list[M3u8Channel] = []
 
     def load(self):
-        self.parse_m3u8("/home/ibanez/Projects/testing/zeronet/listas/ramses.m3u8")
-        self.parse_m3u8("/home/ibanez/Projects/testing/zeronet/listas/electroperra.m3u8")
+        self.parse_m3u8(f"{DATA_PATH}/ramses.m3u8")
+        self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
 
 
     def parse_m3u8(self,filename:str):
