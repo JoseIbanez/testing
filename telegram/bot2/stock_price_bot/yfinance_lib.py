@@ -1,23 +1,33 @@
 import yfinance as yf
 import requests_cache
+import logging
+import time
+import os
 from requests import Session
 from requests_cache import CacheMixin, SQLiteCache
 from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
 from pyrate_limiter import Duration, RequestRate, Limiter
+
+from stock_price_bot.common import configure_loger
+
+DATA_PATH =  os.environ.get("DATA_PATH", "/home/ubuntu/Projects/testing/telegram/bot2/sample-data")
+
 class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
     pass
+
+logger = logging.getLogger(__name__)
 
 sessionXL = CachedLimiterSession(
     limiter=Limiter(RequestRate(2, Duration.SECOND*5),  # max 2 requests per 5 seconds
     bucket_class=MemoryQueueBucket),
-    backend=SQLiteCache("./sample-data/yfinanceXL.cache"),
+    backend=SQLiteCache(f"{DATA_PATH}/yfinanceXL.cache"),
     expire_after = 3600,
 )
 
 session = CachedLimiterSession(
     limiter=Limiter(RequestRate(2, Duration.SECOND*5),  # max 2 requests per 5 seconds
     bucket_class=MemoryQueueBucket),
-    backend=SQLiteCache("./sample-data/yfinance.cache"),
+    backend=SQLiteCache(f"{DATA_PATH}/yfinance.cache"),
     expire_after = 60,
 )
 
@@ -25,54 +35,51 @@ valList=['ITX.MC', 'ELE.MC', 'EOAN.DE', 'VOW3.DE', 'DTE.DE', 'DBK.DE', 'BAYN.DE'
 
 
 
-def get_simbol_info(simbol_id):
+def get_symbol_info(symbol_id):
 
-    ticker=yf.Ticker(simbol_id,session=session)
-    tickerXL=yf.Ticker(simbol_id,session=sessionXL)
+    logger.info("Geting infor for %s",symbol_id)
 
+    time0 = time.time()
+    tickerXL=yf.Ticker(symbol_id,session=sessionXL)
+
+    if not tickerXL.info:
+        logger.error("Symbol:%s not found",symbol_id)
+        return None
 
     name = tickerXL.info.get('displaytName') or tickerXL.info.get('shortName') 
     marketState = tickerXL.info.get('marketState')
-    previousClose = tickerXL.fast_info.get('previousClose')
+    currency = tickerXL.info.get('currency')
 
-    lastPrice = ticker.fast_info.get('lastPrice')
-    var = (lastPrice - previousClose)/previousClose*100
+    previousClose = tickerXL.fast_info.get('previousClose')
+    lastPrice = tickerXL.fast_info.get('lastPrice')
 
     if marketState == "OPENED":
         marketState = ""
+        ticker=yf.Ticker(symbol_id,session=session)
+        lastPrice = ticker.fast_info.get('lastPrice')
+    
+    var = (lastPrice - previousClose)/previousClose*100
 
-    result = f"{simbol_id} {name}:\n  LastPrice:{lastPrice:.3f} {var:+.2f}% {marketState}" 
+
+    result = f"{symbol_id} {name}:\n  LastPrice:{lastPrice:.3f} {currency} {var:+.2f}% {marketState}" 
+
+    
+    logger.info("Symbol:%s updated, delay:%.2fsec",symbol_id,time.time()-time0)
 
     return result
 
 
 def main():
 
+    configure_loger()
+
+
     for val in valList:
 
-        text = get_simbol_info(val)
+        text = get_symbol_info(val)
         print(text)
 
 
-def old_main():
-
-
-    tickers=yf.Tickers(' '.join(valList),session=session)
-    tickersXL=yf.Tickers(' '.join(valList),session=sessionXL)
-
-    for val in valList:
-
-        name = tickersXL.tickers[val].info.get('displaytName') or tickersXL.tickers[val].info.get('shortName') 
-        marketState = tickersXL.tickers[val].info.get('marketState')
-        previousClose = tickersXL.tickers[val].fast_info.get('previousClose')
-
-        lastPrice = tickers.tickers[val].fast_info.get('lastPrice')
-        var = (lastPrice - previousClose)/previousClose*100
-
-        if marketState == "OPENED":
-            marketState = ""
-
-        print(f"{val} {name}: PreviousClose:{previousClose:.3f} LastPrice:{lastPrice:.3f} {var:+.2f}% {marketState}" )
 
 
 if __name__ == "__main__":

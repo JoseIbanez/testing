@@ -3,3 +3,5 @@ requests-cache
 requests-ratelimiter
 pyrate-limiter
 python-telegram-bot
+psycopg2
+

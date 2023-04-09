@@ -12,7 +12,7 @@ import requests
 from requests.exceptions import HTTPError,ConnectionError
 
 from stock_price_bot.common import configure_loger
-from stock_price_bot.yfinance_lib import get_simbol_info
+from stock_price_bot.yfinance_lib import get_symbol_info
 
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -35,8 +35,8 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id, text="wrong cmd, try /s <symbol>")
         return
 
-    simbol_id=cmd[1]
-    result = get_simbol_info(simbol_id)
+    simbol_id=cmd[1].upper()
+    result = get_symbol_info(simbol_id)
 
     await context.bot.send_message(chat_id, text=f"{result}")
 
