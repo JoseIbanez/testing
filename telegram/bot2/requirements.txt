@@ -3,5 +3,7 @@ requests-cache
 requests-ratelimiter
 pyrate-limiter
 python-telegram-bot
+python-telegram-bot[job-queue]
 psycopg2
-
+SQLAlchemy
+#ptbcontrib[ptb_sqlalchemy_jobstore] @ git+https://github.com/python-telegram-bot/ptbcontrib.git@main
