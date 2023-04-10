@@ -1,5 +1,6 @@
 import yfinance as yf
-import requests_cache
+from datetime import datetime
+import pytz
 import logging
 import time
 import os
@@ -8,7 +9,8 @@ from requests_cache import CacheMixin, SQLiteCache
 from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
 from pyrate_limiter import Duration, RequestRate, Limiter
 
-from stock_price_bot.common import configure_loger
+from stock_price_bot.lib.common import configure_loger
+from stock_price_bot.lib.model import Symbol
 
 DATA_PATH =  os.environ.get("DATA_PATH", "/home/ubuntu/Projects/testing/telegram/bot2/sample-data")
 
@@ -35,38 +37,66 @@ valList=['ITX.MC', 'ELE.MC', 'EOAN.DE', 'VOW3.DE', 'DTE.DE', 'DBK.DE', 'BAYN.DE'
 
 
 
-def get_symbol_info(symbol_id):
+def get_symbol_info(symbol_id:str) -> Symbol:
 
     logger.info("Geting infor for %s",symbol_id)
 
     time0 = time.time()
     tickerXL=yf.Ticker(symbol_id,session=sessionXL)
 
-    if not tickerXL.info:
+    try:
+        if tickerXL.info is None:
+            logger.error("Symbol:%s not found",symbol_id)
+            return None
+    except AttributeError:
         logger.error("Symbol:%s not found",symbol_id)
         return None
 
-    name = tickerXL.info.get('displaytName') or tickerXL.info.get('shortName') 
-    marketState = tickerXL.info.get('marketState')
-    currency = tickerXL.info.get('currency')
+    s = Symbol()
+    s.id = symbol_id
+    s.displayName = tickerXL.info.get('displaytName') or tickerXL.info.get('shortName') 
+    s.marketState = tickerXL.info.get('marketState')
+    s.currency = tickerXL.info.get('currency')
+    exchangeTimezoneName = tickerXL.info.get('exchangeTimezoneName')
 
-    previousClose = tickerXL.fast_info.get('previousClose')
-    lastPrice = tickerXL.fast_info.get('lastPrice')
+    s.previousClose = tickerXL.fast_info.get('previousClose')
+    s.lastPrice = tickerXL.fast_info.get('lastPrice')
 
-    if marketState == "OPENED":
-        marketState = ""
+    ticker = None
+    opening = check_opening(symbol_id,exchangeTimezoneName)
+
+    if s.marketState == "OPENED" or opening:
         ticker=yf.Ticker(symbol_id,session=session)
-        lastPrice = ticker.fast_info.get('lastPrice')
+        s.lastPrice = ticker.fast_info.get('lastPrice')
     
-    var = (lastPrice - previousClose)/previousClose*100
+    if opening and ticker:
+        s.marketState = ticker.info.get('marketState')
+        s.previousClose = ticker.fast_info.get('previousClose')
 
 
-    result = f"{symbol_id} {name}:\n  LastPrice:{lastPrice:.3f} {currency} {var:+.2f}% {marketState}" 
+    s.priceVariation = (s.lastPrice - s.previousClose)/s.previousClose*100
 
-    
     logger.info("Symbol:%s updated, delay:%.2fsec",symbol_id,time.time()-time0)
 
-    return result
+    return s
+
+def check_opening(symbol_id,symbol_tz):
+
+    opening = False
+    try:
+        tz=pytz.timezone(symbol_tz)
+        now = datetime.now(tz)
+        current_hour = now.strftime("%H")
+    except pytz.UnknownTimeZoneError:
+        return False
+
+
+    if current_hour in "09":
+        logger.info("Symbol:%s local hour:%s Opening hours", symbol_id,now )
+        opening = True
+
+
+    return opening
 
 
 def main():
