@@ -65,7 +65,7 @@ def get_symbol_info(symbol_id:str) -> Symbol:
     ticker = None
     opening = check_opening(symbol_id,exchangeTimezoneName)
 
-    if s.marketState == "OPENED" or opening:
+    if s.marketState == "REGULAR" or opening:
         ticker=yf.Ticker(symbol_id,session=session)
         s.lastPrice = ticker.fast_info.get('lastPrice')
     
@@ -91,7 +91,7 @@ def check_opening(symbol_id,symbol_tz):
         return False
 
 
-    if current_hour in "09":
+    if current_hour in "09,10":
         logger.info("Symbol:%s local hour:%s Opening hours", symbol_id,now )
         opening = True
 

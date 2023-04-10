@@ -125,7 +125,7 @@ class Psql():
 
 
 
-    def get_symbol_changed(self,user_id) -> list[str]:
+    def get_symbol_changed(self,user_id,var=2) -> list[str]:
 
         symbol_list = []
 
@@ -134,13 +134,13 @@ class Psql():
         FROM watcher 
         JOIN symbol ON watcher.yf_id = symbol.yf_id
         WHERE user_id = %s
-            AND (symbol.marketstate != 'CLOSED')
-            AND (symbol._var > 1.00 or symbol._var < -1.00) 
+            AND (symbol.marketstate = 'REGULAR')
+            AND (symbol._var > %s or symbol._var < %s) 
             AND (var_last < _lastcheck::date or var_last IS NULL);
         """
 
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(sql, (user_id,))
+            cur.execute(sql, (user_id,var,-var))
             for record in cur:
                 s_id = record['s_id']
                 symbol_list.append(s_id)
