@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  worker:
+    environment:
+        - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+        - DATA_PATH=/var/data
+        - ACELINKHOST=http://${ACELINKHOST}:8008
+    image: botliche:latest
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: ./setup/Dockerfile
+    volumes:
+        - ../sample-data:/var/data

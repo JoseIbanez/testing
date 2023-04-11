@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import setuptools
-from botliche._version import __version__
+from stock_price_bot._version import __version__
 
 with open('./requirements.txt') as f:
     install_requires = f.read().strip().split('\n')
@@ -9,7 +9,7 @@ with open("./README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='botliche',
+    name='stock_price_bot',
     version=__version__,
     description='Bot for acestream management',
     url='http://',
@@ -29,7 +29,7 @@ setuptools.setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'botliched = botliche.bot:main'
+            'get_netconf = netconf_gatherer.netconf_controller:main'
             ],
     }
 )

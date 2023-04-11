@@ -172,7 +172,7 @@ async def send_promnt(context,chat_id):
 
 
 
-if __name__ == '__main__':
+def main():
     application = ApplicationBuilder().token(TOKEN).build()
 
     handler_list = [
@@ -192,3 +192,7 @@ if __name__ == '__main__':
 
 
     application.run_polling()
+
+
+if __name__ == '__main__':
+    main()
