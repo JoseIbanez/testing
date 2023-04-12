@@ -1,8 +1,10 @@
+from __future__ import (absolute_import, division, print_function)
+
 import requests
 import os
+import urllib3
 
-from vmanage.api.device import Device
-from vmanage.api.authentication import Authentication
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 STANDARD_HEADERS = {'Connection': 'keep-alive', 'Content-Type': 'application/json'}
@@ -11,16 +13,21 @@ STANDARD_TIMEOUT = 10
 
 class Vmanage(object):
 
-    def __init__(self):
+    def __init__(self,validate_certs=False, timeout=STANDARD_TIMEOUT):
 
         self.host = os.environ.get('VMANAGE_HOST')
         self.port = int(os.environ.get('VMANAGE_PORT',443))
-        username = os.environ.get('VMANAGE_USERNAME')
-        password = os.environ.get('VMANAGE_PASSWORD')
+        self.username = os.environ.get('VMANAGE_USERNAME')
+        self.password = os.environ.get('VMANAGE_PASSWORD')
+        self.session = requests.session()
+        self.session.verify = validate_certs
 
-        self.session = Authentication(host=self.host, port=self.port, user=username, password=password).login()
+        proxy = os.environ.get('VMANAGE_PROXY')
+        if proxy:
+            self.session.proxies = { "http":proxy, "https":proxy} 
+
         self.base_url = f'https://{self.host}:{self.port}/dataservice/'
-
+        self.timeout = STANDARD_TIMEOUT
 
 
     def get_events(self):
@@ -30,7 +37,7 @@ class Vmanage(object):
             "query": {
                 "condition": "AND",
                 "rules": [{
-                    "value": [ "1" ],
+                    "value": [ "6" ],
                     "field": "entry_time",
                     "type": "date",
                     "operator": "last_n_hours"
@@ -47,8 +54,7 @@ class Vmanage(object):
         url = f"{self.base_url}device/interface"
 
         params = {
-            'deviceId': deviceId,
-            'af-type': af_type
+            'deviceId': deviceId
         }
 
         result = self.request('GET',url,params=params)
@@ -59,8 +65,21 @@ class Vmanage(object):
         #url = f"{self.base_url}statistics/interface"
         url = f"{self.base_url}statistics/approute"
 
+        payload = {
+            "size": 10,
+            "query": {
+                "condition": "AND",
+                "rules": [{
+                    "value": [ "1" ],
+                    "field": "entry_time",
+                    "type": "date",
+                    "operator": "last_n_hours"
+                    }]
+                }
+            }
 
-        result = self.request('GET',url)
+
+        result = self.request('POST',url,payload=payload)
         return result
 
 
@@ -112,7 +131,8 @@ class Vmanage(object):
         if files:
             headers = None
 
-        response = self.session.request(method, url, headers=headers, params=params, json=body_json, files=files, data=data, timeout=timeout)
+
+        response = self.session.request(method, url, headers=headers,  params=params, json=body_json, files=files, data=data, timeout=timeout)
 
 
         try:
@@ -124,9 +144,9 @@ class Vmanage(object):
             if result_json and 'error' in result_json:
                 details = result_json['error']['details']
                 error = result_json['error']['message']
-                raise requests.exceptions.HTTPError(f"{self.url}: Error {response.status_code}: {error}: {details}")
+                raise requests.exceptions.HTTPError(f"{url}: Error {response.status_code}: {error}: {details}")
             else:
-                raise requests.exceptions.HTTPError(f"{self.url}: Error {response.status_code} ({response.text})")
+                raise requests.exceptions.HTTPError(f"{url}: Error {response.status_code} ({response.text})")
 
 
 
@@ -138,4 +158,47 @@ class Vmanage(object):
 
 
 
+    def login(self):
+        """Executes login tasks against vManage to retrieve token(s).
 
+        Args:
+            None.
+
+        Returns:
+            self.session: a Requests session with JSESSIONID and an
+            X-XSRF-TOKEN for vManage version >= 19.2.0.
+
+        Raises:
+            LoginFailure: If the username/password are incorrect.
+            RequestException: If the host is not accessible.
+
+        """
+
+        try:
+            api = 'j_security_check'
+            url = f'{self.base_url}{api}'
+
+
+            response = self.session.post(url=url,
+                                         data={
+                                             'j_username': self.username,
+                                             'j_password': self.password
+                                         },
+                                         timeout=self.timeout)
+
+            if (response.status_code != 200 or response.text.startswith('<html>')):
+                raise ConnectionError('Login failed, check user credentials.')
+
+            #version = Utilities(self.session, self.host, self.port).get_vmanage_version()
+            version = '19.2.0'
+
+            if version >= '19.2.0':
+                api = 'client/token'
+                url = f'{self.base_url}{api}'
+                response = self.session.get(url=url, timeout=self.timeout)
+                self.session.headers['X-XSRF-TOKEN'] = response.content
+
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f'Could not connect to {self.host}: {e}')
+
+        return self.session

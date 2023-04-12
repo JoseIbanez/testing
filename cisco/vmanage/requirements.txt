@@ -1,1 +1,2 @@
 viptela
+requests[socks]

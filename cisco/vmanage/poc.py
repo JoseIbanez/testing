@@ -9,18 +9,26 @@ from rn_vmanage import Vmanage
 
 
 vmanage = Vmanage()
+vmanage.login()
 
+try:
+    print("get interface")
+    result = vmanage.get_interface('10.245.9.103','ipv4')
+    print(json.dumps(result,indent=2))
+except:
+    pass
 
-result = vmanage.get_interface('10.10.1.3','ipv4')
-print("get interface")
-print(json.dumps(result[0],indent=2))
+#result = vmanage.get_statistics_approute()
+#print("get approute")
+#print(json.dumps(result,indent=2))
 
-
-result = vmanage.get_statistics_approute()
-print("get approute")
-print(json.dumps(result[0],indent=2))
-
-event_list = vmanage.get_events()
 print("get events")
-print(json.dumps(event_list[0],indent=2))
+event_list = vmanage.get_events()
+
+for event in event_list:
+    print(event)
+    #details = event.get('details')
+    #print(details)
+
+
 
