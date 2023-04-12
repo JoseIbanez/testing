@@ -1,18 +1,25 @@
 create database sp;
 create user bot with encrypted password 'bopass';
 
-grant all privileges on database sp to bot;
 GRANT ALL ON ALL TABLES IN SCHEMA "public" TO bot;
+GRANT ALL PRIVILEGES ON DATABASE sp TO bot;
 
+GRANT ALL ON DATABASE sp TO bot;
+GRANT ALL ON SCHEMA public to bot;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO bot;
 
 
 \c sp;
 
-CREATE TABLE [IF NOT EXISTS] watcher (
-   column1 datatype(length) column_contraint,
-   column2 datatype(length) column_contraint,
-   column3 datatype(length) column_contraint,
-   table_constraints
+CREATE TABLE IF NOT EXISTS watcher (
+    user_id         VARCHAR ( 50 ) NOT NULL,
+    yf_id           VARCHAR ( 50 ) NOT NULL, 
+    minValue        NUMERIC( 10, 3),
+    maxValue        NUMERIC( 10, 3),
+    var_last        TIMESTAMP,
+    minValue_last   TIMESTAMP,
+    maxVaule_last   TIMESTAMP,
+    UNIQUE (user_id, yf_id)
 );
 
 CREATE TABLE IF NOT EXISTS symbol (
