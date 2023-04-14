@@ -38,102 +38,10 @@ class Vmanage(object):
         self.timeout = STANDARD_TIMEOUT
 
 
-    def get_events(self):
-        url = f"{self.base_url}event"
-
-        payload = {
-            "query": {
-                "condition": "AND",
-                "rules": [{
-                    "value": [ "24" ],
-                    "field": "entry_time",
-                    "type": "date",
-                    "operator": "last_n_hours"
-                    }]
-                },
-            "size": 10000
-            }
-
-        result = self.request('POST',url, payload=payload)
-        return result
-
-
-    def get_alarms(self):
-        url = f"{self.base_url}alarms"
-
-        payload = {
-            "query": {
-                "condition": "AND",
-                "rules": [{
-                    "value": [ "2" ],
-                    "field": "entry_time",
-                    "type": "date",
-                    "operator": "last_n_hours"
-                    }]
-                },
-            "size": 10
-            }
-
-        result = self.request('POST',url, payload=payload)
-        return result
 
 
 
-    def get_interface(self,deviceId,af_type):
-        url = f"{self.base_url}device/interface"
-
-        params = {
-            'deviceId': deviceId
-        }
-
-        result = self.request('GET',url,params=params)
-        return result
-
-
-    def get_statistics_approute(self):
-        #url = f"{self.base_url}statistics/interface"
-        url = f"{self.base_url}statistics/approute"
-
-        date_to   = datetime.now(timezone.utc)
-        date_from = date_to - timedelta(minutes=30)
-
-
-        payload = {
-            "size": 10000,
-            "query": {
-                "condition": "AND",
-                "rules": [{
-                    "value": [ date_from.isoformat(), date_to.isoformat() ],
-                    "field": "entry_time",
-                    "type": "date",
-                    "operator": "between"
-                    },{
-                    "value": ["VF0050-5002"],
-                    "field": "host_name",
-                    "type": "string",
-                    "operator": "equal"
-                    },{
-                    "value": ["mpls:mpls"],
-                    "field": "tunnel_color",
-                    "type": "string",
-                    "operator": "equal"
-                    }]
-                },
-            "sort":[{
-                "field": "entry_time",
-                "type": "date",
-                "order": "asc"
-            }],
-            }
-
-
-        result = self.request('POST',url,payload=payload)
-        return result
-
-
-
-
-    def request(self, method, url, params=None, headers=None, payload=None, files=None, timeout=STANDARD_TIMEOUT):
+    def request(self, method, api, params=None, headers=None, payload=None, files=None, timeout=STANDARD_TIMEOUT):
         """Performs HTTP REST API Call.
 
         Args:
@@ -167,7 +75,6 @@ class Vmanage(object):
         if headers is None:
             headers = STANDARD_HEADERS
 
-
         if payload:
             if isinstance(payload, str):
                 data = payload.replace("\'", "\"")
@@ -179,7 +86,7 @@ class Vmanage(object):
         if files:
             headers = None
 
-
+        url = self.base_url+api
         response = self.session.request(method, url, headers=headers,  params=params, json=body_json, files=files, data=data, timeout=timeout)
 
 
@@ -229,29 +136,123 @@ class Vmanage(object):
 
         try:
             api = 'j_security_check'
-            url = f'{self.base_url}{api}'
-
-
-            response = self.session.post(url=url,
-                                         data={
-                                             'j_username': self.username,
-                                             'j_password': self.password
-                                         },
-                                         timeout=self.timeout)
+            data={
+                    'j_username': self.username,
+                    'j_password': self.password
+                }
+ 
+            response = self.session.post(url=self.base_url+api,data=data,timeout=self.timeout)
 
             if (response.status_code != 200 or response.text.startswith('<html>')):
                 raise ConnectionError('Login failed, check user credentials.')
 
-            #version = Utilities(self.session, self.host, self.port).get_vmanage_version()
-            version = '19.2.0'
-
+            version = self.get_vmanage_version() 
             if version >= '19.2.0':
                 api = 'client/token'
-                url = f'{self.base_url}{api}'
-                response = self.session.get(url=url, timeout=self.timeout)
+                response = self.session.get(url=self.base_url+api, timeout=self.timeout)
                 self.session.headers['X-XSRF-TOKEN'] = response.content
 
         except requests.exceptions.RequestException as e:
-            raise ConnectionError(f'Could not connect to {url}: {e}')
+            raise ConnectionError(f'Could not connect to {self.base_url}: {e}')
 
         return self.session
+
+
+    def get_vmanage_version(self):
+
+        params = { 'model':'vmanage'}
+        result = self.request('GET','system/device/controllers',params=params)
+
+        version = result[0]['version']
+        logger.info("Vmanage:%s Version:%s",self.base_url,version)
+        return version
+
+
+
+    def get_events(self):
+
+        payload = {
+            "query": {
+                "condition": "AND",
+                "rules": [{
+                    "value": [ "24" ],
+                    "field": "entry_time",
+                    "type": "date",
+                    "operator": "last_n_hours"
+                    }]
+                },
+            "size": 10000
+            }
+
+        result = self.request('POST',"event", payload=payload)
+        return result
+
+
+    def get_alarms(self):
+
+        payload = {
+            "query": {
+                "condition": "AND",
+                "rules": [{
+                    "value": [ "2" ],
+                    "field": "entry_time",
+                    "type": "date",
+                    "operator": "last_n_hours"
+                    }]
+                },
+            "size": 10
+            }
+
+        result = self.request('POST',"alarms", payload=payload)
+        return result
+
+
+
+    def get_interface(self,deviceId,af_type):
+
+        params = {
+            'deviceId': deviceId
+        }
+
+        result = self.request('GET','device/interface',params=params)
+        return result
+
+
+    def get_statistics_approute(self,host_name:str):
+
+        date_to   = datetime.now(timezone.utc)
+        date_from = date_to - timedelta(minutes=30)
+
+        payload = {
+            "size": 10000,
+            "query": {
+                "condition": "AND",
+                "rules": [{
+                    "value": [ date_from.isoformat(), date_to.isoformat() ],
+                    "field": "entry_time",
+                    "type": "date",
+                    "operator": "between"
+                    },{
+                    "value": [ host_name ],
+                    "field": "host_name",
+                    "type": "string",
+                    "operator": "equal"
+                    }]
+                },
+            "sort":[{
+                "field": "entry_time",
+                "type": "date",
+                "order": "asc"
+            }],
+            }
+
+        result = self.request('POST',"statistics/approute",payload=payload)
+        return result
+
+    def get_devices(self):
+        result = self.request('GET','device')
+        return result
+
+    def get_topology(self):
+        result = self.request('GET','topology')
+        return result
