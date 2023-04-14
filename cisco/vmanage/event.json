@@ -1,0 +1,34 @@
+{
+	"system_ip": "10.245.9.3",
+	"vmanage_system_ip": "10.245.9.3",
+	"tenant": "default",
+	"device_type": "vedge",
+	"entry_time": 1681295311000,
+	"statcycletime": 1681295311000,
+	"eventname": "bfd-state-change",
+	"component": "BFD",
+	"severity_level": "major",
+	"host_name": "VF0050-5002",
+	"event": {
+		"bfd-state-change": {
+			"src-ip": "195.59.44.169",
+			"dst-ip": "217.161.97.237",
+			"local-system-ip": "10.245.9.3",
+			"src-port": 12346,
+			"system-ip": "10.245.9.3",
+			"dst-port": 5381,
+			"remote-color": "biz-internet",
+			"host-name": "VF0050-5002",
+			"remote-system-ip": "10.245.9.108",
+			"severity-level": "major",
+			"local-color": "biz-internet",
+			"xmlns": "http://viptela.com/bfd",
+			"deleted": false,
+			"flap-reason": "timeout",
+			"proto": "ipsec",
+			"new-state": "down"
+		}
+	},
+	"details": "host-name=VF0050-5002; src-ip=195.59.44.169; dst-ip=217.161.97.237; proto=ipsec; src-port=12346; dst-port=5381; local-system-ip=10.245.9.3; local-color=biz-internet; remote-system-ip=10.245.9.108; remote-color=biz-internet; new-state=down; deleted=false; flap-reason=timeout",
+	"id": "bD0CdYcBKlPUj7QCXIK0"
+}
