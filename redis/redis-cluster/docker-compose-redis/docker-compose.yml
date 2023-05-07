@@ -1,0 +1,23 @@
+version: '3.5'
+name: redis-cluster
+services:
+
+  redis-supervisor:
+    image: 'redis:6.0-alpine'
+    command: /project/start-cluster.sh
+    volumes: 
+      - ./start-cluster.sh:/project/start-cluster.sh
+    depends_on:
+      - redis-node
+
+  redis-node:
+    image: 'redis:6.0-alpine'
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis-node.conf:/usr/local/etc/redis/redis.conf
+    deploy:
+      replicas: 6
+
+networks:
+  default:
+    name: redis-cluster
