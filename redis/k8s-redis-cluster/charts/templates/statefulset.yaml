@@ -43,6 +43,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: {{ .Values.image.command }}
+          args: {{ .Values.image.args }}
           env:
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
@@ -60,7 +61,7 @@ spec:
                   key: {{ .secret.key }}
             {{- end }}
             {{- end }} 
-          {{- if or .Values.secrets .Values.additionalVolumes }}
+          {{- if or .Values.secrets .Values.additionalVolumes .Values.fileConfigMap}}
           volumeMounts:
           {{- if .Values.secrets }}
             - name: "{{ .Chart.Name }}-secrets"
@@ -90,7 +91,7 @@ spec:
           {{- if .Values.probes }}
           {{- toYaml .Values.probes | nindent 10 }}
           {{- end }}
-      {{- if or .Values.secrets .Values.additionalVolumes }}
+      {{- if or .Values.secrets .Values.additionalVolumes .Values.fileConfigMap }}
       volumes:
       {{- if .Values.secrets }}
         - name: "{{ .Chart.Name }}-secrets"
