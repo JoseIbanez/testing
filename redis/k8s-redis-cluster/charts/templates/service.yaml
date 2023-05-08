@@ -1,0 +1,17 @@
+{{- if .Values.service }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: "{{ template "charts.fullname" . }}"
+  labels:
+{{- include "charts.labels" . | nindent 4 }}
+  annotations:
+{{ toYaml .Values.service.annotations | indent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: "{{ template "charts.fullname" . }}"
+  ports:
+{{ toYaml .Values.service.ports | indent 4 }}
+{{- end }}
