@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    meta.helm.sh/release-name: redis-cluster
+    meta.helm.sh/release-namespace: esm-aviva
+  creationTimestamp: "2023-05-09T14:18:52Z"
+  generation: 1
+  labels:
+    app: redis-cluster
+    app.kubernetes.io/instance: redis-cluster
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: redis-cluster
+    app.kubernetes.io/version: 1.0.4
+    helm.sh/chart: redis-cluster-1.0.4
+  name: redis-cluster
+  namespace: esm-aviva
+  resourceVersion: "461376198"
+  uid: ce39a1a4-786f-433b-93aa-bfe6f348c35c
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 6
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: redis-cluster
+      app.kubernetes.io/instance: redis-cluster
+      app.kubernetes.io/name: redis-cluster
+  serviceName: redis-cluster
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: redis-cluster
+        app.kubernetes.io/instance: redis-cluster
+        app.kubernetes.io/name: redis-cluster
+    spec:
+      containers:
+      - args:
+        - /usr/local/etc/redis/redis.conf
+        command:
+        - redis-server
+        env:
+        - name: ESM_ENV
+          valueFrom:
+            configMapKeyRef:
+              key: ESM_ENV
+              name: redis-cluster
+        - name: KAFKA_BROKERS
+          valueFrom:
+            configMapKeyRef:
+              key: KAFKA_BROKERS
+              name: redis-cluster
+        image: redis:6.0-alpine
+        imagePullPolicy: Always
+        name: redis-cluster
+        ports:
+        - containerPort: 6379
+          name: redis
+          protocol: TCP
+        resources: {}
+        securityContext: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/local/etc/redis/redis.conf
+          name: redis-cluster-configfiles
+          readOnly: true
+          subPath: redis-node
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: otel-collector-sa
+      serviceAccountName: otel-collector-sa
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: redis-cluster-configfiles
+        name: redis-cluster-configfiles
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+status:
+  availableReplicas: 6
+  collisionCount: 0
+  currentReplicas: 6
+  currentRevision: redis-cluster-7cdb6dbdc7
+  observedGeneration: 1
+  readyReplicas: 6
+  replicas: 6
+  updateRevision: redis-cluster-7cdb6dbdc7
+  updatedReplicas: 6
