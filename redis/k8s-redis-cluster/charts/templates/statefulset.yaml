@@ -1,128 +1,38 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "charts.fullname" . }}
+  name: redis-cluster
   labels:
     {{- include "charts.labels" . | nindent 4 }}
-  annotations:
-    {{- with .Values.deploymentAnnotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-    {{- if .Values.enableAutoDeploymentRollover }}
-    reloader.stakater.com/auto: "true"
-    {{- end }}
 spec:
-  {{- $fullName := include "charts.fullname" . -}}
-  {{- if not .Values.autoscaling.enabled }}
-  serviceName: {{ include "charts.fullname" . }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  serviceName: redis-cluster
+  replicas: 6
   selector:
     matchLabels:
       {{- include "charts.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
         {{- include "charts.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "charts.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      restartPolicy: {{ .Values.restartPolicy }}
       containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: {{ .Values.image.command }}
-          args: {{ .Values.image.args }}
-          env:
-            {{- range $key, $val := .Values.env }}
-            - name: {{ $key }}
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $fullName }}
-                  key: {{ $key }}
-            {{- end }}
-            {{- if .Values.enableSecretObjects }} 
-            {{- range .Values.secretObjects }}
-            - name: {{ .secret.env_var_name }}
-              valueFrom:
-                secretKeyRef: 
-                  name: {{ .secret.name }}
-                  key: {{ .secret.key }}
-            {{- end }}
-            {{- end }} 
-          {{- if or .Values.secrets .Values.additionalVolumes .Values.fileConfigMap}}
-          volumeMounts:
-          {{- if .Values.secrets }}
-            - name: "{{ .Chart.Name }}-secrets"
-              mountPath: {{ .Values.secretsMountPath }}
-              readOnly: true
-          {{- end }}          
-          {{- if .Values.additionalVolumes -}}
-          {{- toYaml .Values.additionalVolumes | nindent 12 }}
-          {{- end }}
-          {{- end }}
-
-          {{- if .Values.fileConfigMap }}
-          {{- range .Values.fileConfigMap }}
-            - name: "{{ $.Chart.Name }}-configfiles"
-              mountPath: {{ .mountPath }}
-              subPath: {{ .name }}
-              readOnly: true
-          {{- end }}
-          {{- end }}
-
-          {{- if .Values.containerPorts }}
-          ports:
-            {{- toYaml .Values.containerPorts | nindent 12 }}
-          {{- end }}
-          resources:
-            {{- toYaml .Values.resourcesWorker | nindent 12 }}
-          {{- if .Values.probes }}
-          {{- toYaml .Values.probes | nindent 10 }}
-          {{- end }}
-      {{- if or .Values.secrets .Values.additionalVolumes .Values.fileConfigMap }}
+      - name: redis
+        image: redis:6.2.3-alpine
+        command: ["redis-server"]
+        args: ["/etc/redis/redis.conf"]
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - mountPath: /etc/redis/redis.conf
+          name: redis-config
+          readOnly: true
+          subPath: redis-node
       volumes:
-      {{- if .Values.secrets }}
-        - name: "{{ .Chart.Name }}-secrets"
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: "{{ .Chart.Name }}-secrets"
-      {{- end }}
-
-      {{- if .Values.fileConfigMap }}
-        - name: "{{ $.Chart.Name }}-configfiles"
-          configMap:
-            name: "{{ $.Chart.Name }}-configfiles"
-      {{- end }}
+      - name: redis-config
+        configMap:
+          defaultMode: 420
+          name: redis-cluster-configfiles
+      serviceAccountName: {{ include "charts.serviceAccountName" . }}
 
 
-      {{- if .Values.additionalVolumes }}
-        {{- toYaml .Values.additionalVolumes | nindent 8 }}
-      {{- end }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
