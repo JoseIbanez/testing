@@ -13,17 +13,27 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rservice.proto\"3\n\x05Point\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"5\n\x07\x46\x65\x61ture\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t2.\n\nRouteGuide\x12 \n\nGetFeature\x12\x06.Point\x1a\x08.Feature\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rservice.proto\"\x16\n\x08TenantId\x12\n\n\x02id\x18\x01 \x01(\t\"\x16\n\x08\x44\x65viceId\x12\n\n\x02id\x18\x01 \x01(\t\"X\n\x06Tenant\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0bsensitivity\x18\x03 \x01(\x05\x12\x0f\n\x07opco_id\x18\x04 \x01(\t\x12\x0e\n\x06source\x18\x05 \x01(\t\"[\n\x06\x44\x65vice\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\ttenant_id\x18\x03 \x01(\t\x12\x15\n\rmanagement_ip\x18\x04 \x01(\t\x12\r\n\x05model\x18\x05 \x01(\t\"3\n\x05Point\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"5\n\x07\x46\x65\x61ture\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t2.\n\nRouteGuide\x12 \n\nGetFeature\x12\x06.Point\x1a\x08.Feature\"\x00\x32\x97\x01\n\x0bInventoryDB\x12!\n\tGetTenant\x12\t.TenantId\x1a\x07.Tenant\"\x00\x12!\n\tGetDevice\x12\t.DeviceId\x1a\x07.Device\"\x00\x12 \n\nSaveTenant\x12\x07.Tenant\x1a\x07.Tenant\"\x00\x12 \n\nSaveDevice\x12\x07.Device\x1a\x07.Device\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'service_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _POINT._serialized_start=17
-  _POINT._serialized_end=68
-  _FEATURE._serialized_start=70
-  _FEATURE._serialized_end=123
-  _ROUTEGUIDE._serialized_start=125
-  _ROUTEGUIDE._serialized_end=171
+  _TENANTID._serialized_start=17
+  _TENANTID._serialized_end=39
+  _DEVICEID._serialized_start=41
+  _DEVICEID._serialized_end=63
+  _TENANT._serialized_start=65
+  _TENANT._serialized_end=153
+  _DEVICE._serialized_start=155
+  _DEVICE._serialized_end=246
+  _POINT._serialized_start=248
+  _POINT._serialized_end=299
+  _FEATURE._serialized_start=301
+  _FEATURE._serialized_end=354
+  _ROUTEGUIDE._serialized_start=356
+  _ROUTEGUIDE._serialized_end=402
+  _INVENTORYDB._serialized_start=405
+  _INVENTORYDB._serialized_end=556
 # @@protoc_insertion_point(module_scope)

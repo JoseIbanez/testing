@@ -17,7 +17,7 @@ serviceAccount:
   create: false
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::078402339249:role/vgsl-unity-global-iam-rl.esm-otel-msk-collector
-  name: default #redis-sa  
+  name: otel-collector-sa
 
 
 podAnnotations: {}
