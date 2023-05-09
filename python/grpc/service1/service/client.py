@@ -9,6 +9,8 @@ import grpc
 from service_pb2 import Feature, Point
 from service_pb2_grpc import RouteGuideStub
 
+from service_pb2_grpc import InventoryDBStub
+from service_pb2 import TenantId,Tenant,DeviceId,Device
 
 
 
@@ -29,8 +31,14 @@ def run():
 
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = RouteGuideStub(channel)
+        stu2 = InventoryDBStub(channel)
         print("-------------- GetFeature --------------")
         guide_get_feature(stub)
+
+        tenantId = TenantId(id="aviva")
+        tenant = stu2.GetTenant(tenantId)
+        print("tenant:")
+        print(tenant)
 
 
 if __name__ == '__main__':

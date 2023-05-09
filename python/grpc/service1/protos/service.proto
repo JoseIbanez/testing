@@ -5,6 +5,38 @@ service RouteGuide {
   rpc GetFeature(Point) returns (Feature) {}
 }
 
+service InventoryDB {
+  rpc GetTenant(TenantId) returns (Tenant) {}
+  rpc GetDevice(DeviceId) returns (Device) {} 
+  rpc SaveTenant(Tenant) returns (Tenant) {}
+  rpc SaveDevice(Device) returns (Device) {}
+}
+
+message TenantId {
+  string id = 1;
+}
+
+message DeviceId {
+  string id =1;
+}
+
+message Tenant {
+  string id = 1;
+  string name = 2;
+  int32 sensitivity = 3;
+  string opco_id = 4;
+  string source = 5;
+}
+
+message Device {
+  string id = 1;
+  string name = 2;
+  string tenant_id = 3;
+  string management_ip = 4;
+  string model = 5;
+}
+
+
 message Point {
   string id = 1;
   int32 count = 2;
