@@ -8,7 +8,7 @@ get_ip() {
 remove_failed_nodes() {
 
     HOSTNAME=$1
-    MAX_NODE=5
+    CLUSER_SIZE=6
 
     # Remove failed nodes
     FAILED=$(redis-cli -c -h $HOSTNAME -p 6379 CLUSTER NODES | grep fail | cut -d' ' -f 1); 
@@ -16,10 +16,9 @@ remove_failed_nodes() {
     for n in $FAILED; do 
         echo "Remove failed Node: $n"
 
-        for i in $(seq 0 $MAX_NODE); do
+        for i in $(seq 0 $(($CLUSER_SIZE - 1)) ); do
             NODENAME="$BASENAME-$i.$BASENAME.$DOMAIN"
             redis-cli -c -h $NODENAME -p 6379 CLUSTER FORGET $n
-
         done
 
     done
@@ -51,14 +50,29 @@ add_new_node() {
 }
 
 
+write_demo_data() {
+
+    HOSTNAME=$1
+
+        # Test to write some data
+    MYKEY=$(echo $RANDOM | md5sum | head -c 20)
+    redis-cli -c -h $HOSTNAME -p 6379 <<EOF
+SET $MYKEY "Hello"
+EXPIRE $MYKEY 300
+
+EOF
+
+}
+
+
 echo "** start redis cluster config **"
 sleep 20
 BASENAME="redis-cluster"
 DOMAIN=$(cat /etc/resolv.conf | grep search | cut -d' ' -f2)
-MAX_NODE=5
+CLUSER_SIZE=6
 NODELIST=""
 
-for i in $(seq 0 $MAX_NODE); do
+for i in $(seq 0 $(($CLUSER_SIZE - 1)) ); do
     HOSTNAME="$BASENAME-$i.$BASENAME.$DOMAIN"
     ping -c 3 $HOSTNAME
     NODELIST="${NODELIST} $(get_ip $HOSTNAME):6379"
@@ -72,7 +86,7 @@ set +x
 while true; do
 
 
-    HOSTNAME="$BASENAME-$(( $RANDOM % $MAX_NODE )).$BASENAME.$DOMAIN"
+    HOSTNAME="$BASENAME-$(( $RANDOM % $CLUSER_SIZE )).$BASENAME.$DOMAIN"
     HOSTURL="$(get_ip $HOSTNAME):6379"
 
     echo 
@@ -89,5 +103,9 @@ while true; do
     redis-cli --cluster check $HOSTURL
     redis-cli --cluster info  $HOSTURL
 
-    sleep 60
+    write_demo_data $HOSTNAME
+
+    sleep 20
 done
+
+
