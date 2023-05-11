@@ -1,19 +1,35 @@
 #!/bin/bash
 
-VMNAME=u04
-IP_ADDR=192.168.122.84
-RAM=2048
-CORES=2
+set -e
 
+export VMNAME=u01
+export IP_ADDR=10.39.122.21
 
+export RAM=2048
+export CORES=2
+export NETWORK=vlan-nodes
+export DISK=10G
 
-mkdir -p $HOME/kvm/$VMNAME
+sudo mkdir -p $HOME/kvm/$VMNAME
+sudo chown $USER:$USER $HOME/kvm/$VMNAME
 cd $HOME/kvm/$VMNAME
 
-#Create root disk
-qemu-img create -F qcow2 -b ~/kvm/base/focal-server-cloudimg-amd64.img -f qcow2 ./$VMNAME.qcow2 10G
+#Ubuntu 20.04
+export IMAGE=focal-server-cloudimg-amd64-disk-kvm.img
 
-INTERFACE=enp1s0
+#Ubuntu 22.04
+export IMAGE=jammy-server-cloudimg-amd64.img 
+
+#More
+#download from: https://cloud-images.ubuntu.com/focal/current/
+
+
+
+
+#Create root disk
+qemu-img create -F qcow2 -b ~/kvm/base/$IMAGE -f qcow2 ./$VMNAME.qcow2 $DISK
+
+export INTERFACE=enp1s0
 
 cat >network-config <<EOF
 ethernets:
@@ -21,7 +37,7 @@ ethernets:
         addresses: 
         - $IP_ADDR/24
         dhcp4: false
-        gateway4: 192.168.122.1
+        gateway4: 10.39.122.1
         nameservers:
             addresses: 
             - 1.1.1.1
@@ -59,6 +75,6 @@ virt-install --connect qemu:///system --virt-type kvm \
     --disk path=$HOME/kvm/$VMNAME/$VMNAME.qcow2,device=disk \
     --disk path=$HOME/kvm/$VMNAME/$VMNAME-seed.qcow2,device=disk \
     --import \
-    --network network=default,model=virtio \
+    --network network=$NETWORK,model=virtio \
     --noautoconsole
 

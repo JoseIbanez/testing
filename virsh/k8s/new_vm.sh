@@ -2,8 +2,12 @@
 
 set -e
 
+#export VMNAME=worker
+#export IP_ADDR=10.39.122.84
 export VMNAME=cp
 export IP_ADDR=10.39.122.85
+
+
 export RAM=8192
 export CORES=2
 export NETWORK=vlan-nodes
