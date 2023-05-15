@@ -39,6 +39,7 @@ rm *.ts *.m3u8
 tsprefix=`date +%d%H%M`
 
 ffmpeg \
+ -reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -re  \
  -i $ACE_URL \
  -map 0:v:0 -map 0:a:0 \
  -c:v copy \
