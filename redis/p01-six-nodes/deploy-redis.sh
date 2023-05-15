@@ -1,45 +1,54 @@
-apt-get -y update
-apt-get install -y build-essential tcl
+#!/bin/bash
 
-apt install -y ruby
-gem install redis
+sudo apt-get update -y
+sudo apt-get install -y redis-server net-tools
+sudo systemctl stop redis-server
+sudo systemctl disable redis-server.service
 
-
-cd /tmp
-curl -O http://download.redis.io/redis-stable.tar.gz
-tar xzvf redis-stable.tar.gz
-cd redis-stable
-
-make
-make test
-sudo make install
-
-cd 7000
-screen -dmS redis7000 /tmp/redis-server redis.conf
-cd ../7001
-screen -dmS redis7001 /tmp/redis-server redis.conf
-cd ../7002
-screen -dmS redis7002 /tmp/redis-server redis.conf
-cd ../7003
-screen -dmS redis7003 /tmp/redis-server redis.conf
-cd ../7004
-screen -dmS redis7004 /tmp/redis-server redis.conf
-cd ../7005
-screen -dmS redis7005 /tmp/redis-server redis.conf
+rm -rf 700*
+export PORT
+for PORT in $(seq 7000 7005 ); do
+    mkdir -p $PORT
+    envsubst < redis.conf > $PORT/redis.conf
+done
 
 
-./redis-trib.rb create --replicas 1 \
-         10.28.1.102:7000 \
-         10.28.1.102:7001 \
-         10.28.1.102:7002 \
-         10.28.1.102:7003 \
-         10.28.1.102:7004 \
-         10.28.1.102:7005 \
-         10.28.1.103:7000 \
-         10.28.1.103:7001 \
-         10.28.1.103:7002 \
-         10.28.1.103:7003 \
-         10.28.1.103:7004 \
-         10.28.1.103:7005
+for PORT in $(seq 7000 7005 ); do
+    cd $PORT
+    ls
+    screen -dmS "redis$PORT" redis-server redis.conf
+    cd ..
+done
 
+
+
+NODELIST=""
+IP="10.39.122.21"
+
+for i in $(seq 7000 7005 ); do
+    NODELIST="${NODELIST} $IP:$i"
+done
+echo $NODELIST
+
+set -x
+redis-cli --cluster create $NODELIST --cluster-replicas 1 --cluster-yes
+set +x
+
+redis-cli --cluster check $IP:7000
+redis-cli --cluster info  $IP:7000
+
+
+redis-cli -c -p 7000 <<EOF
+CLUSTER NODES
+CLUSTER INFO
+
+SET mykey6 "value red" EX 20
+SET mykey1 "value blue" EX 20
+SET mykey3 "value green" EX 20
+
+GET mykey1
+GET mykey3
+GET mykey6
+
+EOF
 
