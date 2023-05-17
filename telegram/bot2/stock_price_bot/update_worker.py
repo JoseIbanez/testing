@@ -18,7 +18,6 @@ def update_list():
     symbol_list = db.get_symbol_list()
 
     for s_id in symbol_list:
-
         s = get_symbol_info(s_id)
         db.update_symbol(s)
 
@@ -30,9 +29,14 @@ def main():
     configure_loger()
 
     while True:
-        update_list()
-        logger.info("wait for other loop")
-        time.sleep(60)
+        try:
+            update_list()
+            logger.info("wait for other loop")
+            time.sleep(300)
+
+        except Exception as e:
+            logger.fatal(e)
+            time.sleep(300)
 
 
 if __name__ == "__main__":
