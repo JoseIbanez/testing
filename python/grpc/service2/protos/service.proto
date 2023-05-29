@@ -1,6 +1,12 @@
 syntax = "proto3";
 
-package protoblog;
+
+service Collector {
+  rpc SendEvent(Metric) returns (Ack) {}
+
+  rpc SendMetric(Metric) returns (Ack) {}
+  rpc SendMetricStream(stream Metric) returns (Ack) {}
+}
 
 
 message Metric {
@@ -10,7 +16,7 @@ message Metric {
    string resource = 4;
    uint32 messageVersion = 5;
 
-   uint32 eventEpoc = 6;
+   uint64 eventEpoc = 6;
 
 
   message Value {
@@ -27,5 +33,9 @@ message Metric {
   repeated Tag tags = 8;
 
 
+}
 
+
+message Ack {
+  int32 code = 1;
 }

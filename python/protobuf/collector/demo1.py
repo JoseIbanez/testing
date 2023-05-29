@@ -1,17 +1,18 @@
 
-import metric_pb2 as Metric
+from metric_pb2 import Metric
 
-my_metric = Metric.Metric(
+my_metric = Metric(
     domain="test",
     opco = "VFES",
     customer= "test",
     resource= "VF001",
     messageVersion=1,
     eventEpoc=444,
-    values= (Metric.Metric.TupleValue( name="cpu", value=300.0)) ,
-    tags= [ Metric.Metric.TupleTag(name="site",value="VF001") ]
 )
-my_metric.opco = "test"
 
+my_metric.values.extend([ Metric.Value( name="cpu", value=300.0), Metric.Value( name="mem", value=100.0) ])
+my_metric.tags.extend([   Metric.Tag(name="site",value="VF001")  ])
+
+print(my_metric.SerializeToString())
 
 print(my_metric)

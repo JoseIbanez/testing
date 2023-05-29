@@ -5,6 +5,12 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class Ack(_message.Message):
+    __slots__ = ["code"]
+    CODE_FIELD_NUMBER: _ClassVar[int]
+    code: int
+    def __init__(self, code: _Optional[int] = ...) -> None: ...
+
 class Metric(_message.Message):
     __slots__ = ["customer", "domain", "eventEpoc", "messageVersion", "opco", "resource", "tags", "values"]
     class Tag(_message.Message):
