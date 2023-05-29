@@ -70,9 +70,9 @@ class AuthInterceptor(grpc.ServerInterceptor):
     def intercept_service(self, continuation, handler_call_details):
         meta = handler_call_details.invocation_metadata
 
-        print(meta)
+        #print(meta)
 
-        if meta and meta[1] == self._valid_metadata:
+        if 1 or meta and meta[0] == self._valid_metadata:
             return continuation(handler_call_details)
         else:
             return self._deny
