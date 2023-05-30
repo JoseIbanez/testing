@@ -5,6 +5,7 @@ from __future__ import print_function
 import logging
 import random
 import time
+import os
 
 import grpc
 from service_pb2 import Metric, Ack
@@ -104,25 +105,49 @@ def run_3():
 
     #href: https://grpc.io/docs/guides/auth/
 
-
-    credentials = grpc.composite_channel_credentials(
-        grpc.local_channel_credentials(),
-        grpc.metadata_call_credentials(GrpcAuth('token'))
-    )
-
-    server = 'localhost:50051'
-    server = '192.168.1.22:50051'
+    server =  os.environ.get('GRPC_TARGET','localhost:50051')
 
 
-    with grpc.secure_channel(server,credentials=credentials) as channel:
+    if "443" in server:
+
+        # build ssl credentials using the cert the same as before
+        with open('./setup/roots.pem', 'rb') as f:
+            cert = f.read()
+
+        channel_security="ssl"
+        credentials = grpc.composite_channel_credentials(
+            grpc.ssl_channel_credentials(cert),
+            grpc.metadata_call_credentials(GrpcAuth('token'))
+        )
+        channel = grpc.secure_channel(server,credentials=credentials)
+
+    elif "127.0.0.1" in server:
+        channel_security = "local"
+        credentials = grpc.composite_channel_credentials(
+            grpc.local_channel_credentials(),
+            grpc.metadata_call_credentials(GrpcAuth('token'))
+        )
+        channel = grpc.secure_channel(server,credentials=credentials)
+
+    else:
+        channel_security = "insecure"
+        channel = grpc.insecure_channel(server)
+
+
+    logger.info("Connecting gRPC target:%s, channel:%s",server,channel_security)
+
+    gen_metric = get_metric()
+    metric_list = iter( [next(gen_metric), next(gen_metric)])
+
+    with channel:
         stub = CollectorStub(channel)
-        result = stub.SendMetricStream(get_metric())
-        logger.info("Done. result %s",str(result.code))
-        time.sleep(60)
+        result = stub.SendMetricStream(get_metric()) # metric_list ) #get_metric())
+        logger.info("Done. resultCode:%s",str(result.code))
+        time.sleep(1)
 
 
 
 
 if __name__ == '__main__':
     logging.basicConfig()
-    run_2()
+    run_3()
