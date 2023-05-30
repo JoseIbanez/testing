@@ -2,6 +2,7 @@
 
 brew install ghz
 
+
 ghz --insecure --async \
   --proto ./protos/service.proto \
   --call Collector/SendEvent \
