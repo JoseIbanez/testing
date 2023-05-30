@@ -49,13 +49,15 @@ class CollectorServicer(service_pb2_grpc.CollectorServicer):
 
     def SendMetricStream(self, request_iterator, context) -> Ack:
 
-        print(context)
-        print(context.invocation_metadata())
+        logger.info("invocation_metadata: %s",context.invocation_metadata())
+        count = 0
+        time0 = time.time()
 
         for request in request_iterator:
+            count += 1
             self.kafka.send(request)
 
-        print("Done")
+        logger.info("Items %d, delay %.03f. Done",count,time.time()-time0)
 
         return Ack(code=0)
 
