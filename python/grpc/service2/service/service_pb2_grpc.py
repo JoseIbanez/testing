@@ -15,17 +15,17 @@ class CollectorStub(object):
             channel: A grpc.Channel.
         """
         self.SendEvent = channel.unary_unary(
-                '/Collector/SendEvent',
+                '/collector.Collector/SendEvent',
                 request_serializer=service__pb2.Metric.SerializeToString,
                 response_deserializer=service__pb2.Ack.FromString,
                 )
         self.SendMetric = channel.unary_unary(
-                '/Collector/SendMetric',
+                '/collector.Collector/SendMetric',
                 request_serializer=service__pb2.Metric.SerializeToString,
                 response_deserializer=service__pb2.Ack.FromString,
                 )
         self.SendMetricStream = channel.stream_unary(
-                '/Collector/SendMetricStream',
+                '/collector.Collector/SendMetricStream',
                 request_serializer=service__pb2.Metric.SerializeToString,
                 response_deserializer=service__pb2.Ack.FromString,
                 )
@@ -72,7 +72,7 @@ def add_CollectorServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'Collector', rpc_method_handlers)
+            'collector.Collector', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -91,7 +91,7 @@ class Collector(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Collector/SendEvent',
+        return grpc.experimental.unary_unary(request, target, '/collector.Collector/SendEvent',
             service__pb2.Metric.SerializeToString,
             service__pb2.Ack.FromString,
             options, channel_credentials,
@@ -108,7 +108,7 @@ class Collector(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Collector/SendMetric',
+        return grpc.experimental.unary_unary(request, target, '/collector.Collector/SendMetric',
             service__pb2.Metric.SerializeToString,
             service__pb2.Ack.FromString,
             options, channel_credentials,
@@ -125,7 +125,7 @@ class Collector(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_unary(request_iterator, target, '/Collector/SendMetricStream',
+        return grpc.experimental.stream_unary(request_iterator, target, '/collector.Collector/SendMetricStream',
             service__pb2.Metric.SerializeToString,
             service__pb2.Ack.FromString,
             options, channel_credentials,
