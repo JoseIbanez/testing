@@ -80,7 +80,10 @@ def run():
 
 def run_2():
 
-    with grpc.insecure_channel('localhost:50051') as channel:
+    server = 'localhost:50051'
+    server = 'h3.loc:50051'
+
+    with grpc.insecure_channel(server) as channel:
         stub = CollectorStub(channel)
 
 
@@ -122,4 +125,4 @@ def run_3():
 
 if __name__ == '__main__':
     logging.basicConfig()
-    run_3()
+    run_2()
