@@ -13,21 +13,21 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rservice.proto\"\xf9\x01\n\x06Metric\x12\x0e\n\x06\x64omain\x18\x01 \x01(\t\x12\x0c\n\x04opco\x18\x02 \x01(\t\x12\x10\n\x08\x63ustomer\x18\x03 \x01(\t\x12\x10\n\x08resource\x18\x04 \x01(\t\x12\x16\n\x0emessageVersion\x18\x05 \x01(\r\x12\x11\n\teventEpoc\x18\x06 \x01(\x04\x12\x1d\n\x06values\x18\x07 \x03(\x0b\x32\r.Metric.Value\x12\x19\n\x04tags\x18\x08 \x03(\x0b\x32\x0b.Metric.Tag\x1a$\n\x05Value\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02\x1a\"\n\x03Tag\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x03\x41\x63k\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x32o\n\tCollector\x12\x1c\n\tSendEvent\x12\x07.Metric\x1a\x04.Ack\"\x00\x12\x1d\n\nSendMetric\x12\x07.Metric\x1a\x04.Ack\"\x00\x12%\n\x10SendMetricStream\x12\x07.Metric\x1a\x04.Ack\"\x00(\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rservice.proto\x12\tcollector\"\x8d\x02\n\x06Metric\x12\x0e\n\x06\x64omain\x18\x01 \x01(\t\x12\x0c\n\x04opco\x18\x02 \x01(\t\x12\x10\n\x08\x63ustomer\x18\x03 \x01(\t\x12\x10\n\x08resource\x18\x04 \x01(\t\x12\x16\n\x0emessageVersion\x18\x05 \x01(\r\x12\x11\n\teventEpoc\x18\x06 \x01(\x04\x12\'\n\x06values\x18\x07 \x03(\x0b\x32\x17.collector.Metric.Value\x12#\n\x04tags\x18\x08 \x03(\x0b\x32\x15.collector.Metric.Tag\x1a$\n\x05Value\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02\x1a\"\n\x03Tag\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x13\n\x03\x41\x63k\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x32\xab\x01\n\tCollector\x12\x30\n\tSendEvent\x12\x11.collector.Metric\x1a\x0e.collector.Ack\"\x00\x12\x31\n\nSendMetric\x12\x11.collector.Metric\x1a\x0e.collector.Ack\"\x00\x12\x39\n\x10SendMetricStream\x12\x11.collector.Metric\x1a\x0e.collector.Ack\"\x00(\x01\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'service_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _METRIC._serialized_start=18
-  _METRIC._serialized_end=267
-  _METRIC_VALUE._serialized_start=195
-  _METRIC_VALUE._serialized_end=231
-  _METRIC_TAG._serialized_start=233
-  _METRIC_TAG._serialized_end=267
-  _ACK._serialized_start=269
-  _ACK._serialized_end=288
-  _COLLECTOR._serialized_start=290
-  _COLLECTOR._serialized_end=401
+  _METRIC._serialized_start=29
+  _METRIC._serialized_end=298
+  _METRIC_VALUE._serialized_start=226
+  _METRIC_VALUE._serialized_end=262
+  _METRIC_TAG._serialized_start=264
+  _METRIC_TAG._serialized_end=298
+  _ACK._serialized_start=300
+  _ACK._serialized_end=319
+  _COLLECTOR._serialized_start=322
+  _COLLECTOR._serialized_end=493
 # @@protoc_insertion_point(module_scope)
