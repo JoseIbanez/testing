@@ -28,7 +28,7 @@ def get_metric() -> Metric:
         metric = parse_metric({})
         yield metric
 
-        if counter > 1000000:
+        if counter > 1000:
             break
         
 
@@ -136,18 +136,21 @@ def run_3():
 
     logger.info("Connecting gRPC target:%s, channel:%s",server,channel_security)
 
-    gen_metric = get_metric()
-    metric_list = iter( [next(gen_metric), next(gen_metric)])
+    #gen_metric = get_metric()
+    #metric_list = iter( [next(gen_metric), next(gen_metric)])
+
+
 
     with channel:
         stub = CollectorStub(channel)
         result = stub.SendMetricStream(get_metric()) # metric_list ) #get_metric())
         logger.info("Done. resultCode:%s",str(result.code))
-        time.sleep(1)
 
 
 
 
 if __name__ == '__main__':
     logging.basicConfig()
-    run_3()
+
+    for round in range(1,200):
+        run_3()
