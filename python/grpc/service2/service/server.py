@@ -55,6 +55,8 @@ class CollectorServicer(service_pb2_grpc.CollectorServicer):
         for request in request_iterator:
             self.kafka.send(request)
 
+        print("Done")
+
         return Ack(code=0)
 
 
