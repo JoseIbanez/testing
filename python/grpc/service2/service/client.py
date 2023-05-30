@@ -107,8 +107,11 @@ def run_3():
         grpc.metadata_call_credentials(GrpcAuth('token'))
     )
 
+    server = 'localhost:50051'
+    server = '192.168.1.22:50051'
 
-    with grpc.secure_channel('localhost:50051',credentials=credentials) as channel:
+
+    with grpc.secure_channel(server,credentials=credentials) as channel:
         stub = CollectorStub(channel)
         result = stub.SendMetricStream(get_metric())
         logger.info("Done. result %s",str(result.code))
