@@ -1,0 +1,24 @@
+
+
+# To fill balcon pool
+15  00,04,08,14,20    *  *  *  /usr/bin/mosquitto_pub -t 'q/ESP60019440E65B' -m "0015;1111"
+
+
+# Irigate
+00        06   *  *  *     /home/ibanez/Projects/testing/IoT/p16-irrigate/irrigate-drought.sh
+00,50     07   *  *  *     /home/ibanez/Projects/testing/IoT/p16-irrigate/irrigate.sh
+00        17   *  *  *     /home/ibanez/Projects/testing/IoT/p16-irrigate/irrigate-drought.sh
+00,50     18   *  *  *     /home/ibanez/Projects/testing/IoT/p16-irrigate/irrigate.sh
+00        19   *  *  *     /home/ibanez/Projects/testing/IoT/p16-irrigate/irrigate-drought.sh
+00,50     20   *  *  *     /home/ibanez/Projects/testing/IoT/p16-irrigate/irrigate.sh
+
+
+# Photo Gema
+#00    *  * *  *  /usr/bin/mosquitto_pub -t "q/ESPCC50E3C4981E" -m "0005;1111"
+#00    *  * *  *  /usr/bin/mosquitto_pub -t "q/ESP2C3AE8128E75" -m "0005;1111"
+
+
+# Fly killer
+*/20   00,18-23  * *  *  /usr/bin/mosquitto_pub -t "q/ESP3C71BF4D0BB8" -m "0900;0001"
+
+

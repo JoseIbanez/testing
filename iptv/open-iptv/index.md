@@ -2,7 +2,7 @@
 
 
 ## News English
-* [BBC World News](http://ott-cdn.ucom.am/s24/index.m3u8)
+* [BBC World News](http://o1.boliche.ovh/4402/stream.m3u8)
 * [CNN](https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8)
 * [Euronews](https://euronews.alteox.app/hls/en_stream.m3u8)
 
