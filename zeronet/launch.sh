@@ -1,5 +1,5 @@
 #!/bin/sh
-docker run -d \
+docker run -d --rm \
   --name zeronet \
   -e "ENABLE_TOR=true" \
   -v ~/Downloads/zeronet:/root/data \
