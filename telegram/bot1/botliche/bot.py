@@ -5,9 +5,10 @@ import os
 import time
 import json
 import shlex
-from telegram import Update
+from telegram import Update, BotCommand
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, CommandHandler, ContextTypes
+
 import requests
 from requests.exceptions import HTTPError,ConnectionError
 
@@ -29,6 +30,15 @@ eventList = EventTVList()
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a super bot, please talk to me!")
 
+    commandList = [
+        BotCommand("search","search channel id"),
+        BotCommand("hls", "start a tx"),
+        BotCommand("check", "check tx status"),
+        BotCommand("kill", "kill tx")
+        ]
+
+
+    await context.bot.setMyCommands(commandList)
 
 async def fetv(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
