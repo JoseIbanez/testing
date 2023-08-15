@@ -65,3 +65,36 @@ def get_m3u8_age(port:int):
 
 
 
+def list_streams():
+
+    listResult = []
+
+    for path in Path('/mnt/d1/hls').rglob('id'):
+        m = re.search(r'.*/hls/(.+)/id',str(path))
+        port = int(m.group(1)) if m else None
+        ace_id = None
+        description = None
+
+        if not port:
+            continue
+
+        try:
+            with open(f"/mnt/d1/hls/{port}/id","r") as f:
+                ace_id = f.readline().rstrip()
+
+            with open(f"/mnt/d1/hls/{port}/description","r") as f:
+                description = f.readline().rstrip()
+
+        except OSError as e:
+            pass
+
+        if not ace_id:
+            continue   
+
+        listResult.append({
+            "port": port,
+            "ace_id": ace_id,
+            "description": description
+        })
+
+    return listResult
