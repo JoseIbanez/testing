@@ -8,7 +8,7 @@ sudo rm -rf /usr/local/bin/$SERVICE_NAME/
 sudo mkdir -p /usr/local/bin/$SERVICE_NAME/
 sudo chown $USER /usr/local/bin/$SERVICE_NAME
 
-deactive || echo ""
+deactivate || echo ""
 python3.10 -m venv /usr/local/bin/$SERVICE_NAME/venv
 source /usr/local/bin/$SERVICE_NAME/venv/bin/activate
 pip install ..

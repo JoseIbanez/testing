@@ -73,6 +73,7 @@ async def hls(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     ace_id=cmd[1]
     port=cmd[2] if len(cmd)>1 else "3231"
+    description=cmd[3] if len(cmd)>2 else ""
     user=update.message.from_user.first_name
 
     await context.bot.send_message(chat_id, text=f"{user}, wait a second for AceId:{ace_id}, Port:{port}")
@@ -83,7 +84,7 @@ async def hls(update: Update, context: ContextTypes.DEFAULT_TYPE):
                    'Authorization': f"Bearer {ACELINKTOKEN}"}
         data = {
             'ace_id': ace_id,
-            'description': ''
+            'description': description
         }
         result = requests.put(path,headers=headers,json=data)
 

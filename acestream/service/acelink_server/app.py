@@ -4,7 +4,7 @@ from flask import request,jsonify
 
 from acelink_server.common import configure_loger
 from acelink_server.docker_handler import run_acelink,del_container,get_container
-from acelink_server.acestream_test import get_m3u8_age, get_status
+from acelink_server.acestream_test import get_m3u8_age, get_status, list_streams
 from acelink_server._version import __version__
 
 app = Flask(__name__)
@@ -17,6 +17,12 @@ logger = logging.getLogger(__name__)
 @app.route("/")
 def hello_world():
     return {"result": "hi"}
+
+@app.route("/hls/", methods=['GET'] )
+def hls_list():
+
+    result = list_streams()
+    return result
 
 
 @app.route("/hls/<int:port>/", methods=['GET','PUT','DELETE'] )
@@ -81,6 +87,9 @@ def hls_manager(port):
 
 
 def check_token(request):
+    """
+    Demo security, dummy check
+    """
 
     auth_header = request.headers.get('Authorization')
 
