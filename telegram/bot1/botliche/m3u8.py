@@ -76,6 +76,7 @@ class M3u8List:
 
         logger.info("Loaded %s, Items:%d",filename,len(self.list))
 
+
     def search(self,query):
 
         ace_id_list = []
@@ -116,6 +117,19 @@ class M3u8List:
         logging.info("Query %s, found %d items",query,len(result))
 
         return result
+
+    def get_by_id(self, ace_id:str):
+
+        ace_id_list = []
+        result = []
+
+        logger.info("Table size %d",len(self.list))
+
+        result = next((item.name for item in self.list if item.ace_id == ace_id), None)
+        return result
+
+
+
 
 
 def parse_extinf_line(line:str): 

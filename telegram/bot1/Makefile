@@ -28,7 +28,7 @@ run-docker:
 	cd setup ; ./run-docker-compose.sh
 
 run-demo:
-	python bot.py
+	python botliche/bot.py
 
 
 .PHONY: init testcd ${PROJECT_FOLDER}

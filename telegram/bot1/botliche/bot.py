@@ -15,6 +15,7 @@ from requests.exceptions import HTTPError,ConnectionError
 from botliche.m3u8 import M3u8List
 from botliche.common import configure_loger
 from botliche.scrape_fetv import EventTVList
+from botliche import fav
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 ACELINKHOST = os.environ.get("ACELINKHOST","http://localhost:8008")
@@ -32,9 +33,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     commandList = [
         BotCommand("search","search channel id"),
-        BotCommand("hls", "start a tx"),
-        BotCommand("check", "check tx status"),
-        BotCommand("kill", "kill tx")
+        BotCommand("hls", "start a tx")
         ]
 
 
@@ -63,30 +62,61 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_promnt(context,chat_id)
 
 
+async def search_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id=update.effective_chat.id
+    filter = update.message.text
+
+    if len(filter) < 4:
+        await context.bot.send_message(chat_id, text="search for longer filter")
+        return
+
+    result = aceList.search(filter)
+
+    for item in result:
+        await context.bot.send_message(chat_id, text=f"{item}")
+
+    await send_promnt(context,chat_id)
+
+
+
 async def hls(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
+    user_id=update.message.from_user.username
+    user_name=update.message.from_user.first_name
     cmd = shlex.split(update.message.text)
 
+    # parse command
     if len(cmd) < 2:
-        await context.bot.send_message(chat_id, text="wrong cmd, try /hls <aceid> [port]")
+        await context.bot.send_message(chat_id, text="wrong cmd, try /hls <aceid> [port] [description]")
         return
 
     ace_id=cmd[1]
-    port=cmd[2] if len(cmd)>1 else "3231"
-    description=cmd[3] if len(cmd)>2 else ""
-    user=update.message.from_user.first_name
+    port=cmd[2] if len(cmd)>2 else "3231"
+    description=cmd[3] if len(cmd)>3 else None
 
-    await context.bot.send_message(chat_id, text=f"{user}, wait a second for AceId:{ace_id}, Port:{port}")
+    # exec command
+    await context.bot.send_message(chat_id, text=f"{user_name}, wait a second for AceId:{ace_id}, Port:{port}")
+    try:
+        result = exec_hls(ace_id,port,description,user_id,user_name)
+
+    except Exception as e:
+        await context.bot.send_message(chat_id, text=f"Something was wrong:\n{e}")
+        return
+
+    # show results
+    await context.bot.send_message(chat_id, text=json.dumps(result,indent=2))
+    await context.bot.send_message(chat_id, text="Done")
+
+
+async def list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id=update.effective_chat.id
+
 
     try:        
-        path = f"{ACELINKHOST}/hls/{port}/"
+        path = f"{ACELINKHOST}/hls/"
         headers = {'Content-type': 'application/json', 'Accept': 'application/json',
                    'Authorization': f"Bearer {ACELINKTOKEN}"}
-        data = {
-            'ace_id': ace_id,
-            'description': description
-        }
-        result = requests.put(path,headers=headers,json=data)
+        result = requests.get(path,headers=headers)
 
 
     except (HTTPError, ConnectionError) as e:
@@ -97,51 +127,42 @@ async def hls(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id, text=f"Something was wrong:\n{result.status_code} {result.text}")
         return
 
-    await context.bot.send_message(chat_id, text=json.dumps(result.json(),indent=2))
-
+    for item in result.json():
+        await context.bot.send_message(chat_id, text=f"{item.get('port')} {item.get('description')}")
     await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
 
 
 
 async def hls_auto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
+    user_id=update.message.from_user.username
+    user_name=update.message.from_user.first_name
     cmd = shlex.split(update.message.text)
 
     ace_id=cmd[0][1:]
-    port="3231"
-    description=""
-    user=update.message.from_user.first_name
 
+    if len(ace_id)<20:
+        await context.bot.send_message(chat_id, text=f"Unknown cmd")
+        return
 
-    await context.bot.send_message(chat_id, text=f"{user}, wait a second for AceId:{ace_id}, Port:{port}")
+    # exec command
+    await context.bot.send_message(chat_id, text=f"{user_name}, wait a second for AceId:{ace_id}")
+    try:
+        result = exec_hls(ace_id, None, None, user_id, user_name) 
 
-    try:        
-        path = f"{ACELINKHOST}/hls/{port}/"
-        headers = {'Content-type': 'application/json', 'Accept': 'application/json',
-                   'Authorization': f"Bearer {ACELINKTOKEN}"}
-        data = {
-            'ace_id': ace_id,
-            'description': description
-        }
-        result = requests.put(path,headers=headers,json=data)
-
-
-    except (HTTPError, ConnectionError) as e:
+    except Exception as e:
         await context.bot.send_message(chat_id, text=f"Something was wrong:\n{e}")
         return
 
-    if result.status_code > 299:
-        await context.bot.send_message(chat_id, text=f"Something was wrong:\n{result.status_code} {result.text}")
-        return
-
-    await context.bot.send_message(chat_id, text=json.dumps(result.json(),indent=2))
-
-    await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
+    # show results
+    await context.bot.send_message(chat_id, text=json.dumps(result,indent=2))
+    await context.bot.send_message(chat_id, text="Done")
 
 
 
 async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
+    user_name=update.message.from_user.first_name
     cmd = shlex.split(update.message.text)
 
     if len(cmd) < 2:
@@ -149,9 +170,8 @@ async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     port=cmd[1]
-    user=update.message.from_user.first_name
 
-    await context.bot.send_message(chat_id, text=f"{user}, wait a second for docker Port:{port}")
+    await context.bot.send_message(chat_id, text=f"{user_name}, wait a second for docker Port:{port}")
 
     try:
         
@@ -177,6 +197,8 @@ async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
+    user_id=update.message.from_user.username
+    user_name=update.message.from_user.first_name
     cmd = shlex.split(update.message.text)
 
     if len(cmd) < 2:
@@ -184,9 +206,8 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     port=cmd[1]
-    user=update.message.from_user.first_name
 
-    await context.bot.send_message(chat_id, text=f"{user}, wait a second for docker Port:{port}")
+    await context.bot.send_message(chat_id, text=f"{user_name}, wait a second for docker Port:{port}")
 
     try:
         
@@ -219,6 +240,34 @@ async def send_promnt(context,chat_id):
 
 
 
+def exec_hls(ace_id,port,description,user_id,user_name):
+
+    if description is None:
+        description = aceList.get_by_id(ace_id)
+
+    if port is None:
+        port = 3231
+
+    path = f"{ACELINKHOST}/hls/{port}/"
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json',
+                'Authorization': f"Bearer {ACELINKTOKEN}"}
+    data = {
+        'ace_id': ace_id,
+        'description': description
+    }
+    result = requests.put(path,headers=headers,json=data)
+
+
+    if result.status_code > 299:
+        raise HTTPError(f"Status code:{result.status_code}\n{result.text}")
+
+    fav.save("hls", ace_id, port, description, user_id, user_name)
+
+    return result.json()
+
+
+
+
 def main():
     application = ApplicationBuilder().token(TOKEN).build()
 
@@ -228,9 +277,10 @@ def main():
         CommandHandler('hls', hls),
         CommandHandler('check', check),
         CommandHandler('kill', kill),
+        CommandHandler('list', list),
         CommandHandler('ftv', fetv),
         MessageHandler(filters.COMMAND, hls_auto),
-        MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
+        MessageHandler(filters.TEXT & (~filters.COMMAND), search_text)
     ]
 
     for handler in handler_list:

@@ -20,6 +20,10 @@ class TestM3u8(unittest.TestCase):
         result = lista.search("laliga")
         print(result)
 
+        ace_id = str(result[0]).split("/")[1]
+        print(ace_id)
+        print(lista.get_by_id(ace_id))
+
 
 
 
