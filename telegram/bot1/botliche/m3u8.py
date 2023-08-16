@@ -21,7 +21,8 @@ class M3u8Channel:
     group_title = None
 
     def __repr__(self):
-        return f"{self.tvg_id}:{self.name} ({self.ace_id})"
+        #return f"{self.tvg_id}:{self.name} ({self.ace_id})"
+        return f"{self.name} /{self.ace_id}"
 
 
 class M3u8List:
@@ -30,9 +31,9 @@ class M3u8List:
         self.list:list[M3u8Channel] = []
 
     def load(self):
+        self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
         self.parse_m3u8(f"{DATA_PATH}/elcano.m3u8")
         self.parse_m3u8(f"{DATA_PATH}/ramses.m3u8")
-        self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
 
 
     def parse_m3u8(self,filename:str):
@@ -90,7 +91,7 @@ class M3u8List:
             if item.ace_id in ace_id_list:
                 continue
 
-            if (re.search(query, str(item.tvg_id) + str(item.name) )):
+            if re.search(query, f"{item.tvg_id} {item.name}", flags=re.IGNORECASE ):
                 result.append(item)
                 ace_id_list.append(item.ace_id)
 
@@ -107,7 +108,7 @@ class M3u8List:
             if item.ace_id in ace_id_list:
                 continue
 
-            if (re.search(query, str(item.tvg_id) + str(item.name) )):
+            if re.search(query, f"{item.tvg_id} {item.name}", flags=re.IGNORECASE ):
                 result.append(item)
                 ace_id_list.append(item.ace_id)
 

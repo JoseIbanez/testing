@@ -6,6 +6,7 @@ services:
         - DATA_PATH=/var/data
         - ACELINKHOST=http://${ACELINKHOST}:8008
     image: botliche:latest
+    container_name: botliche
     restart: unless-stopped
     build:
       context: ..

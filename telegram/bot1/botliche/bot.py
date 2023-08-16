@@ -103,6 +103,42 @@ async def hls(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+async def hls_auto(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id=update.effective_chat.id
+    cmd = shlex.split(update.message.text)
+
+    ace_id=cmd[0][1:]
+    port="3231"
+    description=""
+    user=update.message.from_user.first_name
+
+
+    await context.bot.send_message(chat_id, text=f"{user}, wait a second for AceId:{ace_id}, Port:{port}")
+
+    try:        
+        path = f"{ACELINKHOST}/hls/{port}/"
+        headers = {'Content-type': 'application/json', 'Accept': 'application/json',
+                   'Authorization': f"Bearer {ACELINKTOKEN}"}
+        data = {
+            'ace_id': ace_id,
+            'description': description
+        }
+        result = requests.put(path,headers=headers,json=data)
+
+
+    except (HTTPError, ConnectionError) as e:
+        await context.bot.send_message(chat_id, text=f"Something was wrong:\n{e}")
+        return
+
+    if result.status_code > 299:
+        await context.bot.send_message(chat_id, text=f"Something was wrong:\n{result.status_code} {result.text}")
+        return
+
+    await context.bot.send_message(chat_id, text=json.dumps(result.json(),indent=2))
+
+    await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
+
+
 
 async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
@@ -193,6 +229,7 @@ def main():
         CommandHandler('check', check),
         CommandHandler('kill', kill),
         CommandHandler('ftv', fetv),
+        MessageHandler(filters.COMMAND, hls_auto),
         MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
     ]
 
