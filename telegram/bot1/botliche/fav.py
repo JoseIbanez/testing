@@ -1,35 +1,46 @@
-from datetime import datetime
+from datetime import datetime,timezone
+import os 
 import logging
-from botliche.common import configure_loger
+import json
 
 logger = logging.getLogger(__name__)
 
-class FavoriteChannel:
-    name = None
-    count = 0
-    port = None
-    ace_id = None
-    cmd = None
-    userList = []
+DATA_PATH = os.environ.get("DATA_PATH", "/home/ibanez/Projects/testing/telegram/bot1/sample-data")
 
-    def __repr__(self):
 
-        return f"{self.name} {self.cmd} ({self.ace_id})"
+def save(cmd, ace_id,port,description,user_id,user_name):
 
-class FavoriteList:
+    item = {
+        "cmd": cmd,
+        "ace_id": ace_id,
+        "port": port,
+        "description": description,
+        "user_id": user_id,
+        "user_name": user_name,
+        "date": datetime.now(timezone.utc).isoformat()
 
-    def __init__(self):
-        self.list:list[FavoriteChannel] = []
-    
-    def load(self):
-        pass
+    }
 
-    def save(self):
-        pass
+    with open(f"{DATA_PATH}/hls_cmd.log","+a",encoding="utf8") as fd:
+        json.dump(item,fd)
+        fd.write("\n")
 
-    def update(self,port,ace_id,description,user):
-        fav = FavoriteChannel()
-        fav.ace_id = ace_id
-        fav.port = port
-        fav.name = description
-        fav.user = user
+    return
+
+def search(ace_id):
+
+    with open(f"{DATA_PATH}/hls_cmd.log","r",encoding="utf8") as fd:
+         
+        item = None
+        for line in (fd.readlines() [-200:]):
+
+            print(line)
+            if ace_id in line:
+                item = json.loads(line)
+
+
+    logger.info("ace_id:%s found %s",ace_id,item)
+
+    return item
+
+
