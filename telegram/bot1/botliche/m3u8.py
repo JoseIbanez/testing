@@ -18,6 +18,7 @@ class M3u8Channel:
     tvg_id = None
     owner = None
     name = None
+    canon = None
     group_title = None
 
     def __repr__(self):
