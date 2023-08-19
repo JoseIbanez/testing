@@ -19,7 +19,8 @@ class TestScrape(unittest.TestCase):
         events = EventTVList()
         print (events.get_events())
 
-
+        for event in events.list:
+            print(event.channels)
 
 
 
