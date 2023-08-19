@@ -64,6 +64,13 @@ def del_container(port:int):
         pass
 
     client.close()
+
+    try:
+        os.remove(f"/mnt/d1/hls/{port}/id")
+        os.remove(f"/mnt/d1/hls/{port}/description")
+    except OSError as e:
+        logger.error(e)
+
     return container_id
 
 
