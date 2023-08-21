@@ -20,9 +20,9 @@ class EventTV:
     def __repr__(self):
 
         if self.away:
-            return f"{self.date} {self.competition}: {self.local}-{self.away} // { ', '.join(self.channels) }"
+            return f"{self.date} {self.competition}: {self.local}-{self.away}"
         else:
-            return f"{self.date} {self.competition}: {self.local} // { ','.join(self.channels) }"
+            return f"{self.date} {self.competition}: {self.local}"
 
 
 FOLLOW_TEAMS = [ "Liverpool", "FC Barcelona", "Manchester City", "Real Madrid", "Chelsea", "Arsenal", "Manchester Utd." ]
@@ -120,7 +120,7 @@ class EventTVList:
             self.scrape(LOCAL_FILE)
             self.lastupdate = time.time()
 
-        return [ str(line) for line in self.list ]
+        return
 
 
 def parse_date(cols):

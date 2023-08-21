@@ -16,6 +16,7 @@ from botliche.m3u8 import M3u8List
 from botliche.common import configure_loger
 from botliche.scrape_fetv import EventTVList
 from botliche import fav
+from botliche.auto import match_channel
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 ACELINKHOST = os.environ.get("ACELINKHOST","http://localhost:8008")
@@ -29,21 +30,37 @@ eventList = EventTVList()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a super bot, please talk to me!")
+    chat_id=update.effective_chat.id
 
     commandList = [
-        BotCommand("search","search channel id"),
-        BotCommand("hls", "start a tx")
+        BotCommand("ftv", "see the tv guide"),
+        BotCommand("list", "see the current channels"),
+        BotCommand("hls", "start a tx"),
+        BotCommand("check", "check a tx"),
         ]
 
+    help = """
+Welcome to BotLiche bot!
+* Look for next tv events with /ftv
+* See current active channels /list
+* Search a TV channel just with the name ex: "EuroSport"
+See menu for other commands
+    """
 
     await context.bot.setMyCommands(commandList)
+    await context.bot.send_message(chat_id, text=help)
+
 
 async def fetv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id=update.effective_chat.id
 
-    result = "\n".join(eventList.get_events())
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=result)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a super bot, please talk to me!")
+    eventList.get_events()
+    result = match_channel(eventList,aceList)
+    for event in result:
+        await context.bot.send_message(chat_id, text=event)
+
+    await send_promnt(context,chat_id)
+
 
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
@@ -66,8 +83,8 @@ async def search_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id=update.effective_chat.id
     filter = update.message.text
 
-    if len(filter) < 4:
-        await context.bot.send_message(chat_id, text="search for longer filter")
+    if len(filter) < 3:
+        await context.bot.send_message(chat_id, text="search for a longer text")
         return
 
     result = aceList.search(filter)
@@ -238,7 +255,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def send_promnt(context,chat_id):
     await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
 
-
+####
 
 def exec_hls(ace_id,port,description,user_id,user_name):
 
