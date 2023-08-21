@@ -14,10 +14,10 @@ class TestFav(unittest.TestCase):
 
 
     def test_save(self):
-        fav.save("3333", 3232, "laliga", 333, "aa")
+        fav.save("hls","3333", 3232, "laliga", 333, "aa")
 
     def test_search(self):
-        fav.save("3333", 3251, "laliga", 333, "aa")
+        fav.save("kill","3333", 3251, "laliga", 333, "aa")
         item = fav.search("3333")
         print(item)
 
