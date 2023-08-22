@@ -21,5 +21,9 @@ class TestFav(unittest.TestCase):
         item = fav.search("3333")
         print(item)
 
+    def test_search_2(self):
+        item = fav.search("c373da9e901d414b7384e671112e64d5a2310c29")
+        print(item)
+
 if __name__ == '__main__':
     unittest.main()
