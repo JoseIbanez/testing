@@ -282,7 +282,7 @@ def exec_hls(ace_id,port,description,user_id,user_name):
                 'Authorization': f"Bearer {ACELINKTOKEN}"}
     data = {
         'ace_id': ace_id,
-        'description': description
+        'description': description or ""
     }
     result = requests.put(path,headers=headers,json=data)
 
