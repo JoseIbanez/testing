@@ -7,6 +7,7 @@ import os.path
 import re
 from pathlib import Path
 import logging
+import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ class M3u8Channel:
     tvg_id = None
     owner = None
     name = None
-    canon = None
+    cname = None
     group_title = None
 
     def __repr__(self):
@@ -35,7 +36,7 @@ class M3u8List:
         self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
         self.parse_m3u8(f"{DATA_PATH}/elcano.m3u8")
         self.parse_m3u8(f"{DATA_PATH}/ramses.m3u8")
-
+        self.set_cname()
 
     def parse_m3u8(self,filename:str):
 
@@ -78,46 +79,61 @@ class M3u8List:
         logger.info("Loaded %s, Items:%d",filename,len(self.list))
 
 
+
+    def set_cname(self):
+
+        for item in self.list:
+
+            item_name = item.name
+            item_name = re.sub(' *(1080|720)', '', item_name)
+            item_name = re.sub('M. LaLiga', 'M+ LaLiga TV', item_name)
+            item.cname = item_name
+
+
+            logger.info("%s -> %s.",item.name,item.cname)
+
+            
+        return None
+
+
+
     def search(self,query):
 
+        result = list(itertools.islice(self.search_iter(query),10))
+        return result
+
+
+    def search_iter(self,query):
+
         ace_id_list = []
-        result = []
+        channel_name = query.replace("+","\+")
 
         logger.info("Table size %d",len(self.list))
 
         for item in self.list:
 
-            if not item.owner or not "@Lucas" in item.owner: 
+            if not item.owner or not "elcano" in item.owner: 
                 continue
 
             if item.ace_id in ace_id_list:
                 continue
 
-            if re.search(query, f"{item.tvg_id} {item.name}", flags=re.IGNORECASE ):
-                result.append(item)
+            if re.search(channel_name, f"{item.name} {item.cname}", flags=re.IGNORECASE ):
                 ace_id_list.append(item.ace_id)
-
-            if len(result) > 20:
-                break
-
+                yield item
 
 
         for item in self.list:
 
-            if len(result) > 20:
-                break
-
             if item.ace_id in ace_id_list:
                 continue
 
-            if re.search(query, f"{item.tvg_id} {item.name}", flags=re.IGNORECASE ):
-                result.append(item)
+            if re.search(channel_name, f"{item.name} {item.cname}", flags=re.IGNORECASE ):
                 ace_id_list.append(item.ace_id)
+                yield item
 
 
-        logging.info("Query %s, found %d items",query,len(result))
 
-        return result
 
     def get_by_id(self, ace_id:str):
 
