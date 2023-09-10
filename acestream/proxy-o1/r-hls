@@ -1,0 +1,90 @@
+server{
+
+        listen 80;
+        port_in_redirect off;
+
+	rewrite ^/(4\d+)$ /$1/stream.m3u8 redirect;
+
+        location ~ ^/3 {
+            proxy_pass http://rh2.mooo.com:8800;
+            proxy_set_header       Host $host;
+            proxy_buffering        on;
+            proxy_cache            STATIC;
+            proxy_cache_valid      200  1d;
+            proxy_cache_use_stale  error timeout invalid_header updating
+                                 http_500 http_502 http_503 http_504;
+        }
+
+
+
+        location ~ ^/4 {
+            # Cache
+            expires 60s;
+
+            # CORS setup
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Expose-Headers' 'Content-Length';
+
+            # allow CORS preflight requests
+            if ($request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' '*';
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain charset=UTF-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+
+            types {
+                application/dash+xml mpd;
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2t ts;
+            }
+
+            root /opt/hls/;
+        }
+
+
+        location  ~ ^4.+\.(html)$ {
+            include /etc/nginx/mime.types;
+            default_type  application/octet-stream;
+            root /opt/hls/;
+        }
+
+
+        location ~ ^4.+\.(m3u8)$ {
+            # Disable cache
+            add_header 'Cache-Control' 'no-cache';
+
+            # CORS setup
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Expose-Headers' 'Content-Length';
+
+            # allow CORS preflight requests
+            if ($request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' '*';
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain charset=UTF-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+
+            types {
+                application/dash+xml mpd;
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2t ts;
+            }
+
+            root /opt/hls/;
+        }
+
+
+
+        error_page 404 /error/custom_404.html;
+        location = /error/ {
+            root /opt/hls/;
+            internal;
+        }
+
+
+    }
+
