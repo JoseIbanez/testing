@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sudo killall ffmpeg
+killall -v -g  replay.sh
 
