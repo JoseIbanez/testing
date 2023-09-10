@@ -1,15 +1,98 @@
-server{
 
-    listen 80;
+    server {
+        listen 8800;
+        port_in_redirect off;
 
-    location ~ ^/3 {
-      proxy_pass http://rh2.mooo.com:8800;
-      proxy_set_header       Host $host;
-      proxy_buffering        on;
-      proxy_cache            STATIC;
-      proxy_cache_valid      200  1d;
-      proxy_cache_use_stale  error timeout invalid_header updating
-                             http_500 http_502 http_503 http_504;
+        rewrite ^/ll1$ http://rh2.mooo.com:8800/3231/stream.m3u8 redirect;
+        rewrite ^/ll2$ http://rh2.mooo.com:8800/3232/stream.m3u8 redirect;
+        rewrite ^/l1$ /3231/stream.m3u8 redirect;
+        rewrite ^/l2$ /3232/stream.m3u8 redirect;
+	rewrite ^/p1$ /3241/stream.m3u8 redirect;
+        rewrite ^/p2$ /3242/stream.m3u8 redirect;
+        rewrite ^/p3$ /3243/stream.m3u8 redirect;
+        rewrite ^/f1$ /3251/stream.m3u8 redirect;
+
+        rewrite ^/o$ /open/index.html redirect;	
+        rewrite ^/s$ /streams/index.html redirect;
+
+
+	rewrite ^/(\d+)$ /$1/stream.m3u8 redirect;
+
+
+
+        location ~ /iso/.*iso {
+                root /mnt/d2/Software/;
+        }
+
+
+
+        location / {
+            # Cache
+            expires 60s;
+
+            # CORS setup
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Expose-Headers' 'Content-Length';
+
+            # allow CORS preflight requests
+            if ($request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' '*';
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain charset=UTF-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+
+            types {
+                application/dash+xml mpd;
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2t ts;
+            }
+
+            root /mnt/d1/hls/;
+        }
+
+        location  ~ \.(html)$ {
+            include /etc/nginx/mime.types;
+            default_type  application/octet-stream;
+            root /mnt/d1/hls/;
+        }
+
+
+        location ~ \.(m3u8)$ {
+            # Disable cache
+            add_header 'Cache-Control' 'no-cache';
+
+            # CORS setup
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Expose-Headers' 'Content-Length';
+
+            # allow CORS preflight requests
+            if ($request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' '*';
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain charset=UTF-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+
+            types {
+                application/dash+xml mpd;
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2t ts;
+            }
+
+            root /mnt/d1/hls/;
+        }
+
+
+
+        error_page 404 /error/custom_404.html;
+        location = /error/ {
+                root /mnt/d1/hls/;
+                internal;
+        }
+
+
     }
 
-}
