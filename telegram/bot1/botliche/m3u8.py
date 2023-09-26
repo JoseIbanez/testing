@@ -33,8 +33,9 @@ class M3u8List:
         self.list:list[M3u8Channel] = []
 
     def load(self):
-        self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
+        self.parse_m3u8(f"{DATA_PATH}/elcano.m3u8")
         self.parse_m3u8(f"{DATA_PATH}/pmeister.m3u8")
+        self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
         self.parse_m3u8(f"{DATA_PATH}/ramses.m3u8")
         self.set_cname()
 
@@ -85,9 +86,10 @@ class M3u8List:
         for item in self.list:
 
             item_name = item.name
-            item_name = re.sub(' *(1080|720)', '', item_name)
-            item_name = re.sub('M. LaLiga', 'M+ LaLiga TV', item_name)
-            item_name = re.sub('M.L. Campeones', 'M+ Liga de Campeones', item_name)
+            item_name = re.sub(' *(1080|720)p?', '', item_name, flags=re.IGNORECASE)
+            item_name = re.sub('(4K|1440)p?', 'UHD', item_name, flags=re.IGNORECASE)
+            item_name = re.sub('M. LaLiga', 'M+ LaLiga TV', item_name, flags=re.IGNORECASE)
+            item_name = re.sub('M.L. Campeones', 'M+ Liga de Campeones', item_name, flags=re.IGNORECASE)
             item.cname = item_name
 
             logger.info("%s -> %s.",item.name,item.cname)
