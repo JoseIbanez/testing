@@ -1,32 +1,23 @@
+server{
 
-    server {
-        listen 8800;
+        listen 80;
         port_in_redirect off;
 
-        rewrite ^/ll1$ http://rh2.mooo.com:8800/3231/stream.m3u8 redirect;
-        rewrite ^/ll2$ http://rh2.mooo.com:8800/3232/stream.m3u8 redirect;
-        rewrite ^/l1$ /3231/stream.m3u8 redirect;
-        rewrite ^/l2$ /3232/stream.m3u8 redirect;
-	rewrite ^/p1$ /3241/stream.m3u8 redirect;
-        rewrite ^/p2$ /3242/stream.m3u8 redirect;
-        rewrite ^/p3$ /3243/stream.m3u8 redirect;
-        rewrite ^/f1$ /3251/stream.m3u8 redirect;
+	rewrite ^/(4\d+)$ /$1/stream.m3u8 redirect;
 
-        rewrite ^/o$ /open/index.html redirect;	
-        rewrite ^/s$ /streams/index.html redirect;
-
-
-	rewrite ^/(\d+)$ /$1/stream.m3u8 redirect;
-
-
-
-        location ~ /iso/.*iso {
-                root /mnt/d2/Software/;
+        location ~ ^/3 {
+            proxy_pass http://rh2.mooo.com:8800;
+            proxy_set_header       Host $host;
+            proxy_buffering        on;
+            proxy_cache            STATIC;
+            proxy_cache_valid      200  1d;
+            proxy_cache_use_stale  error timeout invalid_header updating
+                                 http_500 http_502 http_503 http_504;
         }
 
 
 
-        location / {
+        location ~ ^/4 {
             # Cache
             expires 60s;
 
@@ -49,17 +40,18 @@
                 video/mp2t ts;
             }
 
-            root /mnt/d1/hls/;
+            root /opt/hls/;
         }
 
-        location  ~ \.(html)$ {
+
+        location  ~ ^4.+\.(html)$ {
             include /etc/nginx/mime.types;
             default_type  application/octet-stream;
-            root /mnt/d1/hls/;
+            root /opt/hls/;
         }
 
 
-        location ~ \.(m3u8)$ {
+        location ~ ^4.+\.(m3u8)$ {
             # Disable cache
             add_header 'Cache-Control' 'no-cache';
 
@@ -82,15 +74,15 @@
                 video/mp2t ts;
             }
 
-            root /mnt/d1/hls/;
+            root /opt/hls/;
         }
 
 
 
         error_page 404 /error/custom_404.html;
         location = /error/ {
-                root /mnt/d1/hls/;
-                internal;
+            root /opt/hls/;
+            internal;
         }
 
 

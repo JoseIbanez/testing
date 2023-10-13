@@ -27,19 +27,20 @@ def save(cmd, ace_id,port,description,user_id,user_name):
 
     return
 
-def search(ace_id):
+def search(ace_id:str,user:str="vlan717"):
 
     with open(f"{DATA_PATH}/hls_cmd.log","r",encoding="utf8") as fd:
-         
-        item = None
-        for line in (fd.readlines() [-200:]):
 
-            print(line)
-            if ace_id in line:
+        for line in reversed(list(fd)):
+            if ace_id in line and user in line:
                 item = json.loads(line)
+                if item.get('ace_id')==ace_id and item.get('user_id')==user:
+                    break
+        else:
+            item = {}
 
-
-    logger.info("ace_id:%s found %s",ace_id,item)
+    if item:
+        logger.info("ace_id:%s found, port:%s",ace_id,item.get('port'))
 
     return item
 

@@ -1,0 +1,15 @@
+version: "3.5"
+services:
+  i2p:
+    image: geti2p/i2p
+    volumes:
+        - ./i2pconfig:/i2p/.i2p
+        - ./i2ptorrents:/i2psnark
+    environment:
+        - JVM_XMX=256m
+    ports:
+        - 4444:4444
+        - 6668:6668
+        - 7657:7657
+        - 55321:12345
+        - 55321:12345/udp
