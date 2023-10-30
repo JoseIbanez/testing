@@ -3,14 +3,12 @@ package main
 import (
 	"example/greetings"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math"
 	"os"
 
-	"io/ioutil"
-
 	"github.com/tidwall/gjson"
-
 	"rsc.io/quote"
 )
 

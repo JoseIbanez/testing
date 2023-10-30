@@ -6,12 +6,12 @@
 
 
 
-#EXTINF:-1 tvg-logo="https://i.ibb.co/yfV1Q8n/liga.png" group-title="Liga" tvg-id="M+ LaLiga TV HD", M. LaLiga 1080P
-acestream://aa82e7d4f03061f2144a2f4be22f2e2210d42280
 #EXTINF:-1 tvg-logo="https://i.ibb.co/yfV1Q8n/liga.png" group-title="Liga" tvg-id="M+ LaLiga TV HD", M. LaLiga 1080 Multiaudio
 acestream://7d8c87e057be98f00f22e23b23fbf08999e4b02f
 #EXTINF:-1 tvg-logo="https://i.ibb.co/yfV1Q8n/liga.png" group-title="Liga" tvg-id="M+ LaLiga TV HD", M. LaLiga 1080 MultiAudio
 acestream://1969c27658d4c8333ab2c0670802546121a774a5
+#EXTINF:-1 tvg-logo="https://i.ibb.co/yfV1Q8n/liga.png" group-title="Liga" tvg-id="M+ LaLiga TV HD", M. LaLiga 1080P
+acestream://aa82e7d4f03061f2144a2f4be22f2e2210d42280
 #EXTINF:-1 tvg-logo="https://i.ibb.co/yfV1Q8n/liga.png" group-title="Liga" tvg-id="M+ LaLiga TV HD", M. LaLiga 720
 acestream://f031f5728b32f6089dda28edebe990cf198108d8
 #EXTINF:-1 tvg-logo="https://i.ibb.co/Tc97zSb/liga2.png" group-title="Liga" tvg-id="M+ LaLiga TV 2 HD", M. LaLiga 2 1080 Multiaudio

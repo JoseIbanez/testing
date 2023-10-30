@@ -200,7 +200,7 @@ class Vmanage(object):
                     "operator": "last_n_hours"
                     }]
                 },
-            "size": 10
+            "size": 10000
             }
 
         result = self.request('POST',"alarms", payload=payload)
