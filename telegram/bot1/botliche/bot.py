@@ -23,7 +23,7 @@ from botliche.auto import match_channel
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 ACELINKHOST = os.environ.get("ACELINKHOST","http://localhost:8008")
 ACELINKTOKEN = os.environ.get("ACELINKTOKEN","MAGIC")
-VIP_USERS = [ "vlan717", "Jacobo", "Diego", "Jorge"]
+VIP_USERS = [ "vlan717", "Jacobo", "Diego", "Jorge", "ocsalbi", "Ignacio" ]
 
 configure_loger()
 
