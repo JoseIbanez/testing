@@ -9,19 +9,27 @@ import (
 )
 
 func LoadJson(filename string) (string, error) {
+
 	jsonFile, err := os.Open("users.json")
+
 	// if we os.Open returns an error then handle it
 	if err != nil {
 		fmt.Println(err)
+		return "", err
 	}
 	fmt.Println("Successfully Opened users.json")
 
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
 
-	byteValue, _ := io.ReadAll(jsonFile)
+	byteValue, err := io.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
 
-	value := gjson.GetBytes(byteValue, "users.1")
+	query := "users.1"
+	value := gjson.GetBytes(byteValue, query)
 	println(string(value.Raw))
 
 	var raw []byte
@@ -30,10 +38,13 @@ func LoadJson(filename string) (string, error) {
 	} else {
 		raw = []byte(value.Raw)
 	}
-	println(raw)
+	fmt.Printf("Query:%s result:%s\n", query, raw)
 
 	value2 := gjson.GetBytes(raw, "name")
-	println(string(value2.Raw))
+	fmt.Printf("name: %s\n", value2.String())
+
+	value3 := gjson.GetBytes(raw, "age")
+	fmt.Printf("age: %d\n", value3.Int())
 
 	return "hi", nil
 
