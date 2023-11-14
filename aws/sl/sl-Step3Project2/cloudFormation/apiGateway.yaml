@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: My API Gateway and Lambda function
+
+Parameters:
+  lambdaFunction:
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9:-]+"
+    Default: my-function
+
+Resources:
+
+  apiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: Example API Gateway
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      Name: feedback-api
+
+  apiResource: 
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref apiGateway
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: api
+    DependsOn: apiGateway
+
+  feedbackResource: 
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref apiGateway
+      ParentId: !Ref apiResource
+      PathPart: feedback
+    DependsOn: apiGateway
+
+
+  feedbackPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations
+          - lambdaArn: !Ref lambdaFunction
+      ResourceId: !Ref feedbackResource
+      RestApiId: !Ref apiGateway
+
+
+  optionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,access-control-allow-origin,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+          method.response.header.Access-Control-Allow-Headers: false
+          method.response.header.Access-Control-Allow-Methods: false
+          method.response.header.Access-Control-Allow-Origin: false
+      ResourceId: !Ref feedbackResource
+      RestApiId: !Ref apiGateway
+
+
+  apiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - feedbackPostMethod
+    Properties:
+      RestApiId: !Ref apiGateway
+      StageName: prod
+
+
+  lambdaApiGatewayInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref lambdaFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/api/feedback
+
+
+Outputs:
+  apiGatewayInvokeURL:
+    Value: !Sub https://${apiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod
+

@@ -1,0 +1,21 @@
+{
+    "RuleSetName": "delete_file",
+    "Rule": {
+        "Name": "bot",
+        "Enabled": true,
+        "TlsPolicy": "Optional",
+        "Recipients": [
+            "${BOT_MAIL}"
+        ],
+        "Actions": [
+            {
+                "SNSAction": { 
+                    "TopicArn": "${SNS_DEL_ARN}",
+                    "Encoding": "Base64"
+                }
+            }
+        ],
+        "ScanEnabled": true
+    }
+    
+}

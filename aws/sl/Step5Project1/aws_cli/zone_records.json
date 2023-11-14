@@ -1,0 +1,22 @@
+{
+    "Comment": "Create mail records ",
+    "Changes": [{
+        "Action": "UPSERT",
+        "ResourceRecordSet": {
+            "Name": "selector._domainkey.${MAIL_DOMAIN}",
+            "Type": "TXT",
+            "TTL": 300,
+            "ResourceRecords": [{ "Value": "\"p=${PUBLIC_KEY}\""}]
+        }
+    },
+    {
+        "Action": "UPSERT",
+        "ResourceRecordSet": {
+            "Name": "${MAIL_DOMAIN}",
+            "Type": "MX",
+            "TTL": 300,
+            "ResourceRecords": [{ "Value": "10 inbound-smtp.us-east-1.amazonaws.com"}]
+        }
+    }    
+    ]   
+}

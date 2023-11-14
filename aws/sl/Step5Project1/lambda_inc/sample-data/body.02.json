@@ -1,0 +1,38 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.1",
+            "eventSource": "aws:s3",
+            "awsRegion": "us-east-1",
+            "eventTime": "2022-10-28T11:47:51.670Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AROARRRZRGSR7MKZUGPYB:jose.ibanez_vodafone"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "47.61.159.213"
+            },
+            "responseElements": {
+                "x-amz-request-id": "0KMK2Q6AMABNZVQ9",
+                "x-amz-id-2": "ZL6KSWGjFLKIcJjcXN3OpVcO1/P/XoRjPTh2Eaqi4RZDvWHYwpf04bqkUXuANon6MRB3EHQzIe2zsGXGDJ9fDI4MIOtLzuy2"
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "S3 New Object",
+                "bucket": {
+                    "name": "sl-ibanez-s5p1-incoming",
+                    "ownerIdentity": {
+                        "principalId": "A1Q4WHT0ZTUK63"
+                    },
+                    "arn": "arn:aws:s3:::sl-ibanez-s5p1-incoming"
+                },
+                "object": {
+                    "key": "02.txt",
+                    "size": 1969,
+                    "eTag": "abb4fd3952d3ba85339fb43527d352a0",
+                    "sequencer": "00635BC16786A980F9"
+                }
+            }
+        }
+    ]
+}

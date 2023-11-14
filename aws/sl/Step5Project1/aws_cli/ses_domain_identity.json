@@ -1,0 +1,7 @@
+{
+    "EmailIdentity":"${MAIL_DOMAIN}",
+    "DkimSigningAttributes":{
+        "DomainSigningPrivateKey":"${PRIVATE_KEY}",
+        "DomainSigningSelector":"selector"
+    }
+}

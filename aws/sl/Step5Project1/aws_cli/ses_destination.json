@@ -1,0 +1,5 @@
+{
+    "ToAddresses":  ["${SENDER_MAIL}","${SENDER_MAIL_2}"],
+    "CcAddresses":  ["jose.ibanez@vodafone.com"],
+    "BccAddresses": []
+}
