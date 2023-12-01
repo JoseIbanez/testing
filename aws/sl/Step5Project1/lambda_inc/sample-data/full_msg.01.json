@@ -1,0 +1,21 @@
+{
+    "Records": [
+        {
+            "messageId": "d0609fc2-dae7-4067-b01b-8c2c4e9d4a3c",
+            "receiptHandle": "AQEBenk17WrW0m+zw7SeochPeDJNmQodqe9vUQqz07N5Aj6w67NZvDLhwPhVaW4z73I8g2WiWgKndioWudlSCXdd1r4ZycBUKXgHn/aJVh+PBegFz1yug7w+IGRZfD36ZoE+PkQRtvBEDrs0HKuGp9VBPMn1/EEfo2gIzqdU1qDm3ISlcHGpVAJDzVHb+P2v9YI5VN7H9gDZmcarK3LEM9g6+1qZlCaSVj1PwgSohyxb4UuUM6lRPUFqILuvdXwp2Bff7Wl+1P0ZNYKaB54Y31an/KoW/C0sic5RbCKik+oNvn7Ndg29U+OWPOaK8RAN8SroXRv2RJCsRlQuMW/Bu5VL3k2X+U5wBqtbRjdjrIAdfAONLJeuPN4j0TkHj6rq8TKS",
+            "body": "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2022-10-29T16:48:12.154Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:AROARRRZRGSR7MKZUGPYB:jose.ibanez_vodafone\"},\"requestParameters\":{\"sourceIPAddress\":\"92.59.249.142\"},\"responseElements\":{\"x-amz-request-id\":\"P8AK93R4RKA21RBM\",\"x-amz-id-2\":\"+8ktoz1E64Rk8aJMCX6LmRRgjuxPOPDf6VCCd3DUZMXmbhE7HNeH+vVUR1wSk3EfAALL6nIe/HHMcm9npK3oFHK5Ih9GwxCV\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"S3 New Object\",\"bucket\":{\"name\":\"sl-ibanez-s5p1-incoming\",\"ownerIdentity\":{\"principalId\":\"A1Q4WHT0ZTUK63\"},\"arn\":\"arn:aws:s3:::sl-ibanez-s5p1-incoming\"},\"object\":{\"key\":\"02.txt\",\"size\":1969,\"eTag\":\"abb4fd3952d3ba85339fb43527d352a0\",\"sequencer\":\"00635D594C01954955\"}}}]}",
+            "attributes": {
+                "ApproximateReceiveCount": "7",
+                "SentTimestamp": "1667062093408",
+                "SenderId": "AIDAJHIPRHEMV73VRJEBU",
+                "ApproximateFirstReceiveTimestamp": "1667062093408"
+            },
+            "messageAttributes": {},
+            "md5OfMessageAttributes": null,
+            "md5OfBody": "fd623389bbc8f80ec27d657189943736",
+            "eventSource": "aws:sqs",
+            "eventSourceARN": "arn:aws:sqs:us-east-1:106421105827:IncomingFile",
+            "awsRegion": "us-east-1"
+        }
+    ]
+}

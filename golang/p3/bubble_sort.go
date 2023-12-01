@@ -25,7 +25,7 @@ func GetInputList(sli []int) {
 	for index := 0; index <10; index++ {
 		var value int
 
-		count, err := fmt.Scanf("%d",&value)
+		count, err := fmt.Scanf("%d\n",&value)
 
 		if count < 1 || err != nil {
 			return
