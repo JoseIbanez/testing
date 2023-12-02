@@ -41,6 +41,16 @@ public class Car {
         this.speed = speed;
     }
 
+    public String getMaker() {
+        return maker;
+    }
+
+    public void setMaker(String maker) {
+        this.maker = maker;
+    }
+
+
+
     private static String generate_random_plate() {
         String new_plate = String.format("%s%s",
                 RandomStringUtils.randomNumeric(4),
