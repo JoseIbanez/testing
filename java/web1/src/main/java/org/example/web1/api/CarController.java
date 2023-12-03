@@ -7,12 +7,13 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.example.web1.model.Car;
 import org.example.web1.service.CarService;
-
-import javax.swing.plaf.SplitPaneUI;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @RequestMapping("api/v1/car")
@@ -30,7 +31,11 @@ public class CarController {
     @PostMapping
     public Car updateCar(@RequestBody Car car) {
         logger.info("new {}",car);
-        carService.updateCar(car);
+        var result = carService.updateCar(car);
+        if (result <0 ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicated car");
+        }
+
         return car;
     }
 
@@ -46,3 +51,6 @@ public class CarController {
     }
 
 }
+
+
+
