@@ -16,11 +16,7 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger((MethodHandles.lookup().lookupClass()));
 
 
-    public static void main(String[] args) {
-        // Press Opt+Enter with your caret at the highlighted text to see how
-        // IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome to %s!\n","java");
-
+    public static void testingList() {
         int x;
         Car car1 = new Car("Tesla");
         Car car2 = new Car("BMW","0001BBD");
@@ -49,6 +45,46 @@ public class Main {
             logger.info("Plate:{}, speed:{}",car.plate,car.speed);
         }
 
+
+    }
+
+    public static void testingLocks() {
+
+
+        var myCars = new ArrayList<SharedCar>();
+        myCars.add(new SharedCar("BMW"));
+        myCars.add(new SharedCar("SEAT"));
+        myCars.add(new SharedCar("SEAT"));
+        myCars.add(new SharedCar("SEAT"));
+
+        List<Thread> theadList = new ArrayList<Thread>();
+
+        for (int i=0; i< 10; i++ ) {
+            theadList.add(new Thread(new Driver(String.format("D%d",i),myCars)));
+        }
+
+        try {
+
+            for (Thread thread: theadList) { thread.start();}
+            logger.info("All player in the road");
+
+            for (Thread thread: theadList) { thread.join();}
+
+
+
+        } catch (InterruptedException err) {
+            logger.error(err.toString());
+        }
+
+
+    }
+
+    public static void main(String[] args) {
+        // Press Opt+Enter with your caret at the highlighted text to see how
+        // IntelliJ IDEA suggests fixing it.
+        System.out.printf("Hello and welcome to %s!\n","java");
+        testingList();
+        testingLocks();
 
     }
 }
