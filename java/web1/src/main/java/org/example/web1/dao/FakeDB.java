@@ -130,8 +130,8 @@ public class FakeDB implements CarDao {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
 
-            //String jsonString = objectMapper.writeValueAsString(CarDB);
-            //logger.info("DB: {}", jsonString);
+            // String jsonString = objectMapper.writeValueAsString(CarDB);
+            // logger.info("DB: {}", jsonString);
             CarDB = objectMapper.readValue(new File("/tmp/car_db.json"), new TypeReference<List<Car>>() {});
             logger.info("DB loaded, Items:{}", CarDB.size());
             return 0;

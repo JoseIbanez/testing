@@ -30,7 +30,7 @@ public class Driver implements Runnable {
         int numberCars = carList.size();
         Random index = new Random();
 
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 50; i++) {
 
             try {
                 Thread.sleep(100);
@@ -44,7 +44,7 @@ public class Driver implements Runnable {
 
                     rides++;
                     logger.info("Driver:{}, round {}, with Car{}, rides:{}",name,i,car.plate,rides);
-                    Thread.sleep(2000);
+                    Thread.sleep(500);
 
 
                     car.unsetDriver();
