@@ -27,6 +27,7 @@ public class EmployeeService {
 
         ResponseEntity<Employee> resp = restTemplate.getForEntity("http://localhost:8080/employee/" + id,
                 Employee.class);
+
         return resp.getStatusCode() == HttpStatus.OK ? resp.getBody() : null;
 
     }

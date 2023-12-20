@@ -45,4 +45,12 @@ public class Employee {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @Override
+    public String toString(){
+        return String.format("Employee: Id=%s, Name=%s",
+                this.id, this.name);
+    }
+
+
 }

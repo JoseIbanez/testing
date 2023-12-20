@@ -1,12 +1,10 @@
 package org.example.web1;
 
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
-
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.web1.idmPojo.IdmEmployeePojo;
+import org.example.web1.model.Employee;
+import org.example.web1.service.EmployeeService;
+import org.example.web1.service.IdmEmployeeService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,23 +19,25 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.RequestMatcher;
-import org.springframework.test.web.client.ResponseActions;
 import org.springframework.web.client.RestTemplate;
 
-import org.example.web1.SpringTestConfig;
-import org.example.web1.model.Employee;
-import org.example.web1.service.EmployeeService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+
+
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = SpringTestConfig.class)
-public class EmployeeServiceTest {
+public class IdmEmployeeServiceTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EmployeeServiceTest.class);
 
     @Autowired
-    private EmployeeService empService;
+    private IdmEmployeeService idmEmployeeService;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -86,38 +86,25 @@ public class EmployeeServiceTest {
 
 
 
+
+
     @Test
     public void test01() throws Exception {
-        Employee emp1 = new Employee("E001", "Eric Simmons");
-        Employee emp2 = new Employee("E002", "Eric Simmons");
 
-        simpleExpect("http://localhost:8080/employee/E001", emp1);
-        simpleExpect("http://localhost:8080/employee/E002", emp2);
+        simpleExpectFromFile("http://localhost:8080/employees", "employeeList-01.json");
 
+        String result = idmEmployeeService.downloadEmployees();
+        logger.info("Message: {}",result);
 
-        Employee employee1 = empService.getEmployee("E001");
-        logger.info("Employee, Id:{} Name:{}",employee1.getId(), employee1.getName());
-        Assertions.assertEquals(emp1, employee1);
+        IdmEmployeePojo emp1 = idmEmployeeService.getIdmEmployee(1);
+        logger.info(emp1.toString());
 
-        Employee employee2 = empService.getEmployee("E002");
-        logger.info("Employee, Id:{} Name:{}",employee2.getId(), employee2.getName());
-        Assertions.assertEquals(emp2, employee2);
+        for (var emp: idmEmployeeService.getIdmEmployees()) {
+            logger.info("{} -> {}",emp.toString(), emp.toEmployee().toString());
+        }
 
         mockServer.verify();
     }
-
-    @Test
-    public void test02() throws Exception {
-
-        simpleExpectFromFile("http://localhost:8080/employee/E001", "emp1.json");
-
-        Employee employee1 = empService.getEmployee("E001");
-        logger.info("Employee, Id:{} Name:{}",employee1.getId(), employee1.getName());
-        Assertions.assertEquals(employee1.getId(),"E001");
-
-        mockServer.verify();
-    }
-
 
 
 
