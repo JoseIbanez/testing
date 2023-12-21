@@ -34,7 +34,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @SpringBootTest(classes = SpringTestConfig.class)
 public class IdmEmployeeServiceTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmployeeServiceTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(IdmEmployeeServiceTest.class);
 
     @Autowired
     private IdmEmployeeService idmEmployeeService;
