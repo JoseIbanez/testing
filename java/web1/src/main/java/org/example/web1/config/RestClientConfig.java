@@ -1,4 +1,4 @@
-package org.example.web1.configuration;
+package org.example.web1.config;
 
 
 import org.springframework.context.annotation.Bean;
