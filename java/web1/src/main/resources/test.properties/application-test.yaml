@@ -1,6 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:h2:mem:mydb
-    username: sa
-    schema: h2/schema.sql
-    data: h2/test-data.sql
