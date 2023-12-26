@@ -1,6 +1,6 @@
 spring:
   datasource:
-    driverClassName: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/musicdb?useSSL=false
-    username: prospring6
-    password: prospring6
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/demo?useSSL=false
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}

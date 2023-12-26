@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Sql({ "classpath:h2/create-schema.sql","classpath:h2/test-data.sql" })
 @SpringBootTest
 public class JdbcTemplateTest {
-    private static Logger LOGGER = LoggerFactory.getLogger(JdbcTemplateTest.class);
+    private static Logger logger = LoggerFactory.getLogger(JdbcTemplateTest.class);
 
     @Autowired
     SingerRepo singerRepo;
@@ -25,7 +25,10 @@ public class JdbcTemplateTest {
     public void test01() throws Exception {
 
         var name = singerRepo.findNameById(1);
-        LOGGER.info("name:{}",name.toString());
+        logger.info("name:{}",name.toString());
+
+        var text = singerRepo.findByName("%o%");
+
     }
 
 
