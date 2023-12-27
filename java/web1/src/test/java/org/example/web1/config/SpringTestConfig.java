@@ -1,4 +1,4 @@
-package org.example.web1;
+package org.example.web1.config;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;

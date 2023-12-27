@@ -21,11 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.RequestMatcher;
-import org.springframework.test.web.client.ResponseActions;
 import org.springframework.web.client.RestTemplate;
 
-import org.example.web1.SpringTestConfig;
+import org.example.web1.config.SpringTestConfig;
 import org.example.web1.model.Employee;
 import org.example.web1.service.EmployeeService;
 import com.fasterxml.jackson.databind.ObjectMapper;

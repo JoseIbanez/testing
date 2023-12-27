@@ -1,5 +1,6 @@
 package org.example.web1;
 
+import org.example.web1.config.SpringTestConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;

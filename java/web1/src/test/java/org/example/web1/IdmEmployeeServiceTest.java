@@ -1,11 +1,9 @@
 package org.example.web1;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.web1.config.SpringTestConfig;
 import org.example.web1.idmPojo.IdmEmployeePojo;
-import org.example.web1.model.Employee;
-import org.example.web1.service.EmployeeService;
 import org.example.web1.service.IdmEmployeeService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
