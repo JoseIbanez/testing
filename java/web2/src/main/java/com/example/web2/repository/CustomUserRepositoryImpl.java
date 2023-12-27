@@ -6,7 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import java.util.Objects;
-
+import java.util.stream.Stream;
 
 public class CustomUserRepositoryImpl implements CustomUserRepository {
 
@@ -20,6 +20,18 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                 .getSingleResult();
         return user;
     }
+
+    @Override
+    public  Stream<User> customFindByName(String filter) {
+        var stream = entityManager.createQuery("FROM User u WHERE u.name like :filter")
+                .setParameter("filter",filter)
+                .getResultList()
+                .stream();
+
+        return stream;
+    }
+
+
 
     @PostConstruct
     public void postConstruct() {
