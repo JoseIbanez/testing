@@ -51,10 +51,18 @@ public class UnstructuredJsonTest {
     @Test
     public void elasticSearchTest() throws Exception {
 
-        importElasticService.downloadSyslog();
-
+        var stream = importElasticService.downloadSyslog("CPS");
+        stream.forEach(e -> {
+            logger.info(e.toString());
+            syslogEntryRepository.save(e);
+        });
     }
 
+    @Test
+    public void elasticSearchTest_02() throws Exception {
+
+        importElasticService.justDownloadSyslog("CPS");
+    }
 
 
 
