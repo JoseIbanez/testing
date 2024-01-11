@@ -12,7 +12,7 @@ public class RestClientConfig {
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
-       return restTemplate;
+        return restTemplate;
     }
 
 }
