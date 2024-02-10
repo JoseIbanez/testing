@@ -145,14 +145,35 @@ def parse_datetime(date:str,hour:str):
             e_datetime = datetime.now()
 
     return e_datetime
+
+def parse_competition(col):
+
+    try:
+        labels = col.findChildren('label')
+        spans = col.findChildren('span')
+
+        if labels and len(labels)>0:
+            competition = labels[0].string
+        elif spans and len(spans)>0:
+            competition = spans[0].string
+        else:
+            logger.error("Col without competition, %s",col)
+            competition = ""     
+
+        competition = competition.rstrip().lstrip()
+    except  (AttributeError, IndexError) as e:
+        logger.error("Error:%s, for col:%s",e,col)
+        competition = ""
     
+    return competition
+
 
 def parse_4_cols(cols,date):
 
     e = EventTV()
     hour   =  cols[0].string.rstrip().lstrip()
     e.date = parse_datetime(date,hour)
-    e.competition = cols[1].findChildren('span')[0].string.rstrip().lstrip()
+    e.competition = parse_competition(cols[1])
     e.local  = cols[2].text.rstrip().lstrip()
     e.away  =  None
     e.channels = [ i.string for i in cols[3].findChildren('li')]   
@@ -164,7 +185,7 @@ def parse_5_cols(cols,date):
     e = EventTV()
     hour   =  cols[0].string.rstrip().lstrip()
     e.date = parse_datetime(date,hour)
-    e.competition = cols[1].findChildren('label')[0].string.rstrip().lstrip()
+    e.competition = parse_competition(cols[1])
     e.local  = cols[2].findChild('span').string
     e.away  =  cols[3].findChild('span').string
     e.channels = [ i.string for i in cols[4].findChildren('li')]   
