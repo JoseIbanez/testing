@@ -3,7 +3,7 @@ import requests
 import time
 import os
 import re
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, ResultSet, Tag
 from datetime import datetime
 import logging
 from botliche.common import configure_loger
@@ -77,14 +77,17 @@ class EventTVList:
 
         logger.info("Page scraped, duration:%0.3f",time.time() -time0)
 
+
+
     def scrape_table(self,main_table):
 
         row_counter = -1
         date = None
 
-        for row in main_table.findChildren('tr'):
+        for row in main_table.findChildren('tr'): 
 
             cols = row.findChildren('td')
+
             row_counter += 1
             if row_counter == 0:
                 date = parse_date(cols)
@@ -125,10 +128,15 @@ class EventTVList:
         return
 
 
-def parse_date(cols):
+def parse_date(cols:ResultSet):
+    """
+    Parse date line
+    """
+    
     m = re.search("(\d+/\d+/\d+)",cols[0].string)
     date = m.group(1) if m else ""
     return date
+
 
 def parse_datetime(date:str,hour:str):
 
@@ -146,7 +154,7 @@ def parse_datetime(date:str,hour:str):
 
     return e_datetime
 
-def parse_competition(col):
+def parse_competition(col:Tag):
 
     try:
         labels = col.findChildren('label')
@@ -168,7 +176,7 @@ def parse_competition(col):
     return competition
 
 
-def parse_4_cols(cols,date):
+def parse_4_cols(cols:ResultSet,date):
 
     e = EventTV()
     hour   =  cols[0].string.rstrip().lstrip()
@@ -180,7 +188,7 @@ def parse_4_cols(cols,date):
     return e
 
 
-def parse_5_cols(cols,date):
+def parse_5_cols(cols:ResultSet,date):
 
     e = EventTV()
     hour   =  cols[0].string.rstrip().lstrip()
