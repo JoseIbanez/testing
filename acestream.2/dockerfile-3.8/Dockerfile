@@ -32,7 +32,7 @@ ENV PATH $ACE_DIR:$PATH
 RUN apt-get -q update && \
     apt-get install -y --no-install-recommends \
         libsqlite3-0 \
-        netcat \
+        netcat wget \
         net-tools \
     && \
     apt-get clean && \
@@ -46,12 +46,16 @@ COPY --from=build $ACE_DIR $ACE_DIR
 # Copy entrypoint scripts
 COPY ./print_token.py /
 COPY ./start.sh /
+COPY ./acestream.conf /acestream/acestream.conf
 
 # Make entrypoint executable
 RUN chmod +x /start.sh
 
 # Let docker know how to test container health
-HEALTHCHECK CMD nc -zv localhost 6878 || exit 1
+HEALTHCHECK CMD wget -q -t1 -O- 'http://127.0.0.1:6878/webui/api/service?method=get_version' | grep '"error": null'
 
 # Start acestream (client console only)
 ENTRYPOINT [ "/start.sh" ]
+
+EXPOSE 6878
+EXPOSE 8621
