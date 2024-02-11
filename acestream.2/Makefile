@@ -2,4 +2,4 @@
 
 
 docker-build:
-	cd docker-file-3.8  ; ./build.sh
+	cd dockerfile-3.8  ; ./build.sh
