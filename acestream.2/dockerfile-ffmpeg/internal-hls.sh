@@ -13,9 +13,10 @@ export ACE_URL="http://127.0.0.1:6878/ace/getstream?id=$ID"
 #    -map 0:v:0 -map 0:a:1 \
 #        -c:a ac3 \
 
+sleep 5
+
 while true; do
 
-    sleep 5
     tsprefix=`date +%d%H%M`
 
     ffmpeg \
@@ -29,5 +30,10 @@ while true; do
     -hls_init_time 4 -hls_time 4 \
     stream.m3u8
 
+
+    pkill acestream
+    sleep 5
+    supervisorctl restart acestream
+    sleep 2
 
 done

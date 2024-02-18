@@ -8,6 +8,7 @@ RUN set -ex && \
         software-properties-common \
         iproute2 \
         ffmpeg \
+        procps \
         supervisor && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/cache/*
