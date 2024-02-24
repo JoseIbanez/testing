@@ -1,8 +1,19 @@
 
-
-listas_m3u8:
+m3u8_lists:
   - elcano.m3u8
   - pmeister.m3u8
   - electroperra.m3u8
   - ramses.m3u8
 
+
+m3u8_cname:
+  - match: ' *(1080|720)p?\*?'
+    replace: ''
+  - match: '(4K|1440)p?'
+    replace: 'UHD'
+  - match: 'M. LaLiga'
+    replace: 'M+ LaLiga TV'
+  - match: 'M.L. Campeones'
+    replace: 'M+ Liga de Campeones'
+  - match: '(M.|Movistar)? ?Supercopa'
+    replace: 'Movistar Supercopa de España'
