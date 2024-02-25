@@ -36,8 +36,7 @@ func (peerList *PeerList) add(peer *Peer) error {
  
 
 	idx := slices.IndexFunc(*peerList, func(c Peer) bool { return c.address == peer.address })
-
-	if idx > 0 {
+	if idx >= 0 {
 		return nil
 	}
 
