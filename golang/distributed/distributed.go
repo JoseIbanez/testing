@@ -7,6 +7,8 @@ type Peer struct {
 	lastUpdate int
 }
 
+type PeerList []Peer
+
 type Frame struct {
 	id int
 	streamId string
