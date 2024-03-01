@@ -12,81 +12,67 @@ import (
 
 func server(source string, bs string) {
 
-  log.SetPrefix(source)
+	//log.SetPrefix(source)
 
+	addr, err := net.ResolveUDPAddr("udp", source)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-  addr, err := net.ResolveUDPAddr("udp", source)
-  if err != nil {
-	fmt.Println(err)
-	return
-  }
+	sock, err := net.ListenUDP("udp", addr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-  sock,err := net.ListenUDP("udp", addr)
-  if err != nil {
-	fmt.Println(err)
-	return
-  }
+	peerList := make(PeerList, 0, 30)
+	peerList.add_address(bs)
 
-  peerList := make(PeerList,0,30)
-  peerList.add_address(bs)
+	state := SystemState{peerList: &peerList, Address: source, StreamId: "1111"}
 
-  state := SystemState{peerList: peerList, Address: source, StreamId: "1111" }
+	go server_listen(sock, &state, &peerList)
+	go server_send_updates(sock, &state, &peerList)
 
-
-  go server_listen(sock,&state,&peerList)
-  go server_send_updates(sock,&state,&peerList)
-
-
-  fmt.Printf("peerList: %v\n", peerList)
+	//fmt.Printf("peerList: %v\n", peerList)
 
 }
-
-
-
-
-
 
 func server_listen(sock *net.UDPConn, state *SystemState, peerList *PeerList) {
 
-  for {
-    buf := make([]byte, 1024)
-    rlen, raddr, err := sock.ReadFromUDP(buf)
-	received_micro := time.Now().UnixMicro()
-	if err != nil {
-      fmt.Println(err)
-    }
+	for {
+		buf := make([]byte, 1024)
+		rlen, raddr, err := sock.ReadFromUDP(buf)
+		received_micro := time.Now().UnixMicro()
+		if err != nil {
+			fmt.Println(err)
+		}
 
-	log.Printf("%s <- %s:%d, msg:%s", state.Address ,raddr.IP,raddr.Port,string(buf[0:rlen]))
+		log.Printf("%s <- %s:%d, msg:%s", state.Address, raddr.IP, raddr.Port, string(buf[0:rlen]))
 
-	// Add new peer to the list
-	//peerList.add_address(fmt.Sprintf("%s:%d",raddr.IP,raddr.Port))
-	peerList.add(&Peer{Address: fmt.Sprintf("%s:%d",raddr.IP,raddr.Port),
-		 			   lastUpdate: time.Now().Unix()})
+		// Add new peer to the list
+		peerList.add_address(fmt.Sprintf("%s:%d", raddr.IP, raddr.Port))
 
-	// Analize message
-	msg := &Message{}
-	msg.deserialize(buf[0:rlen])
+		// Analize message
+		msg := &Message{}
+		msg.deserialize(buf[0:rlen])
 
+		if msg.Command == "ping" {
+			server_send_pong(sock, state, raddr, msg.Ping, received_micro)
+		}
 
-	if msg.Command == "ping" {
-		server_send_pong(sock, state, raddr, msg.Ping, received_micro)
+		if msg.Command == "pong" {
+			update_peer_delay(state, raddr, msg.Ping, received_micro)
+		}
+
+		if msg.PeerList != nil {
+			peerList.add_from_list(&msg.PeerList)
+		}
+
+		state.print()
+
 	}
-
-	if msg.Command == "pong" {
-		update_peer_delay(state, raddr, msg.Ping, received_micro)
-	}
-
-
-	if  msg.PeerList != nil {
-		peerList.add_from_list(&msg.PeerList)
-	}
-
-
-
-  }
 }
-
-
 
 func client() {
 
@@ -106,22 +92,18 @@ func client() {
 
 	for i := 0; i < 10000; i++ {
 
-
 		fmt.Println(".")
 		buf := []byte("bla bla bla I am the packet")
 
 		_, err := con.Write(buf)
 		if err != nil {
-		  fmt.Println(err)
+			fmt.Println(err)
 		}
 
 		time.Sleep(10 * time.Millisecond)
 
 	}
 }
-
-
-
 
 func main() {
 
@@ -137,18 +119,17 @@ func main() {
 	log.SetPrefix("main: ")
 	log.SetFlags(0)
 
-
 	// Finally print the collected string
 	log.Println(*b)
 
-	go server(":2000","")
-	go server(":2001","127.0.0.1:2000")
-	go server(":2002","127.0.0.1:2000")
-	go server(":2003","127.0.0.1:2000")
+	go server(":2000", "")
+	go server(":2001", *b)
+	go server(":2002", *b)
+	go server(":2003", *b)
 
 	//go client()
 	//go client()
 
-	time.Sleep( 60 * time.Second)
+	time.Sleep(60 * time.Second)
 
 }
