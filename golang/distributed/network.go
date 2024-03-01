@@ -11,65 +11,81 @@ import (
 )
 
 func server(source string, bs string) {
+
+  log.SetPrefix(source)
+
+
   addr, err := net.ResolveUDPAddr("udp", source)
   if err != nil {
 	fmt.Println(err)
 	return
   }
+
   sock,err := net.ListenUDP("udp", addr)
   if err != nil {
 	fmt.Println(err)
 	return
   }
 
-  //peerList := make([]Peer,0,30)
   peerList := make(PeerList,0,30)
-
   peerList.add_address(bs)
 
-  go server_listen(sock,addr,&peerList)
+  state := SystemState{peerList: peerList, Address: source, StreamId: "1111" }
+
+
+  go server_listen(sock,&state,&peerList)
+  go server_send_updates(sock,&state,&peerList)
 
 
   fmt.Printf("peerList: %v\n", peerList)
 
-  for {
-	time.Sleep(1 * time.Second)
-	for i,peer := range peerList {
-
-
-		log.Printf("PING %d peer:%s",i,peer.address)
-
-		raddr, _ := net.ResolveUDPAddr("udp", peer.address)
-		_, _ = sock.WriteToUDP([]byte("ping"), raddr)
-
-		time.Sleep(1 * time.Second)
-
-	}
-  }
-
 }
 
-func server_listen(sock *net.UDPConn, laddr *net.UDPAddr, peerList *PeerList) {
+
+
+
+
+
+func server_listen(sock *net.UDPConn, state *SystemState, peerList *PeerList) {
 
   for {
     buf := make([]byte, 1024)
     rlen, raddr, err := sock.ReadFromUDP(buf)
-    if err != nil {
+	received_micro := time.Now().UnixMicro()
+	if err != nil {
       fmt.Println(err)
     }
 
-	log.Printf("%s:%d <- %s:%d, msg:%s", laddr.IP, laddr.Port ,raddr.IP,raddr.Port,string(buf[0:rlen]))
+	log.Printf("%s <- %s:%d, msg:%s", state.Address ,raddr.IP,raddr.Port,string(buf[0:rlen]))
+
+	// Add new peer to the list
+	//peerList.add_address(fmt.Sprintf("%s:%d",raddr.IP,raddr.Port))
+	peerList.add(&Peer{Address: fmt.Sprintf("%s:%d",raddr.IP,raddr.Port),
+		 			   lastUpdate: time.Now().Unix()})
+
+	// Analize message
+	msg := &Message{}
+	msg.deserialize(buf[0:rlen])
 
 
-
-    //go handlePacket(buf, rlen)
-	//_, _ = sock.WriteToUDP([]byte("pong"), raddr)
-
-	peerList.add_address(fmt.Sprintf("%s:%d",raddr.IP,raddr.Port))
-
+	if msg.Command == "ping" {
+		server_send_pong(sock, state, raddr, msg.Ping, received_micro)
 	}
 
+	if msg.Command == "pong" {
+		update_peer_delay(state, raddr, msg.Ping, received_micro)
+	}
+
+
+	if  msg.PeerList != nil {
+		peerList.add_from_list(&msg.PeerList)
+	}
+
+
+
+  }
 }
+
 
 
 func client() {
@@ -133,6 +149,6 @@ func main() {
 	//go client()
 	//go client()
 
-	time.Sleep( 15 * time.Second)
+	time.Sleep( 60 * time.Second)
 
 }
