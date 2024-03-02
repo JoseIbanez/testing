@@ -1,11 +1,16 @@
 package main
 
 type Peer struct {
-	Address    string `json:"address"`
-	Delay      int    `json:"delay"`
-	Capacity   int    `json:"capacity"`
-	lastUpdate int64
+	Address  string `json:"address"`
+	Delay    int    `json:"delay"`
+	Capacity int    `json:"capacity"`
+
+	last_ping_in     int64
+	last_ping_out    int64
+	counter_ping_in  uint32
+	counter_ping_out uint32
 }
+
 type PeerList []Peer
 
 type Message struct {

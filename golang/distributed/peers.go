@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"slices"
+	"strings"
 )
 
 func (peerList *PeerList) print() error {
@@ -22,7 +24,7 @@ func (peerList *PeerList) add_address(address string) error {
 		return nil
 	}
 
-	err := peerList.add(&Peer{Address: address, Delay: -1, Capacity: 1, lastUpdate: 0})
+	err := peerList.add(&Peer{Address: address, Delay: -1, Capacity: 1})
 	return err
 
 }
@@ -89,8 +91,21 @@ func (peerList *PeerList) add_from_list(remoteList *PeerList) error {
 
 }
 
+func (peer *Peer) to_string() string {
+
+	return fmt.Sprintf("Addr:%s Ping:%d/%d Delay:%d", peer.Address, peer.counter_ping_out, peer.counter_ping_in, peer.Delay)
+
+}
+
 func (node *SystemState) print() {
 
-	log.Printf("Node:%s, peers:%v", node.Address, *node.peerList)
+	out := make([]string, len(*node.peerList))
+
+	for i, peer := range *node.peerList {
+		out[i] = peer.to_string()
+
+	}
+
+	log.Printf("Node:%s, peers:[ %s ]", node.Address, strings.Join(out, " "))
 
 }
