@@ -48,7 +48,7 @@ func update_peer_delay(state *SystemState, raddr *net.UDPAddr, ping *Ping, recei
 
 	rAddress := fmt.Sprintf("%s:%d", raddr.IP, raddr.Port)
 
-	log.Printf("Node:%s delate to Peer:%s, total:%d, remote:%d, network:%d", state.Address, rAddress, total_delay, remote_delay, total_delay-remote_delay)
+	log.Printf("Node:%s delay to Peer:%s, total:%d, remote:%d, network:%d", state.Address, rAddress, total_delay, remote_delay, total_delay-remote_delay)
 
 	peer := state.peerList.find_by_address(rAddress)
 	if peer == nil {

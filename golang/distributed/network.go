@@ -7,7 +7,10 @@ import (
 	"os"
 	"time"
 
+	"math/rand"
+
 	"github.com/akamensky/argparse"
+	"github.com/google/uuid"
 )
 
 func server(source string, bs string) {
@@ -29,7 +32,7 @@ func server(source string, bs string) {
 	peerList := make(PeerList, 0, 30)
 	peerList.add_address(bs)
 
-	state := SystemState{peerList: &peerList, Address: source, StreamId: "1111"}
+	state := SystemState{peerList: &peerList, Address: source, Id: uuid.New().String(), StreamId: "1111"}
 
 	go server_listen(sock, &state, &peerList)
 	go server_send_updates(sock, &state, &peerList)
@@ -51,7 +54,14 @@ func server_listen(sock *net.UDPConn, state *SystemState, peerList *PeerList) {
 		log.Printf("%s <- %s:%d, msg:%s", state.Address, raddr.IP, raddr.Port, string(buf[0:rlen]))
 
 		// Add new peer to the list
-		peerList.add_address(fmt.Sprintf("%s:%d", raddr.IP, raddr.Port))
+		peerAddress := fmt.Sprintf("%s:%d", raddr.IP, raddr.Port)
+		peerList.add_address(peerAddress)
+
+		// Update lastUpdate
+		peer := peerList.find_by_address(peerAddress)
+		if peer != nil {
+			peer.lastUpdate = time.Now().Unix()
+		}
 
 		// Analize message
 		msg := &Message{}
@@ -108,7 +118,8 @@ func client() {
 func main() {
 
 	parser := argparse.NewParser("distributed network", "Deploy a distributed network")
-	b := parser.String("b", "string", &argparse.Options{Required: true, Help: "bootstrap server"})
+	bs := parser.String("b", "bootstrap", &argparse.Options{Required: false, Help: "bootstrap server"})
+	port := parser.Int("p", "port", &argparse.Options{Required: false, Help: "listening port"})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -116,20 +127,23 @@ func main() {
 		return
 	}
 
-	log.SetPrefix("main: ")
+	//log.SetPrefix("main: ")
 	log.SetFlags(0)
 
-	// Finally print the collected string
-	log.Println(*b)
+	if port != nil {
+		go server(fmt.Sprintf(":%d", *port), "")
+	}
 
-	go server(":2000", "")
-	go server(":2001", *b)
-	go server(":2002", *b)
-	go server(":2003", *b)
+	if bs != nil {
+		for i := 1; i <= 5; i++ {
 
+			other := rand.Intn(32000-10000) + 10000
+			go server(fmt.Sprintf(":%d", other), *bs)
+		}
+	}
 	//go client()
 	//go client()
 
-	time.Sleep(60 * time.Second)
+	time.Sleep(180 * time.Second)
 
 }
