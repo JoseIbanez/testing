@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"testing"
+	"time"
 )
 
 func TestPeer_add_address(t *testing.T) {
@@ -32,6 +33,42 @@ func TestPeer_add_address_01(t *testing.T) {
 	aux_add(&peerList, "127.0.0.1:2002")
 
 	if len(peerList) != 3 {
+		t.Fatalf("len(PeerList)=%d", len(peerList))
+	}
+
+	peerList.print()
+
+}
+
+func TestPeer_del_by_idx(t *testing.T) {
+
+	peerList := make(PeerList, 0, 30)
+
+	peerList.add_address("127.0.0.1:2000")
+	aux_add(&peerList, "127.0.0.1:2001")
+	aux_add(&peerList, "127.0.0.1:2002")
+
+	peerList.del_by_idx(1)
+
+	if len(peerList) != 2 {
+		t.Fatalf("len(PeerList)=%d", len(peerList))
+	}
+
+	peerList.print()
+
+}
+
+func TestPeer_del_by_ping(t *testing.T) {
+
+	peerList := make(PeerList, 0, 30)
+
+	peerList.add_address("127.0.0.1:2000")
+	peerList.add(&Peer{Address: "127.0.0.1:2001", last_ping_in: time.Now().Unix()})
+	aux_add(&peerList, "127.0.0.1:2002")
+
+	peerList.del_by_ping()
+
+	if len(peerList) != 1 {
 		t.Fatalf("len(PeerList)=%d", len(peerList))
 	}
 

@@ -69,6 +69,9 @@ func server_listen(sock *net.UDPConn, state *SystemState, peerList *PeerList) {
 			peerList.add_from_list(&msg.PeerList)
 		}
 
+		//Clean up
+		state.peerList.del_by_ping()
+
 		state.print()
 
 	}

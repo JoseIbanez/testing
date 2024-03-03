@@ -6,13 +6,18 @@ import (
 	"log"
 	"slices"
 	"strings"
+	"time"
 )
 
 func (peerList *PeerList) print() error {
 
+	out := make([]string, len(*peerList))
+
 	for i, peer := range *peerList {
-		log.Printf("PEER:%d %s", i, peer.Address)
+		out[i] = peer.to_string()
 	}
+
+	log.Printf("Peers:[ %s ]", strings.Join(out, " "))
 
 	return nil
 }
@@ -49,6 +54,36 @@ func (peerList *PeerList) add(peer *Peer) error {
 
 	*peerList = append(*peerList, *peer)
 	log.Printf("New peer:%s", peer.Address)
+	return nil
+
+}
+
+func (peerList *PeerList) del_by_idx(idx int) error {
+
+	if idx >= len(*peerList) {
+		log.Printf("Error to delete, idx:%d bigger than len(peerList):%d", idx, len(*peerList))
+		return nil
+	}
+
+	log.Printf("Peer:%s idx:%d to delete", (*peerList)[idx].Address, idx)
+
+	*peerList = append((*peerList)[:idx], (*peerList)[idx+1:]...)
+	return nil
+
+}
+
+func (peerList *PeerList) del_by_ping() error {
+
+	ret := &PeerList{}
+
+	for _, peer := range *peerList {
+		if peer.last_ping_in+40 > time.Now().Unix() || peer.counter_ping_out < 3 {
+			*ret = append(*ret, peer)
+		}
+	}
+
+	*peerList = *ret
+
 	return nil
 
 }
@@ -93,7 +128,7 @@ func (peerList *PeerList) add_from_list(remoteList *PeerList) error {
 
 func (peer *Peer) to_string() string {
 
-	return fmt.Sprintf("Addr:%s Ping:%d/%d Delay:%d", peer.Address, peer.counter_ping_out, peer.counter_ping_in, peer.Delay)
+	return fmt.Sprintf("Addr:%s Ping:%d/%d(%d sec ago) Delay:%d", peer.Address, peer.counter_ping_out, peer.counter_ping_in, int(time.Now().Unix()-peer.last_ping_in), peer.Delay)
 
 }
 

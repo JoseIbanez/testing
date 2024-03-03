@@ -11,7 +11,7 @@ import (
 func send_ping(sock *net.UDPConn, state *SystemState, peerList *PeerList) {
 
 	for {
-		time.Sleep(5 * time.Second)
+		time.Sleep(1 * time.Second)
 
 		for i, peer := range *state.peerList {
 
@@ -23,7 +23,7 @@ func send_ping(sock *net.UDPConn, state *SystemState, peerList *PeerList) {
 				continue
 			}
 
-			log.Printf("Id:%s idx:%d update to peer:%s", state.Address, i, peer.Address)
+			log.Printf("Node:%s ping to %s", state.Address, peer.Address)
 
 			msg := Message{Command: "ping",
 				PeerList:    *peerList,
@@ -31,12 +31,17 @@ func send_ping(sock *net.UDPConn, state *SystemState, peerList *PeerList) {
 				Ping:        &Ping{A_out: time.Now().UnixMicro()}}
 			msg.send_to_peer(sock, &peer)
 
+			if i >= len(*state.peerList) {
+				break
+			}
+
 			(*state.peerList)[i].last_ping_out = time.Now().Unix()
 			(*state.peerList)[i].counter_ping_out++
 
 			time.Sleep(1 * time.Second)
 
 		}
+
 	}
 
 }
@@ -76,6 +81,6 @@ func update_peer_delay(state *SystemState, raddr *net.UDPAddr, ping *Ping, recei
 	}
 
 	peer.Delay = int(total_delay - remote_delay)
-	log.Printf("Node:%s, peer updated:%v", state.Address, *peer)
+	//log.Printf("Node:%s, peer updated:%v", state.Address, *peer)
 
 }
