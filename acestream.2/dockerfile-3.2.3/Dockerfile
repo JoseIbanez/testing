@@ -10,17 +10,27 @@ ENV LC_ALL="C.UTF-8" \
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked\
     --mount=type=cache,target=/var/lib/apt,sharing=locked\
     --mount=type=tmpfs,target=/tmp\
-    set -ex;\
-    apt-get update;\
-    apt-get install -yq --no-install-recommends ca-certificates python3.8 libpython3.8 python3-pip wget;\
-    echo "wget here";\
-    mkdir -p /opt/acestream;\
-    wget --no-verbose --output-document /opt/acestream/acestream.tgz $DOWNLOAD_URL;\
-    echo "$CHECKSUM /opt/acestream/acestream.tgz" | sha256sum --check;\
-    tar --extract --gzip --directory /opt/acestream --file /opt/acestream/acestream.tgz;\
-    rm /opt/acestream/acestream.tgz;\
-    python3 -m pip install -r /opt/acestream/requirements.txt;\
-    /opt/acestream/start-engine --version;
+    set -ex && \
+    apt-get update && \
+    apt-get install -yq --no-install-recommends \
+        ca-certificates \
+        python3.8 \
+        libpython3.8 \
+        python3-pip \
+        wget
+
+# Download acestream
+RUN mkdir -p /opt/acestream && \
+    wget --no-verbose --output-document /tmp/acestream.tgz $DOWNLOAD_URL && \
+    echo "$CHECKSUM /tmp/acestream.tgz" | sha256sum --check && \
+    tar --extract --gzip --directory /opt/acestream --file /tmp/acestream.tgz && \
+    rm /tmp/acestream.tgz
+
+# Install python requirements
+RUN python3 -m pip install -r /opt/acestream/requirements.txt
+
+# Test acesstream
+RUN /opt/acestream/start-engine --version
 
 COPY ./start.sh /start.sh
 COPY acestream.conf /opt/acestream/acestream.conf
