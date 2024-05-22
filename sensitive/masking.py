@@ -1,4 +1,9 @@
+#!/usr/bin/env python3
 
+"""
+Anonymize a customers file in csv format.
+@Jose Ibanez Vela
+"""
 
 SENSITIVE_FIELDS_TEXT = [ "Name", "Email"] 
 SENSITIVE_FIELDS_NUMBER = [ "Billing" ] 
@@ -66,8 +71,10 @@ def masking_file(in_filename:str,out_filename:str):
             col_names = header.split(',')
 
             # List of the positions of the numerical (sensitive) colls, ex: [4]
-            numerical_cols = [ idx for idx,name in enumerate(col_names) if name in SENSITIVE_FIELDS_NUMBER ] 
-
+            numerical_cols = [ idx 
+                               for idx,name in enumerate(col_names) 
+                               if name in SENSITIVE_FIELDS_NUMBER 
+                             ] 
             continue
 
         # values line, one iteration per line
@@ -102,8 +109,8 @@ def masking_file(in_filename:str,out_filename:str):
     output_file.close()
 
     # Print report
-    for _,reportItem in report.items():
-        print(reportItem)
+    for _,report_item in report.items():
+        print(report_item)
 
 
 def mask_text_collumn(value:str) -> str:
@@ -118,7 +125,7 @@ def mask_text_collumn(value:str) -> str:
     if STRIP_OUTPUT:
         value = value.strip()
 
-    # Split, replace and join. No libs
+    # Split, replace and join. No libraries :)
     masked = [ 'X' if x not in SPECIAL_CHARS else x for x in value ]
     result = ''.join(masked)
 
@@ -138,7 +145,7 @@ def calculate_line_average(value_in_list:list[str|int|float],numerical_cols:list
     if not numerical_cols or len(numerical_cols) == 0:
         return 0
 
-    sum = 0
+    sum_ = 0
     for idx in numerical_cols:
 
         try:
@@ -146,13 +153,16 @@ def calculate_line_average(value_in_list:list[str|int|float],numerical_cols:list
         except ValueError:
             value = 0
 
-        sum += value
+        sum_ += value
 
-    average = sum/len(numerical_cols)
+    average = sum_/len(numerical_cols)
     return average
 
 
 def update_report(report:dict[str,ReportItem],col_name:str,value):
+    """
+    Update report list with a new value, col_name and col value
+    """
 
     # Init report item
     if not report.get(col_name):
@@ -176,8 +186,26 @@ def update_report(report:dict[str,ReportItem],col_name:str,value):
 
 
 
+def main():
+    """
+    Get input parameter, input file
+    Execute main function, masking file
+    """
 
-masking_file("./customers 3.csv","./masked_clients.csv")
+    # I whould like to use argparse lib to get input param, and show shome help, but not
+    # libraries for this exercise
+    input_filename = input("Input filename to anonymize: ")
+    output_filename = "./masked_clients.csv"
+    
+    try:
+        masking_file(input_filename,output_filename)
+
+    except OSError as err:
+        print("OS error:%s",err)
+
+
+if __name__ == '__main__':
+    main()
 
 
 
