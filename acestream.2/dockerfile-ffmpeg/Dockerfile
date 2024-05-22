@@ -2,17 +2,17 @@ FROM acelink
 
 # Install system packages
 
-RUN set -ex && \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked\
+    --mount=type=cache,target=/var/lib/apt,sharing=locked\
+    --mount=type=tmpfs,target=/tmp\
+    set -ex && \
     apt-get update && \
     apt-get install -yq --no-install-recommends \
         software-properties-common \
         iproute2 \
         ffmpeg \
         procps \
-        supervisor && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /var/cache/*
-
+        supervisor 
 
 
 RUN mkdir -p /mnt/hls
