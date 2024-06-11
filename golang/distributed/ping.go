@@ -25,10 +25,13 @@ func send_ping(sock *net.UDPConn, state *SystemState, peerList *PeerList) {
 
 			log.Printf("Node:%s ping to %s", state.Address, peer.Address)
 
-			msg := Message{Command: "ping",
+			msg := Message{
+				Command:     "ping",
 				PeerList:    *peerList,
+				Frame:       &Frame{},
 				SystemState: state,
-				Ping:        &Ping{A_out: time.Now().UnixMicro()}}
+				Ping:        &Ping{A_out: time.Now().UnixMicro()},
+			}
 			msg.send_to_peer(sock, &peer)
 
 			if i >= len(*state.peerList) {

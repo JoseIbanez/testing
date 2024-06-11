@@ -5,5 +5,11 @@ init:
 tidy:
 	go mod tidy
 
+build:
+	go build
+
+wasm:
+	GOOS=js GOARCH=wasm go build -o main.wasm
+
 run:
 	go run .
