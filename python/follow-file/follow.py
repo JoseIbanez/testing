@@ -1,5 +1,6 @@
 import time
 import sys
+import os
 
 def main():
 
@@ -9,8 +10,8 @@ def main():
 
 def proccessor():
 
-    input_file = sys.stdin
-    reader =follow(input_file)
+    filename = None
+    reader =follow(filename)
 
 
     while True:
@@ -18,12 +19,12 @@ def proccessor():
         #Fetch new data
         line = next(reader)
 
-        if not line:
-            time.sleep(1)
-            continue
 
         #Convert to format
         msg = line
+        if not msg:
+            time.sleep(1)
+            continue
 
         #Send data 
         print(msg)
@@ -34,13 +35,18 @@ def proccessor():
 
 
 
-def follow(thefile):
+def follow(filename):
+
+    if filename:
+        input_file = open(filename,encoding="utf-8")
+        input_file.seek(0,os.SEEK_END)
+    else:
+        input_file = sys.stdin
     
     # Go to the end of the file
-    #thefile.seek(0,2) 
-    
     while True:
-        line = thefile.readline()
+        line = input_file.readline()
         yield line
+
 
 main()
