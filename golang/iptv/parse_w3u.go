@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/tidwall/gjson"
@@ -46,13 +46,19 @@ func parseW3UFile(name string) ([]Link) {
 	log.Printf("Name: %s Author: %s", list_name, list_author)
 
 	value := gjson.GetBytes(byteValue, "groups")
+	if value.Index <= 0 {
+		log.Printf("No groups found in file %s", filePath)
+		os.WriteFile(filePath+".done", []byte("done"), 0755)
+		return []Link{}
+	}
 	raw := byteValue[value.Index : value.Index+len(value.Raw)]
 
 	//parse json array
 	var link_list []Link
 	err = json.Unmarshal(raw, &link_list)
 	if err != nil {
-		log.Println("Error due to parsing json: ", err)
+		log.Printf("Error parsing file: %s, err:%s ",filePath, err)
+		os.WriteFile(filePath+".done", []byte("done"), 0755)
 		return []Link{}
 	}
 
@@ -80,6 +86,7 @@ func parseW3UFile(name string) ([]Link) {
 
 
 	log.Printf("Parsed %d links", len(result))
+	os.WriteFile(filePath+".done", []byte("done"), 0755)
 
 	return result
 }
@@ -100,14 +107,32 @@ func FilenameFromUrl(urlstr string) (string, error) {
 
 func get_w3u_files() ([]string) {
 
-	files, err := ioutil.ReadDir("cache/")
+	files, err := os.ReadDir("cache/")
 	if err != nil {
 		log.Fatal(err)
 	}
-	var result []string
+
+	// Get a list of file names (.w3u or .done)
+	var file_names []string 
 	for _, file := range files {
-		if filepath.Ext(file.Name()) == ".w3u" {
-			result = append(result, file.Name())
+		file_name := file.Name()
+		file_ext := filepath.Ext(file_name)
+		if file_ext == ".w3u" || file_ext == ".done" {
+			file_names = append(file_names, file_name)
+		}
+	}
+
+	var result []string
+	for _, file := range file_names {
+
+		//check if the file is already processed
+		if slices.Contains(file_names, file+".done") {
+			log.Printf("File %s already processed", file)
+			continue	
+		}
+
+		if filepath.Ext(file) == ".w3u" {
+			result = append(result, file)
 		}
 	}
 	return result

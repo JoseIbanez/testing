@@ -29,13 +29,15 @@ func parse_w3u_files_async() {
 	}
 
 	w3u_files := get_w3u_files()
+	log.Printf("Found %d files to proccess",len(w3u_files))
 	for _, file := range w3u_files {
-		link_list := parseW3UFile(file)
 
+		link_list := parseW3UFile(file)
 		for _, link := range link_list {
 			//	DownloadFile(link.Filename, link.Url)
 			queue <- link
 		}	
+
 
 	}
 	close(queue)
