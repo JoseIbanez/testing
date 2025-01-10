@@ -20,8 +20,7 @@ func DownloadFile(name string, url string) error {
 
 	// Check if the file already exists
 	if _, err := os.Stat(filePath); err == nil {
-		log.Printf("File %s already exists", filePath)
-		return nil
+		return fmt.Errorf("File %s already exists", filePath)
 	}
 
 	// Create the file
@@ -64,15 +63,15 @@ func main() {
 	fmt.Println(err)
 
 
-	//sample_url = "https://af1c1onados.vercel.app/af1cionados.w3u"
-	//err = DownloadFile("af1cionados.w3u", sample_url)
+	sample_url = "https://af1c1onados.vercel.app/af1cionados.w3u"
+	err = DownloadFile("af1cionados.w3u", sample_url)
 
-	sample_url = "https://af1c1onados.vercel.app/02.Menu.Iptvs.w3u"
-	err = DownloadFile("02.Menu.Iptvs.w3u", sample_url)
+	//sample_url = "https://af1c1onados.vercel.app/02.Menu.Iptvs.w3u"
+	//err = DownloadFile("02.Menu.Iptvs.w3u", sample_url)
 	fmt.Println(err)
 
 
-	parse_w3u_files()
+	parse_w3u_files_async()
 
 
 }

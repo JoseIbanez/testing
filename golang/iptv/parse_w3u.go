@@ -50,9 +50,11 @@ func parseW3UFile(name string) ([]Link) {
 
 	//parse json array
 	var link_list []Link
-
-	_ = json.Unmarshal(raw, &link_list)
-
+	err = json.Unmarshal(raw, &link_list)
+	if err != nil {
+		log.Println("Error due to parsing json: ", err)
+		return []Link{}
+	}
 
 	for _, link := range link_list {
 
