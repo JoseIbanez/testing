@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +29,10 @@ func main() {
 			Author: "yo",
 			Price:  300,
 		}
+
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
+		log.Println("b1",b1,"b2","2")
+		b1.ID = b1.ID + 1
 
 		//result := gin.H{"data": "test", "result": 0, "b": gin.H{"c": 3}}
 		c.JSON(http.StatusOK, b1)
