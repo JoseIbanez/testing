@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
 	jira "github.com/andygrunwald/go-jira/v2/onpremise"
 )
 
-func get_jira() *jira.Client {
+func get_jira() (*jira.Client, error) {
+	// Connect to Jira using environment variables for URL and API token
 
 	jiraURL := os.Getenv("JIRA_URL")
 	jiraToken := os.Getenv("JIRA_API_TOKEN")
@@ -24,26 +24,31 @@ func get_jira() *jira.Client {
 	}
 	client, err := jira.NewClient(jiraURL, tp.Client())
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	u, _, err := client.User.GetSelf(context.Background())
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	log.Printf("Connected to jira, User:%v\n", u.EmailAddress)
 
-	check_ticket(client, "PPEP-310")
-
-	return client
+	return client, nil
 
 }
 
 func check_ticket(jiraClient *jira.Client, issueId string) {
-	issue, _, _ := jiraClient.Issue.Get(context.Background(), issueId, nil)
+	// Check the status of the issue
+	log.Printf("Checking issue: %s\n", issueId)
+
+	issue, response, err := jiraClient.Issue.Get(context.Background(), issueId, nil)
+	if err != nil {
+		log.Fatalf("Error getting issue %s: %v, Response:%v", issueId, err, response)
+	}
+
 	currentStatus := issue.Fields.Status.Name
-	fmt.Printf("Current status: %s\n", currentStatus)
+	log.Printf("%s Description:%s (%s)\n", issue.Key, issue.Fields.Summary, currentStatus)
 
 	subTaskList := issue.Fields.Subtasks
 	ctx := context.Background()
@@ -59,12 +64,30 @@ func check_ticket(jiraClient *jira.Client, issueId string) {
 
 }
 
+func get_args() string {
+	// Get the issue ID from command line arguments
+	// Usage: jira1 <issue-id>
+
+	if len(os.Args) < 2 {
+		log.Fatalf("Usage: jira1 <issue-id>")
+	}
+
+	return os.Args[1]
+}
+
 func main() {
 
+	// Set up logging
 	log.SetPrefix("main: ")
 	log.SetFlags(0)
 
-	jc := get_jira()
-	fmt.Printf("jiraClient: %v\n", jc)
+	issueId := get_args()
+
+	jc, err := get_jira()
+	if err != nil {
+		log.Fatalf("Error connecting to Jira: %v", err)
+	}
+
+	check_ticket(jc, issueId)
 
 }
