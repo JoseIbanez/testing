@@ -9,6 +9,7 @@ services:
       - rest
       - minio
     volumes:
+      - /usr/data/:/home/iceberg/datahouse
       - ./warehouse:/home/iceberg/warehouse
       - ./notebooks:/home/iceberg/notebooks/notebooks
     environment:
@@ -38,7 +39,7 @@ services:
     image: minio/minio
     container_name: minio
     volumes:
-      - ./data:/data
+      - /usr/data/minio:/data
     environment:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password

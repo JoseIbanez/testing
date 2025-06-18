@@ -1,4 +1,6 @@
 
+# 
+docker exec -it spark-iceberg spark-sql
 
 
 CREATE TABLE demo.nyc.taxis
