@@ -59,27 +59,20 @@ func (s *Store) search(query string, after string) ([]string, string, error) {
 		s.es.Search.WithTrackTotalHits(true),
 	)
 	if err != nil {
-		log.Fatalf("Error getting response: %s", err)
+		return nil, "", fmt.Errorf("error getting response: %w", err)
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
-		log.Fatalf("Error: %s", res.String())
+		return nil, "", fmt.Errorf("error: %s", res.String())
 	}
 
-	//log.Printf("Response: %s", res.String())
-
-	time1 := time.Now().UnixMilli()
-	log.Printf("Search took %d ms", time1-time0)
-
 	var r map[string]interface{}
-
 	json.NewDecoder(res.Body).Decode(&r)
 
 	hits := r["hits"].(map[string]interface{})["hits"].([]interface{})
 
 	var last_sort []interface{}
-
 	var results []string
 
 	for _, hit := range hits {
@@ -88,7 +81,7 @@ func (s *Store) search(query string, after string) ([]string, string, error) {
 		results = append(results, string(strH))
 	}
 	strSort, _ := json.Marshal(last_sort)
-	time1 = time.Now().UnixMilli()
+	time1 := time.Now().UnixMilli()
 	log.Printf("Got %d hits, last sort %s, process took %d ms", len(hits), string(strSort), time1-time0)
 
 	return results, string(strSort), nil

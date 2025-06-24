@@ -2,9 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/elastic/go-elasticsearch/v8"
 )
@@ -26,18 +28,32 @@ func main() {
 	log.Printf("Client version %s\n", elasticsearch.Version)
 	log.Println(es.Info())
 
-	query := `	
+	query_template := `	
 		"size" : 10000,
 		"query" : {
 			"range" : {
 				"@timestamp" : 
-					{"gte" : "2025-06-14T00:00:00.000Z",
-					  "lt" : "2025-06-15T00:00:00.000Z"}
+					{"gte" : "%s",
+					  "lt" : "%s"}
 			}
 		},
 		"sort": [
 			{ "@timestamp": "asc" }
 		]`
+
+	date_from_in := "2025-06-12T11:00:00.000Z"
+	offset := 1
+
+	t, err := time.Parse(time.RFC3339, date_from_in)
+	if err != nil {
+		log.Fatalf("Error parsing date: %s", err)
+	}
+	date_from := t.Format(time.RFC3339)
+	date_to := t.Add(time.Hour * time.Duration(offset)).Format(time.RFC3339)
+
+	log.Printf("Parsed date: %s, from:%s to:%s", t, date_from, date_to)
+	query := fmt.Sprintf(query_template, date_from, date_to)
+	log.Printf("Query: %s", query)
 
 	store, _ := NewStore(StoreConfig{
 		Client:    es,
@@ -57,12 +73,16 @@ func main() {
 		}
 	}()
 
-	for i := 0; i < 100; i++ {
-
+	for {
 		result, last_sort, err = store.search(query, last_sort)
 
 		if err != nil {
 			log.Printf("Error searching: %s", err)
+			break
+		}
+
+		if len(result) == 0 {
+			log.Println("End of results")
 			break
 		}
 
