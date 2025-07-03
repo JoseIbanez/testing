@@ -1,8 +1,7 @@
 #!/bin/bash
 
 
-datafile="./data/output-$1.jsonl"
-
+datafile="/mnt/d2/esdumps/meraki-o-$1.jsonl"
 
 echo $datafile
 if [ -f "$datafile.gz" ] 

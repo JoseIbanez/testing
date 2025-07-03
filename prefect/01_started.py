@@ -38,13 +38,13 @@ def gzip_data(target_date: DateTime) -> str:
 
 
 @flow
-def main() -> list[str]:
+def main(offset=0) -> list[str]:
 
     flow_run_context = get_run_context()
     flow_run = flow_run_context.flow_run
     expected_start = flow_run.expected_start_time
 
-    target_date = expected_start.add(hours=-2)
+    target_date = expected_start.add(hours=offset)
     print(f"Flow run ID: {flow_run.id} will start at {expected_start}, target date is {target_date}")
 
     elaslic_result = get_elastic_data(target_date)
