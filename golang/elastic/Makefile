@@ -1,5 +1,6 @@
 build:
-	go build
+	go build -ldflags \
+		"-X main.buildVersion=${shell git describe --tags}"
 
 init:
 	go mod init esm/elastic

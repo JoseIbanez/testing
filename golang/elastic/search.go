@@ -9,14 +9,45 @@ import (
 	"time"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/jessevdk/go-flags"
+)
+
+var (
+	buildVersion = "UNKNOWN"
 )
 
 func main() {
 
 	log.SetPrefix("main: ")
 	log.SetFlags(0)
+	log.Printf("Starting elasticsearch dump tool, version: %s", buildVersion)
 
-	cfg, err := GetConfig()
+	var opts struct {
+		DateFrom string `short:"d" long:"date-from" description:"Date from in RFC3339 format, e.g. 2025-06-12T12:00:00Z" required:"true"`
+		Index    string `short:"i" long:"index" description:"Index name, e.g. cisco-vmanage-pm-metrics" required:"true"`
+		Output   string `short:"o" long:"output" description:"Output forlder name, e.g. ./data/" required:"true"`
+		Slot     int    `short:"s" long:"slot" description:"Slot in hours, e.g. 1" required:"true"`
+		Verbose  bool   `short:"v" long:"verbose" description:"Enable verbose logging"`
+	}
+
+	// Get args
+	args, err := flags.ParseArgs(&opts, os.Args)
+	switch err := err.(type) {
+	case nil:
+		break
+	case *flags.Error:
+		if err.Type == flags.ErrHelp {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
+	default:
+		os.Exit(1)
+	}
+	log.Printf("Parsed flags: %+v, args: %v", opts, args)
+
+	// Elasticsearch client config
+	cfg, err := getConfig()
 	if err != nil {
 		log.Fatalf("Error getting config: %s", err)
 	}
@@ -41,61 +72,33 @@ func main() {
 			{ "@timestamp": "asc" }
 		]`
 
-	date_from_in := "2025-06-12T11:00:00.000Z"
-	offset := 1
-
-	t, err := time.Parse(time.RFC3339, date_from_in)
+	// date_form and date_to
+	t, err := time.Parse(time.RFC3339, opts.DateFrom)
 	if err != nil {
 		log.Fatalf("Error parsing date: %s", err)
 	}
 	date_from := t.Format(time.RFC3339)
-	date_to := t.Add(time.Hour * time.Duration(offset)).Format(time.RFC3339)
+	date_to := t.Add(time.Hour * time.Duration(opts.Slot)).Format(time.RFC3339)
+	filename := fmt.Sprintf("o-%s.jsonl", t.Format("20060102-15"))
 
-	log.Printf("Parsed date: %s, from:%s to:%s", t, date_from, date_to)
+	log.Printf("Parsed date: %s, from:%s to:%s, file:%s", t, date_from, date_to, filename)
 	query := fmt.Sprintf(query_template, date_from, date_to)
 	log.Printf("Query: %s", query)
 
 	store, _ := NewStore(StoreConfig{
 		Client:    es,
-		IndexName: "cisco-vmanage-pm-metrics",
+		IndexName: opts.Index,
 	})
 
-	last_sort := ""
-	var result []string
-
-	fo, err := os.Create("output.jsonl")
+	// Query ES and save to file
+	err = saveToFile(store, query, opts.Output, filename)
 	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		if err := fo.Close(); err != nil {
-			panic(err)
-		}
-	}()
-
-	for {
-		result, last_sort, err = store.search(query, last_sort)
-
-		if err != nil {
-			log.Printf("Error searching: %s", err)
-			break
-		}
-
-		if len(result) == 0 {
-			log.Println("End of results")
-			break
-		}
-
-		// write a chunk
-		if _, err := fo.Write([]byte(strings.Join(result, "\n") + "\n")); err != nil {
-			panic(err)
-		}
-
+		log.Fatalf("Error saving to file: %s", err)
 	}
 
 }
 
-func GetConfig() (*elasticsearch.Config, error) {
+func getConfig() (*elasticsearch.Config, error) {
 
 	es_url := os.Getenv("ES_URL")
 	es_username := os.Getenv("ES_USERNAME")
@@ -114,4 +117,52 @@ func GetConfig() (*elasticsearch.Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func saveToFile(store *Store, query string, path string, filename string) error {
+
+	time0 := time.Now().UnixMilli()
+	totalHits := 0
+
+	full_filename := path + filename
+
+	// Create or open the file for writing
+	fo, err := os.Create(full_filename)
+	if err != nil {
+		return fmt.Errorf("error creating file: %w", err)
+	}
+	defer func() {
+		if err := fo.Close(); err != nil {
+			log.Printf("Error closing file: %s", err)
+		}
+	}()
+
+	// Iterate through search results
+	last_sort := ""
+	var result []string
+
+	for {
+		result, last_sort, err = store.search(query, last_sort)
+		totalHits += len(result)
+
+		if err != nil {
+			log.Printf("Error searching: %s", err)
+			break
+		}
+
+		if len(result) == 0 {
+			break
+		}
+
+		// write a chunk
+		if _, err := fo.Write([]byte(strings.Join(result, "\n") + "\n")); err != nil {
+			return err
+		}
+
+	}
+
+	time1 := time.Now().UnixMilli()
+	log.Printf("End of results, total hits:%d, time taken: %d seconds, output filename: %s", totalHits, (time1-time0)/1000, full_filename)
+
+	return nil
 }
