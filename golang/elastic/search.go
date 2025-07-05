@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"compress/gzip"
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -108,27 +107,6 @@ func generateQuery(opts *ArgsOptions) (string, string, error) {
 	log.Printf("Query: %s", query)
 
 	return query, filename, nil
-}
-
-func getElasticConfig() (*elasticsearch.Config, error) {
-
-	es_url := os.Getenv("ES_URL")
-	es_username := os.Getenv("ES_USERNAME")
-	es_password := os.Getenv("ES_PASSWORD")
-
-	if es_url == "" || es_username == "" || es_password == "" {
-		return nil, errors.New("environment variables ES_URL, ES_USERNAME, and ES_PASSWORD must be set")
-	}
-
-	cfg := elasticsearch.Config{
-		Addresses: []string{
-			es_url,
-		},
-		Username: es_username,
-		Password: es_password,
-	}
-
-	return &cfg, nil
 }
 
 func saveToFile(store *Store, query string, path string, filename string) error {
