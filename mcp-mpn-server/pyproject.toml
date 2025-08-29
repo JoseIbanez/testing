@@ -1,0 +1,12 @@
+[project]
+name = "mcp-mpn-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "anthropic>=0.54.0",
+    "cachetools>=6.0.0",
+    "elasticsearch==7",
+    "mcp>=1.9.4",
+]
