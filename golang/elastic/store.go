@@ -69,16 +69,16 @@ func (s *Store) search(query string, after string) ([]string, string, error) {
 		return nil, "", fmt.Errorf("error: %s", res.String())
 	}
 
-	var r map[string]interface{}
+	var r map[string]any
 	json.NewDecoder(res.Body).Decode(&r)
 
-	hits := r["hits"].(map[string]interface{})["hits"].([]interface{})
+	hits := r["hits"].(map[string]any)["hits"].([]any)
 
-	var last_sort []interface{}
+	var last_sort []any
 	var results []string
 
 	for _, hit := range hits {
-		last_sort = hit.(map[string]interface{})["sort"].([]interface{})
+		last_sort = hit.(map[string]any)["sort"].([]any)
 		strH, _ := json.Marshal(hit)
 		results = append(results, string(strH))
 	}
