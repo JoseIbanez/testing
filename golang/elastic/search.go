@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"compress/gzip"
 	"context"
 	"fmt"
 	"log"
@@ -68,8 +66,15 @@ func main() {
 		log.Fatalf("Error generating query: %s", err)
 	}
 
+	// Get writer
+	writer, err := NewWriter(opts.Output, filename)
+	if err != nil {
+		log.Fatalf("Error creating writer: %s", err)
+	}
+	defer writer.Defer()
+
 	// Query ES and save to file
-	err = saveToFile(store, query, opts.Output, filename)
+	err = QueryAndSave(store, writer, query)
 	if err != nil {
 		log.Fatalf("Error saving to file: %s", err)
 	}
@@ -109,32 +114,16 @@ func generateQuery(opts *ArgsOptions) (string, string, error) {
 	return query, filename, nil
 }
 
-func saveToFile(store *Store, query string, path string, filename string) error {
+// QueryAndSave saves the query results to a file
+func QueryAndSave(store *Store, writer *Writer, query string) error {
 
 	time0 := time.Now().UnixMilli()
 	totalHits := 0
 
-	full_filename := path + filename + ".gz"
-
-	// Create or open the file for writing
-	fo, err := os.Create(full_filename)
-	if err != nil {
-		return fmt.Errorf("error creating file: %w", err)
-	}
-	gf := gzip.NewWriter(fo)
-	fw := bufio.NewWriter(gf)
-
-	defer func() {
-		fw.Flush()
-		gf.Close()
-		if err := fo.Close(); err != nil {
-			log.Printf("Error closing file: %s", err)
-		}
-	}()
-
 	// Iterate through search results
 	last_sort := ""
 	var result []string
+	var err error
 
 	for {
 		result, last_sort, err = store.search(query, last_sort)
@@ -150,7 +139,7 @@ func saveToFile(store *Store, query string, path string, filename string) error 
 		}
 
 		// write a chunk
-		if _, err := fw.Write([]byte(strings.Join(result, "\n") + "\n")); err != nil {
+		if err := writer.Write(strings.Join(result, "\n") + "\n"); err != nil {
 			return err
 		}
 
@@ -162,7 +151,7 @@ func saveToFile(store *Store, query string, path string, filename string) error 
 	}
 
 	time1 := time.Now().UnixMilli()
-	log.Printf("End of results, total hits:%d, time taken: %d seconds, output filename: %s", totalHits, (time1-time0)/1000, full_filename)
+	log.Printf("End of results, total hits:%d, time taken: %d seconds, output filename: %s", totalHits, (time1-time0)/1000, writer.full_filename)
 
 	return nil
 }

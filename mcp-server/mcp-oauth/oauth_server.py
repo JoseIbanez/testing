@@ -22,7 +22,7 @@ class SimpleTokenVerifier(TokenVerifier):
     async def verify_token(self, token: str) -> AccessToken | None:
         logger.info(f"Verifying token: {token}")
 
-        return AccessToken(token=token, client_id="client_id33", scopes=["user"])
+        return AccessToken(token=token, client_id="client_id33", scopes=["read:Sites", "read:Topics"])
 
 
 # Create FastMCP instance as a Resource Server
@@ -34,7 +34,7 @@ mcp = FastMCP(
     auth=AuthSettings(
         issuer_url=AnyHttpUrl(AUTH_SERVER),  # Authorization Server URL
         resource_server_url=AnyHttpUrl("http://localhost:8000"),  # This server's URL
-        required_scopes=["user"],
+        required_scopes=["read:Sites", "read:Topics"],
     ),
 )
 
