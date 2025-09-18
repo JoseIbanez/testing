@@ -1,5 +1,6 @@
 import os
 import json
+from logging import getLogger
 
 
 from google.oauth2.credentials import Credentials
@@ -7,10 +8,13 @@ from google.auth.transport.requests import Request
 from google.adk.auth.auth_schemes import OpenIdConnectWithConfig
 from google.adk.auth.auth_credential import AuthCredential, AuthCredentialTypes, OAuth2Auth
 from google.adk.auth import AuthConfig
+from google.adk.auth.auth_handler import AuthHandler
 from google.adk.tools.openapi_tool.openapi_spec_parser.openapi_toolset import OpenAPIToolset
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.tools import FunctionTool, ToolContext
 from typing import Dict
+
+logger = getLogger(__name__)
 
 # --- Authentication Configuration ---
 # This section configures how the agent will handle authentication using OpenID Connect (OIDC),
@@ -74,13 +78,18 @@ def get_user_info(tool_context: ToolContext) -> dict:
     """
     Provide user information: user_id, email, etc. 
     """
+    #auth_config = AuthConfig(auth_scheme=auth_scheme, raw_auth_credential=auth_credential)
+    #TOKEN_CACHE_KEY = AuthHandler(auth_config).get_credential_key()
     TOKEN_CACHE_KEY = "my_tool_tokens"
     creds = None
 
 
     ### Check Token Cache in State ###
+    logger.info("Tool context state: %s", tool_context._state._value)  
     cached_token_info = tool_context.state.get(TOKEN_CACHE_KEY)
-    print(f"DEBUG: Cached token info from state: {cached_token_info}")
+    logger.info("Token cache key: %s", TOKEN_CACHE_KEY)
+    logger.info("Cached token info from state: %s", cached_token_info)
+
     if cached_token_info:
         try:
             creds = Credentials.from_authorized_user_info(cached_token_info, SCOPES)
@@ -105,6 +114,8 @@ def get_user_info(tool_context: ToolContext) -> dict:
                                             raw_auth_credential=auth_credential,
         ))
  
+        logger.info("Exchanged credential from auth response: %s", exchanged_credential)
+
         # If exchanged_credential is not None, then there is already an exchanged credetial from the auth response. 
         if exchanged_credential:
             # ADK exchanged the access token already for us
@@ -113,10 +124,10 @@ def get_user_info(tool_context: ToolContext) -> dict:
             creds = Credentials(
                   token=access_token,
                   refresh_token=refresh_token,
-                  token_uri=auth_scheme.flows.authorizationCode.tokenUrl,
+                  #token_uri=auth_scheme.flows.authorizationCode.tokenUrl,
                   client_id=auth_credential.oauth2.client_id,
                   client_secret=auth_credential.oauth2.client_secret,
-                  scopes=list(auth_scheme.flows.authorizationCode.scopes.keys()),
+                  #scopes=list(auth_scheme.flows.authorizationCode.scopes.keys()),
             )
             print(f"DEBUG: Obtained exchanged credentials: {creds}")
             # Cache the token in session state and call the API, skip to step 5

@@ -1,6 +1,9 @@
+from logging import getLogger
 from google.adk.auth import AuthConfig
 from google.adk.events import Event
 import asyncio
+
+logger = getLogger(__name__)
 
 # --- Helper Functions ---
 async def get_user_input(prompt: str) -> str:
@@ -104,7 +107,12 @@ def get_function_call_auth_config(event: Event) -> AuthConfig:
   ):
     # Reconstruct the AuthConfig object using the dictionary provided in the arguments.
     # The ** operator unpacks the dictionary into keyword arguments for the constructor.
-    return AuthConfig(
+
+
+
+    auth_config = AuthConfig(
           **event.content.parts[0].function_call.args.get('auth_config')
       )
+    logger.info("Extracted AuthConfig: %s", auth_config)
+    return auth_config
   raise ValueError(f'Cannot get auth config from event {event}')
