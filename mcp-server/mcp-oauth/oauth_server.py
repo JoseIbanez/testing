@@ -38,6 +38,7 @@ mcp = FastMCP(
     ),
 )
 
+mcp
 
 @mcp.tool()
 async def get_weather(city: str = "London") -> dict[str, str]:
