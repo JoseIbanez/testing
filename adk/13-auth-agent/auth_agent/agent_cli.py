@@ -4,7 +4,7 @@ from logging import getLogger,DEBUG
 from dotenv import load_dotenv
 from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService
 from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
+from google.adk.sessions import InMemorySessionService, DatabaseSessionService
 from google.genai import types
 
 from helpers import is_pending_auth_event, get_function_call_id, get_function_call_auth_config, get_user_input
@@ -26,7 +26,9 @@ async def async_main():
     """
     # --- Step 1: Service Initialization ---
     # Use in-memory services for session and artifact storage (suitable for demos/testing).
-    session_service = InMemorySessionService()
+    db_url = "sqlite:///./my_agent_data.db"
+    session_service = DatabaseSessionService(db_url=db_url)
+    #session_service = InMemorySessionService()
     artifacts_service = InMemoryArtifactService()
 
     # Create a new user session to maintain conversation state.

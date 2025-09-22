@@ -1,7 +1,8 @@
 import os
 import json
 from logging import getLogger
-
+import asyncio
+import nest_asyncio
 
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
@@ -13,6 +14,8 @@ from google.adk.tools.openapi_tool.openapi_spec_parser.openapi_toolset import Op
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.tools import FunctionTool, ToolContext
 from typing import Dict
+
+from jwt_validate import SimpleTokenVerifier
 
 logger = getLogger(__name__)
 
@@ -74,10 +77,11 @@ auth_credential = AuthCredential(
 #    auth_credential=auth_credential,
 # )
 
-def get_user_info(tool_context: ToolContext) -> dict:
-    """
-    Provide user information: user_id, email, etc. 
-    """
+
+
+
+def validate_creds(tool_context: ToolContext) -> Credentials | None:
+
     #auth_config = AuthConfig(auth_scheme=auth_scheme, raw_auth_credential=auth_credential)
     #TOKEN_CACHE_KEY = AuthHandler(auth_config).get_credential_key()
     TOKEN_CACHE_KEY = "my_tool_tokens"
@@ -92,8 +96,9 @@ def get_user_info(tool_context: ToolContext) -> dict:
 
     if cached_token_info:
         try:
-            creds = Credentials.from_authorized_user_info(cached_token_info, SCOPES)
-            print(f"DEBUG: Loaded cached creds from state: {creds}")
+            logger.info("EXEC 3: Found cached creds (token_info)")
+            creds = Credentials.from_authorized_user_info(cached_token_info)
+            logger.info("Loaded cached creds from state: %s", json.dumps(creds))
             if not creds.valid and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
                 tool_context.state[TOKEN_CACHE_KEY] = json.loads(creds.to_json()) # Update cache
@@ -101,7 +106,7 @@ def get_user_info(tool_context: ToolContext) -> dict:
                 creds = None # Invalid, needs re-auth
                 tool_context.state[TOKEN_CACHE_KEY] = None
         except Exception as e:
-            print(f"Error loading/refreshing cached creds: {e}")
+            logger.error("Error loading/refreshing cached creds: %s", e)
             creds = None
             tool_context.state[TOKEN_CACHE_KEY] = None
 
@@ -114,13 +119,24 @@ def get_user_info(tool_context: ToolContext) -> dict:
                                             raw_auth_credential=auth_credential,
         ))
  
-        logger.info("Exchanged credential from auth response: %s", exchanged_credential)
 
         # If exchanged_credential is not None, then there is already an exchanged credetial from the auth response. 
         if exchanged_credential:
+            logger.info("EXEC 2: Found raw credentials from auth response")
+            logger.info("Exchanged credential from auth response: %s", exchanged_credential)
+
             # ADK exchanged the access token already for us
             access_token = exchanged_credential.oauth2.access_token
             refresh_token = exchanged_credential.oauth2.refresh_token
+
+            # Decode JWT token
+            token_verifier=SimpleTokenVerifier(AUTH_SERVER_URL)
+            loop = asyncio.get_event_loop()
+
+            nest_asyncio.apply()
+            access = loop.run_until_complete(token_verifier.verify_token(access_token))
+            logger.info("Decoded access token: %s", access)
+
             creds = Credentials(
                   token=access_token,
                   refresh_token=refresh_token,
@@ -128,25 +144,48 @@ def get_user_info(tool_context: ToolContext) -> dict:
                   client_id=auth_credential.oauth2.client_id,
                   client_secret=auth_credential.oauth2.client_secret,
                   #scopes=list(auth_scheme.flows.authorizationCode.scopes.keys()),
+                  scopes=access.scopes,
+                  granted_scopes=access.scopes,
+                  account=access.client_id
             )
-            print(f"DEBUG: Obtained exchanged credentials: {creds}")
+            logger.info(f"Obtained exchanged credentials: %s", creds.to_json())
             # Cache the token in session state and call the API, skip to step 5
             tool_context.state[TOKEN_CACHE_KEY] = json.loads(creds.to_json())
-            print(f"DEBUG: Cached/updated tokens under key: {TOKEN_CACHE_KEY}")
+
 
 
     if not creds or not creds.valid:
-        print("no credentials")
+        logger.info("EXEC 1: No credentials, requesting authentication")
         tool_context.request_credential(AuthConfig(
                       auth_scheme=auth_scheme,
                       raw_auth_credential=auth_credential,
         ))
+        return None
+
+
+
+    logger.info("Using credentials: %s", creds.to_json())
+    return creds
+
+
+
+
+
+def get_user_info(tool_context: ToolContext) -> dict:
+    """
+    Provide user information: user_id, email, etc. 
+    """
+
+    creds = validate_creds(tool_context)
+    if not creds:
         return {'pending': True, 'message': 'Awaiting user authentication.'}
 
-    print(f"Using credentials: {creds}")
-    name = "unknown"
 
-    result = {"message": f"Hello {name}. This is a response from an authenticated tool."}
+    name = creds.account
+    result = {"message": f"Hello {name}. This is a response from an authenticated tool.",
+              "user_id": creds.account,
+              "scopes": creds.scopes}
+    
     print(result)
     return result
 
@@ -163,11 +202,3 @@ root_agent = LlmAgent(
     #tools=userinfo_toolset.get_tools(),
 )
 
-# --- Ready for Use ---
-# The `root_agent` is now configured with tools protected by OIDC/OAuth2 authentication.
-# When the agent attempts to use one of these tools, the ADK framework will automatically
-# trigger the authentication flow defined by `auth_scheme` and `auth_credential`
-# if valid credentials are not already available in the session.
-# The subsequent interaction flow would guide the user through the login process and handle
-# token exchanging, and automatically attach the exchanged token to the endpoint defined in
-# the tool.
