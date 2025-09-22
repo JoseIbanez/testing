@@ -9,7 +9,9 @@ dependencies = [
     "google-adk[database]==0.3.0",
     "google-generativeai==0.8.5",
     "litellm==1.66.3",
+    "nest-asyncio>=1.6.0",
     "psutil==5.9.5",
+    "pyjwt>=2.10.1",
     "python-dotenv==1.1.0",
     "yfinance==0.2.56",
 ]
