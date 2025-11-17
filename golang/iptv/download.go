@@ -48,31 +48,22 @@ func DownloadFile(name string, url string) error {
 	return nil
 }
 
-
-
-
-
 func main() {
 
 	log.SetPrefix("main: ")
 	log.SetFlags(0)
 
 	sample_url := "https://iptv-org.github.io/iptv/index.m3u"
-
-	err := DownloadFile("sample.m3u", sample_url)
+	err := DownloadFile("index.m3u", sample_url)
 	fmt.Println(err)
 
+	sample_url = "https://af1c1onados.vercel.app/af1cionados.w3u"
+	err = DownloadFile("af1cionados.w3u", sample_url)
 
-	//sample_url = "https://af1c1onados.vercel.app/af1cionados.w3u"
-	//err = DownloadFile("af1cionados.w3u", sample_url)
-
-	sample_url = "https://af1c1onados.vercel.app/02.Menu.Iptvs.w3u"
-	err = DownloadFile("02.Menu.Iptvs.w3u", sample_url)
+	//sample_url = "https://af1c1onados.vercel.app/02.Menu.Iptvs.w3u"
+	//err = DownloadFile("02.Menu.Iptvs.w3u", sample_url)
 	fmt.Println(err)
-
 
 	parse_w3u_files_async()
 
-
 }
-
