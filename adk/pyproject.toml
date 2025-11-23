@@ -1,0 +1,17 @@
+[project]
+name = "adk-cc"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "deprecated>=1.2.18",
+    "google-adk[database]==0.3.0",
+    "google-generativeai==0.8.5",
+    "litellm==1.66.3",
+    "nest-asyncio>=1.6.0",
+    "psutil==5.9.5",
+    "pyjwt>=2.10.1",
+    "python-dotenv==1.1.0",
+    "yfinance==0.2.56",
+]

@@ -1,0 +1,28 @@
+
+
+https://your-endpoint.okta.com/oauth2/v1/authorize?
+    response_type=code&
+    client_id=CLIENT_ID&
+    scope=openid+profile+email&
+    state=jAKZhPHWhQsrnyXNGjk2Z4lszbES3M&
+    access_type=offline&
+    prompt=consent&
+    redirect_uri=http://localhost:8000/dev-ui
+
+auth-req:
+https://dev-pi8anw6xrasoipv5.us.auth0.com/authorize?
+    response_type=code&
+    client_id=4lseOsMSSFsWVCoMDp8Os1MNGiSecwtO&
+    scope=read%3ASite&
+    state=42IEGMvPVP3onBchTR1ClDGjs8eVoa&
+    access_type=offline&
+    prompt=consent&
+    redirect_uri=http://localhost:8000/dev-ui
+
+auth-response:
+http://localhost:8000/dev-ui?code=hDy6lAfii8MSG0Kw9Mlerz0PKSGzABYeSN_VZuGE0EwF4&state=42IEGMvPVP3onBchTR1ClDGjs8eVoa
+
+http://localhost:8000/dev-ui?
+    code=hDy6lAfii8MSG0Kw9Mlerz0PKSGzABYeSN_VZuGE0EwF4&
+    state=42IEGMvPVP3onBchTR1ClDGjs8eVoa
+
