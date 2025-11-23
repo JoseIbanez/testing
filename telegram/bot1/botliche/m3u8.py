@@ -9,10 +9,9 @@ from pathlib import Path
 import logging
 import itertools
 
-from botliche.config import Config, DATA_PATH
-
 logger = logging.getLogger(__name__)
 
+DATA_PATH = os.environ.get("DATA_PATH", "/home/ibanez/Projects/testing/telegram/bot1/sample-data")
 
 
 class M3u8Channel:
@@ -29,24 +28,15 @@ class M3u8Channel:
 
 
 class M3u8List:
-    """
-    Manage m3u8 (ZeroNet) channel lists
-    """
 
     def __init__(self):
         self.list:list[M3u8Channel] = []
-        self.config = Config()
-        self.sub_list = []
-
 
     def load(self):
-        self.config.load()
-
-        for item in self.config.get("m3u8_lists"):
-            self.parse_m3u8(f"{DATA_PATH}/{item}")
-
+        self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
+        self.parse_m3u8(f"{DATA_PATH}/elcano.m3u8")
+        self.parse_m3u8(f"{DATA_PATH}/ramses.m3u8")
         self.set_cname()
-
 
     def parse_m3u8(self,filename:str):
 
@@ -90,52 +80,15 @@ class M3u8List:
 
 
 
-    def create_sub_list(self):
-        """
-        """
-
-        self.sub_list = [ (sub_item.get("match") , sub_item.get("replace") )  for sub_item in self.config.get("m3u8_cname",[]) ]
-
-        logger.debug("Subtitution list: %s",self.sub_list)
-
-
-
-    def sub_cname(self,channel_name):
-        """
-        Set common name for a particular channel
-        Iterate in subsitution list
-        """
-
-        item_name = channel_name
-        for sub_item in self.sub_list:
-            item_name = re.sub(sub_item[0], sub_item[1], item_name, flags=re.IGNORECASE)
-
-        return item_name
-
-
     def set_cname(self):
-
-        self.create_sub_list()
-
-        for item in self.list:
-            item.cname = self.sub_cname(item.name)
-            logger.info("%s -> %s.",item.name,item.cname)
-
-            
-        return None
-
-
-    def set_cname_old(self):
 
         for item in self.list:
 
             item_name = item.name
-
-            item_name = re.sub(' *(1080|720)p?', '', item_name, flags=re.IGNORECASE)
-            item_name = re.sub('(4K|1440)p?', 'UHD', item_name, flags=re.IGNORECASE)
-            item_name = re.sub('M. LaLiga', 'M+ LaLiga TV', item_name, flags=re.IGNORECASE)
-            item_name = re.sub('M.L. Campeones', 'M+ Liga de Campeones', item_name, flags=re.IGNORECASE)
+            item_name = re.sub(' *(1080|720)', '', item_name)
+            item_name = re.sub('M. LaLiga', 'M+ LaLiga TV', item_name)
             item.cname = item_name
+
 
             logger.info("%s -> %s.",item.name,item.cname)
 
@@ -248,5 +201,18 @@ def parse_http_link(line:str):
     return ace_id
 
 
+def main():
+    parse_extinf_line('#EXTINF:-1 tvg-logo="https://i.ibb.co/QfX8Xx6/DAZN3.jpg" group-title="By @Lucas_m_o_o_m" tvg-id="DAZN 3", DAZN 3 1080')
+    parse_acestream_link('acestream://50b6d2b5fd59fefb9f4fd2176994d418f2b94a80')
+    parse_http_link('http://127.0.0.1:6878/ace/getstream?id=37d42d2b5d2278e6bb5810329a5f220867b3cf0c')
+
+    lista = M3u8List()
+    lista.parse_m3u8("/home/ibanez/Projects/testing/zeronet/listas/ramses.m3u8")
+    lista.parse_m3u8("/home/ibanez/Projects/testing/zeronet/listas/electroperra.m3u8")
+    result = lista.search("DAZN La")
+
+    print(result)
 
 
+if __name__ == "__main__":
+    main()

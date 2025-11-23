@@ -3,7 +3,7 @@ import requests
 import time
 import os
 import re
-from bs4 import BeautifulSoup, ResultSet, Tag
+from bs4 import BeautifulSoup
 from datetime import datetime
 import logging
 from botliche.common import configure_loger
@@ -25,10 +25,8 @@ class EventTV:
             return f"{self.date} {self.competition}: {self.local}"
 
 
-FOLLOW_TEAMS = [ "Real Madrid", "FC Barcelona", 
-                 "Manchester City", "Liverpool",
-                 "C. Alcaraz" ]
-FOLLOW_COMPETITIONS = [ "Fórmula 1", "MotoGP" ]
+FOLLOW_TEAMS = [ "Liverpool", "FC Barcelona", "Manchester City", "Real Madrid", "Chelsea", "Arsenal", "Manchester Utd." ]
+FOLLOW_COMPETITIONS = [ "Fórmula 1", "MotoGP", "Masters Miami" ]
 BANNED_CHANNELS = [ "DAZN (Regístrate)", 'MotoGP Videopass', 'ATP Tennis TV' ] 
 
 FETV_URL = "https://www.futbolenlatv.es/deporte"
@@ -77,17 +75,14 @@ class EventTVList:
 
         logger.info("Page scraped, duration:%0.3f",time.time() -time0)
 
-
-
     def scrape_table(self,main_table):
 
         row_counter = -1
         date = None
 
-        for row in main_table.findChildren('tr'): 
+        for row in main_table.findChildren('tr'):
 
             cols = row.findChildren('td')
-
             row_counter += 1
             if row_counter == 0:
                 date = parse_date(cols)
@@ -128,15 +123,10 @@ class EventTVList:
         return
 
 
-def parse_date(cols:ResultSet):
-    """
-    Parse date line
-    """
-    
+def parse_date(cols):
     m = re.search("(\d+/\d+/\d+)",cols[0].string)
     date = m.group(1) if m else ""
     return date
-
 
 def parse_datetime(date:str,hour:str):
 
@@ -153,47 +143,26 @@ def parse_datetime(date:str,hour:str):
             e_datetime = datetime.now()
 
     return e_datetime
-
-def parse_competition(col:Tag):
-
-    try:
-        labels = col.findChildren('label')
-        spans = col.findChildren('span')
-
-        if labels and len(labels)>0:
-            competition = labels[0].string
-        elif spans and len(spans)>0:
-            competition = spans[0].string
-        else:
-            logger.error("Col without competition, %s",col)
-            competition = ""     
-
-        competition = competition.rstrip().lstrip()
-    except  (AttributeError, IndexError) as e:
-        logger.error("Error:%s, for col:%s",e,col)
-        competition = ""
     
-    return competition
 
-
-def parse_4_cols(cols:ResultSet,date):
+def parse_4_cols(cols,date):
 
     e = EventTV()
     hour   =  cols[0].string.rstrip().lstrip()
     e.date = parse_datetime(date,hour)
-    e.competition = parse_competition(cols[1])
+    e.competition = cols[1].findChildren('span')[0].string.rstrip().lstrip()
     e.local  = cols[2].text.rstrip().lstrip()
     e.away  =  None
     e.channels = [ i.string for i in cols[3].findChildren('li')]   
     return e
 
 
-def parse_5_cols(cols:ResultSet,date):
+def parse_5_cols(cols,date):
 
     e = EventTV()
     hour   =  cols[0].string.rstrip().lstrip()
     e.date = parse_datetime(date,hour)
-    e.competition = parse_competition(cols[1])
+    e.competition = cols[1].findChildren('label')[0].string.rstrip().lstrip()
     e.local  = cols[2].findChild('span').string
     e.away  =  cols[3].findChild('span').string
     e.channels = [ i.string for i in cols[4].findChildren('li')]   

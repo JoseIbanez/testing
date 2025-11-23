@@ -1,6 +1,0 @@
-spring:
-  datasource:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/demo?useSSL=false
-    username: ${POSTGRES_USERNAME}
-    password: ${POSTGRES_PASSWORD}

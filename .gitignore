@@ -20,7 +20,6 @@ bin/
 
 
 .vscode/
-.env
 
 #Vagrant 
 .vagrant

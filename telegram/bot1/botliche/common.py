@@ -7,5 +7,3 @@ def configure_loger():
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.INFO
         )
-
-

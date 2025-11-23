@@ -1,1 +1,0 @@
-pyHanko[pkcs11,image-support,opentype,xmp]

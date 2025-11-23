@@ -23,7 +23,7 @@ from botliche.auto import match_channel
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 ACELINKHOST = os.environ.get("ACELINKHOST","http://localhost:8008")
 ACELINKTOKEN = os.environ.get("ACELINKTOKEN","MAGIC")
-VIP_USERS = [ "vlan717", "Jacobo", "Diego", "Jorge", "ocsalbi", "Ignacio" ]
+VIP_USERS = [ "vlan717", "Jacobo", "Diego", "Jorge"]
 
 configure_loger()
 
@@ -255,19 +255,6 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
 
 
-async def reload(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id=update.effective_chat.id
-    user_id=update.message.from_user.username
-    user_name=update.message.from_user.first_name
-    cmd = shlex.split(update.message.text)
-
-    aceList.load()
-
-    await send_promnt(context,chat_id)
-
-
-
-
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
@@ -275,9 +262,6 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def send_promnt(context,chat_id):
     await context.bot.send_message(chat_id, text="I'm a super bot, please talk to me!")
-
-
-
 
 ####
 
@@ -351,7 +335,6 @@ def main():
         CommandHandler('kill', kill),
         CommandHandler('list', list),
         CommandHandler('ftv', fetv),
-        CommandHandler('reload', reload),
         MessageHandler(filters.COMMAND, hls_auto),
         MessageHandler(filters.TEXT & (~filters.COMMAND), search_text)
     ]

@@ -1,1 +1,0 @@
-scalene --cli test.py
