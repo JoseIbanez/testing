@@ -1,0 +1,37 @@
+{
+    "_index": "5g-pm-nmodu-11-2024",
+    "_type": "_doc",
+    "_id": "DH222000111::NOKIA::ASIK_2024-11-16T21:30:00Z_PLMN-PLMN/MRBTS-13550/NRBTS-13550/NRCELL-0",
+    "_score": null,
+    "_source": {
+        "pm_data_source": {
+            "hw_alias": "",
+            "edge_alias": "",
+            "edge_id": "CZ222222VM::HPE::DL110",
+            "dn": "PLMN-PLMN/MRBTS-13550/NRBTS-13550/NRCELL-0",
+            "technology": "5G",
+            "edge_hostname": "21-651-n-1",
+            "nhg_id": "9343eeb4-3681-4281-65c5-3ddqq11497b8",
+            "end_timestamp": "2024-11-16T21:45:00Z",
+            "nhg_alias": "UK-N-ONM-VFLAB-001",
+            "hw_id": "DH222000111::NOKIA::ASIK",
+            "serial_no": "DH222000111",
+            "slice_id": "21-651",
+            "timestamp": "2024-11-16T21:30:00Z"
+        },
+        "enriched_data": {
+            "Node_type": "RAN",
+            "Assurance_ID": "UK-N-ONM-VFLAB-001",
+            "Vendor": "Nokia",
+            "Release": "SBTS24R2"
+        },
+        "pm_data": {
+            "NMODU_M55148C00001": 0,
+            "NMODU_M55148C00002": 0
+        },
+        "timestamp": "2024-11-16T21:55:50.664019451Z"
+    },
+    "sort": [
+        1731794150664
+    ]
+}

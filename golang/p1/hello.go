@@ -1,6 +1,7 @@
 package main
 
 import (
+<<<<<<< HEAD
 	"example/greetings"
 	"fmt"
 	"log"
@@ -12,6 +13,16 @@ import (
 	"github.com/tidwall/gjson"
 
 	"rsc.io/quote"
+=======
+	"fmt"
+	"log"
+	"math"
+
+	"rsc.io/quote"
+
+	"example/greetings"
+	"example/myuser"
+>>>>>>> cb608f0bfd1fad405411a3fe5c1e565c4ddc3dee
 )
 
 type User struct {
@@ -40,6 +51,7 @@ func print_this(i MyItem) {
 	fmt.Println(i.description())
 }
 
+<<<<<<< HEAD
 func loadJson(filename string) (string, error) {
 	jsonFile, err := os.Open("users.json")
 	// if we os.Open returns an error then handle it
@@ -77,6 +89,20 @@ func main() {
 	log.SetFlags(0)
 
 	msg3, err := loadJson("Gladys")
+=======
+func main() {
+
+
+
+	log.SetPrefix("main: ")
+	log.SetFlags(0)
+
+	msg4, err := myuser.TestPointer("hi")
+	log.Println(err, msg4)
+
+
+	msg3, err := myuser.LoadJson("Gladys")
+>>>>>>> cb608f0bfd1fad405411a3fe5c1e565c4ddc3dee
 	fmt.Println(err, msg3)
 
 	fmt.Println("Hello, 世界")

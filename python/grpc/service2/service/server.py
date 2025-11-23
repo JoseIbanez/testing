@@ -89,7 +89,9 @@ def serve():
         CollectorServicer(),
         server)
 
-    server.add_insecure_port('[::]:50051')
+    server_port = os.environ.get('GRPC_SERVER_PORT','50051')
+
+    server.add_insecure_port(f"[::]:{server_port}")
     server.start()
     server.wait_for_termination()
 

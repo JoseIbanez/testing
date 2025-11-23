@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"io/ioutil"
+=======
+	"io"
+>>>>>>> cb608f0bfd1fad405411a3fe5c1e565c4ddc3dee
 	"log"
 	"os"
 
@@ -20,7 +24,11 @@ func loadJson(filename string) (string, error) {
 	log.Println("Successfully Opened users.json")
 	defer jsonFile.Close()
 
+<<<<<<< HEAD
 	byteValue, _ := ioutil.ReadAll(jsonFile)
+=======
+	byteValue, _ := io.ReadAll(jsonFile)
+>>>>>>> cb608f0bfd1fad405411a3fe5c1e565c4ddc3dee
 
 	// Search for nested key
 	value := gjson.GetBytes(byteValue, "users.0.name")

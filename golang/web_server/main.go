@@ -1,6 +1,10 @@
 package main
 
 import (
+<<<<<<< HEAD
+=======
+	"log"
+>>>>>>> cb608f0bfd1fad405411a3fe5c1e565c4ddc3dee
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +33,13 @@ func main() {
 			Price:  300,
 		}
 
+<<<<<<< HEAD
+=======
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
+		log.Println("b1",b1,"b2","2")
+		b1.ID = b1.ID + 1
+
+>>>>>>> cb608f0bfd1fad405411a3fe5c1e565c4ddc3dee
 		//result := gin.H{"data": "test", "result": 0, "b": gin.H{"c": 3}}
 		c.JSON(http.StatusOK, b1)
 
