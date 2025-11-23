@@ -59,3 +59,5 @@ Thumbs.db
 terraform.tfstate*
 .terraform/
 
+#Secrets
+.env
