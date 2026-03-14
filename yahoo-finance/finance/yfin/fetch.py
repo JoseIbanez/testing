@@ -25,6 +25,10 @@ def yahoo_fetch(ticker: str, period: str = "3mo", interval: str = "1d"):
 
     if os.path.exists(cache_file) and (time.time() - os.path.getmtime(cache_file)) < 86400:
         df = pd.read_csv(cache_file)
+        df['Date'] = pd.to_datetime(df['Date'],utc=True)
+        logger.info("Dataframe: \n%s", df.dtypes)
+        df.set_index('Date', inplace=True)
+
         logger.info("Using cached data for %s (%s), rows:%d", ticker, period, len(df))
         return df
 
