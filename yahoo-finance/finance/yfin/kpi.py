@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from scipy.signal import argrelextrema
-
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ def add_indicators(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
 
 
     logger.info("Added indicators to dataframe for %s", ticker)
-    logger.info("Dataframe: %s", df)
+    #logger.info("Dataframe: %s", df)
 
     #Save to csv
     df.to_csv(f"./data/{ticker}_indicators.csv")
@@ -82,10 +82,16 @@ def kmeans_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
 
     return cluster_centers
 
+
+
 def get_swing_points(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate swing points
     """
+
+    # Recent samples, last 2 years
+    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
+
 
     # Identify local maxima (swing highs)
     swing_highs_idx = argrelextrema(df['High'].values, np.greater_equal, order=5)
@@ -94,12 +100,12 @@ def get_swing_points(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     swing_lows_idx = argrelextrema(df['Low'].values, np.less_equal, order=5)
     swing_lows = df.index[swing_lows_idx]
 
-    logger.info("Swing highs values: \n%s", df['High'][swing_highs])
-    logger.info("Swing lows values: \n%s", df['Low'][swing_lows])
+    #logger.info("Swing highs values: \n%s", df['High'][swing_highs])
+    #logger.info("Swing lows values: \n%s", df['Low'][swing_lows])
 
     # Preparing data for clustering for swing points:
     sv = np.concatenate((df['High'][swing_highs], df['Low'][swing_lows]), axis=0)
-    logger.info("Swing points: %s", sv)
+    #logger.info("Swing points: %s", sv)
 
     # Normalize time and price to have similar scales
     X_time = np.linspace(0, 1, len(sv)).reshape(-1, 1)
@@ -172,9 +178,119 @@ def get_support_resistance(ticker: str, df: pd.DataFrame) -> dict:
     print(f"Estimated Support Price: {support_price:.2f}")
     print(f"Estimated Resistance Price: {resistance_price:.2f}")
 
+    #Global kpi
+    max_price = df['Close'].max()
+    min_price = df['Close'].min()
+    last_price = df['Close'].iloc[-1]
+    
+    max_volatility = df['Volatility'].max()
+    
+
     levels = {
         "support": support_price,
-        "resistance": resistance_price
+        "resistance": resistance_price,
+        "max_price": max_price,
+        "min_price": min_price,
+        "last_price": last_price,
+        "max_volatility": max_volatility
     }
 
     return levels
+
+
+
+def get_summary_kpi(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Calculate support and resistance levels
+    """
+ 
+
+    # Recent samples, last 2 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
+
+
+    #Global kpi
+    max_price = df['Close'].max()
+    last_price = df['Close'].iloc[-1]
+
+
+    df['SMA_5'] = df['Close'].rolling(window=5).mean()
+    df['SMA_10'] = df['Close'].rolling(window=10).mean()
+    df['SMA_200'] = df['Close'].rolling(window=200).mean()
+    
+   
+    # Trend
+    trend_5_10 = ( df['SMA_5'].iloc[-1] - df['SMA_10'].iloc[-1] ) / df['SMA_10'].iloc[-1] * 100
+    if trend_5_10 > 1:
+        trend = "bullish"
+    elif trend_5_10 < -1:
+        trend = "bearish"
+    else:
+        trend = "neutral"
+
+    # Distance to max
+    diff_to_max = ( max_price - last_price ) / max_price * 100
+    if diff_to_max < 1:
+        max_label = "at_max"
+    else:
+        max_label = None
+
+
+    diff_200 = ( df['Close'].iloc[-1] - df['SMA_200'].iloc[-1] ) / df['SMA_200'].iloc[-1] * 100
+
+
+    levels = {
+        "ticker": ticker,
+        "max_label": max_label,
+        "max_price": max_price,
+        "last_price": last_price,
+        "trend_5_10_pct": trend_5_10,
+        "trend_label": trend,
+        "diff_200_pct": diff_200
+    }
+
+    return levels
+
+def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
+
+    # Recent samples, last 2 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
+    
+    # Identify local minima (swing lows)
+    swing_lows_idx = argrelextrema(df['Low'].values, np.less_equal, order=5)
+    swing_lows = df.index[swing_lows_idx]
+
+    logger.info("Last swing low: %s", swing_lows[-2:])    
+    last_min_date = swing_lows[-1]
+
+
+    last_df = df[df.index >= last_min_date]
+    df_bullish = last_df[last_df['Close'] > last_df['Close'].shift(1)]
+    df_bearish = last_df[last_df['Close'] < last_df['Close'].shift(1)]
+
+    tr_bullish = (df_bullish['High'] - df_bullish['Low']) / df_bullish['Low'] * 100
+    tr_bearish = (df_bearish['High'] - df_bearish['Low']) / df_bearish['Low'] * 100
+
+    #logger.info("tr_bullish: %s", tr_bullish)
+    #logger.info("tr_bearish: %s", tr_bearish)
+
+    volatility_mean_bullish = tr_bullish.mean()
+    volatility_p80_bullish = tr_bullish.quantile(0.8)
+
+    volatility_mean_bearish = tr_bearish.mean()
+    volatility_p80_bearish = tr_bearish.quantile(0.8)
+
+    number_days = len(last_df)
+    price_diff = (last_df['Close'].iloc[-1] - last_df['Close'].iloc[0]) / last_df['Close'].iloc[0] * 100
+
+    volatility = {
+        "ticker": ticker,
+        "number_days": number_days,
+        "price_diff": price_diff,
+        "volatility_mean_bullish": volatility_mean_bullish,
+        "volatility_p80_bullish": volatility_p80_bullish,
+        "volatility_mean_bearish": volatility_mean_bearish,
+        "volatility_p80_bearish": volatility_p80_bearish
+    }
+
+    return volatility
