@@ -16,6 +16,13 @@ def main():
     ticker = "XOM"
     ticker = "DOW"
     ticker = "BAS.DE"
+    ticker = "CVE"
+    ticker = "ENI.MI"
+    #ticker = "IMO"
+    ticker = "BP.L"
+    ticker = "RWE.DE"
+    ticker = "EDP.LS"
+    ticker = "SSE.L"
 
 
     df = load_ticker(ticker)

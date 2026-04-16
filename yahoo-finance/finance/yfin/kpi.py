@@ -156,7 +156,15 @@ def get_support_resistance(ticker: str, df: pd.DataFrame) -> dict:
     # Estimating support and resistance
     current_price = df['Close'].iloc[-1]
     support_idx = np.argmax(volume_profile[:np.digitize(current_price, price_bins)])
-    resistance_idx = np.argmax(volume_profile[np.digitize(current_price, price_bins):]) + np.digitize(current_price, price_bins)
+
+
+    logger.info("Volume profile: %s", volume_profile[np.digitize(current_price, price_bins):])
+    logger.info("Price bins: %s", np.digitize(current_price, price_bins))
+    resistance_bins = volume_profile[np.digitize(current_price, price_bins):]
+    if len(resistance_bins) == 0:
+        resistance_idx = len(price_bins) - 2  # Last bin if no bins above current price
+    else:
+        resistance_idx = np.argmax(resistance_bins) + np.digitize(current_price, price_bins)
 
     support_price = price_bins[support_idx]
     resistance_price = price_bins[resistance_idx]
