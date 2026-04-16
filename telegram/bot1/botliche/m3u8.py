@@ -33,9 +33,9 @@ class M3u8List:
         self.list:list[M3u8Channel] = []
 
     def load(self):
-        self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
+        #self.parse_m3u8(f"{DATA_PATH}/electroperra.m3u8")
         self.parse_m3u8(f"{DATA_PATH}/elcano.m3u8")
-        self.parse_m3u8(f"{DATA_PATH}/ramses.m3u8")
+        self.parse_m3u8(f"{DATA_PATH}/newera.m3u8")
         self.set_cname()
 
     def parse_m3u8(self,filename:str):
