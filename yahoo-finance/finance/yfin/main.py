@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 import json
-
+import argparse
 
 from finance.yfin.fetch import load_ticker
 from finance.yfin.kpi import add_indicators, kmeans_clustering, get_support_resistance, get_swing_points, get_summary_kpi, get_last_volatility
@@ -9,14 +9,27 @@ from finance.yfin.kpi import add_indicators, kmeans_clustering, get_support_resi
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Fetch and analyze stock data")
+    parser.add_argument("--ticker", type=str, default="AAPL", help="Ticker symbol to analyze")
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
+    ticker = args.ticker
 
-    ticker = "DBK.DE"
-    ticker = "DTE.DE"
-    ticker = "XOM"
-    ticker = "DOW"
-    ticker = "BAS.DE"
+    #ticker = "DBK.DE"
+    #ticker = "DTE.DE"
+    #ticker = "XOM"
+    #ticker = "DOW"
+    #ticker = "BAS.DE"
+    #ticker = "STB.OL"
 
+    calculate_kpis(ticker)
+
+
+def calculate_kpis(ticker):
 
     df = load_ticker(ticker)
     df = add_indicators(ticker, df)
