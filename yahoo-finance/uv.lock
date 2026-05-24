@@ -1022,7 +1022,11 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+<<<<<<< HEAD
     { name = "cachetools" },
+=======
+    { name = "cachetools", specifier = ">=6.2.1" },
+>>>>>>> a2b90e4ef1c4258afc43d47f755291ca79e13b20
     { name = "lxml", specifier = ">=6.0.2" },
     { name = "matplotlib", specifier = ">=3.10.8" },
     { name = "numpy", specifier = ">=2.3.5" },

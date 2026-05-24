@@ -25,7 +25,6 @@ def main():
     #ticker = "DOW"
     #ticker = "BAS.DE"
     #ticker = "STB.OL"
-
     calculate_kpis(ticker)
 
 
