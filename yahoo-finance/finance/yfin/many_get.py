@@ -45,7 +45,7 @@ def get_fast_info(ticker):
     # First try to get from cache
     fast_info = my_cache.get_fast_info(ticker)
     if fast_info:
-        logger.debug("Cache hit for %s", ticker)
+        logger.debug("Cache hit for %s: %s", ticker, fast_info)
         return fast_info
 
     logger.debug("Cache miss for %s, fetching from Yahoo Finance", ticker)
@@ -55,14 +55,14 @@ def get_fast_info(ticker):
         #ticker_obj = tickers.tickers[ticker]
         yf_ticker = yf.Ticker(ticker)
         fast_info = {   
-                "lastPrice": yf_ticker.fast_info['lastPrice'],
-                "yearHigh": yf_ticker.fast_info['yearHigh'],
-                "twoHundredDayAverage": yf_ticker.fast_info['twoHundredDayAverage']
+                "lastPrice": float(yf_ticker.fast_info['lastPrice']),
+                "yearHigh": float(yf_ticker.fast_info['yearHigh']),
+                "twoHundredDayAverage": float(yf_ticker.fast_info['twoHundredDayAverage'])
         }
 
-    except (AttributeError, TypeError) as e:
+    except (AttributeError, TypeError, KeyError) as e:
         logger.error("Error fetching data for %s: %s", ticker, str(e))
-        fast_info = {}
+        return None
 
 
     # Store in cache for future use
@@ -97,7 +97,9 @@ def get_more_info(ticker):
 
 def get_args():
     parser = argparse.ArgumentParser(description="Fetch and cache stock data from Yahoo Finance")
-    parser.add_argument("--index", "-i", type=str, default="STOXX_600", help="Name of the index file (without .csv) in ./data/index/")
+    parser.add_argument("--index", "-i", type=str, default="", help="Name of the index file (without .csv) in ./data/index/")
+    parser.add_argument("--init", action=argparse.BooleanOptionalAction, help="Initialize the DB cache")
+    parser.add_argument("--check", "-c", action=argparse.BooleanOptionalAction, help="Check tickers in the DB")
     return parser.parse_args()
 
 
@@ -105,15 +107,53 @@ def main():
 
 
     args = get_args()
-    tickers_list = get_ticker_list(args.index)
-    tickers = yf.Tickers(tickers_list)
 
+
+    if args.init:
+        my_cache.create_table()
+        logger.info("Cache initialized")
+        return
+
+
+    if args.index:
+        logger.info("Importing tickers from index: %s", args.index)
+        import_index(args.index)
+        return
+
+
+    if args.check:
+        logger.info("Checking tickers in DB")
+        check_ticker_list()
+        return
+
+
+
+def check_ticker_list():
+
+    tickers_list = my_cache.query_ticker_list()
 
     for ticker in tickers_list:
+        check_ticker(ticker)
+
+
+
+
+def import_index(index):
+
+    tickers_list = get_ticker_list(index)
+
+    for ticker in tickers_list:
+        check_ticker(ticker)
+
+
+
+
+def check_ticker(ticker):
 
         fast_info = get_fast_info(ticker)
-        if not fast_info or 'lastPrice' not in fast_info:
-            continue
+        if not fast_info:
+            return
+
 
         last_price = fast_info['lastPrice']
         year_high = fast_info['yearHigh']
@@ -128,7 +168,7 @@ def main():
 
         print(f"Information for {ticker}:  {last_price:.2f} / {year_high:.2f} / {d200_avg:.2f} {note}")
         if note != "**":
-            continue
+            return
 
 
         more_info = get_more_info(ticker)
@@ -147,15 +187,6 @@ def main():
 
 
 
-    # access each ticker using (example)
-    for ticker in []: # tickers_list:
-        current_price = tickers.tickers[ticker].info['currentPrice']
-        w52_high = tickers.tickers[ticker].info['fiftyTwoWeekHigh']
-        all_high = tickers.tickers[ticker].info['allTimeHigh']
-
-
-
-        print(f"Information for {ticker}:  {current_price:.2f} / {w52_high:.2f} / {all_high:.2f}")
 
 
 if __name__ == "__main__":
