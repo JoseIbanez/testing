@@ -14,11 +14,15 @@ logger = logging.getLogger(__name__)
 
 
 
-def get_fast_info(ticker):
+def get_fast_info(ticker:str,force=False):
 
     # First try to get from cache
     my_cache = MyDBCache()
-    fast_info = my_cache.get_fast_info(ticker)
+    if not force:
+        fast_info = my_cache.get_fast_info(ticker)
+    else:
+        fast_info = None
+        
     if fast_info:
         logger.debug("Cache hit for %s: %s", ticker, fast_info)
         return fast_info
@@ -32,11 +36,13 @@ def get_fast_info(ticker):
         fast_info = {   
                 "lastPrice": float(yf_ticker.fast_info['lastPrice']),
                 "yearHigh": float(yf_ticker.fast_info['yearHigh']),
-                "twoHundredDayAverage": float(yf_ticker.fast_info['twoHundredDayAverage'])
+                "twoHundredDayAverage": float(yf_ticker.fast_info['twoHundredDayAverage']),
+                "fiftyDayAverage": float(yf_ticker.fast_info['fiftyDayAverage'])
         }
 
     except (AttributeError, TypeError, KeyError) as e:
         logger.error("Error fetching data for %s: %s", ticker, str(e))
+        my_cache.put_error(ticker)
         return None
 
 

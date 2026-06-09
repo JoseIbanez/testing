@@ -1,3 +1,4 @@
+import json
 import logging
 import pandas as pd
 import numpy as np
@@ -21,6 +22,7 @@ def add_indicators(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
 
     df['SMA_5'] = df['Close'].rolling(window=5).mean()
     df['SMA_10'] = df['Close'].rolling(window=10).mean()
+    df['EMA_200'] = df['Close'].ewm(span=200, adjust=False).mean()
     df['MACD'] = df['Close'].ewm(span=12, adjust=False).mean() - df['Close'].ewm(span=26, adjust=False).mean()
     df['Bollinger_Bands'] = df['Close'].rolling(window=20).mean() + 2 * df['Close'].rolling(window=20).std()
     df['Bollinger_Bands_Lower'] = df['Close'].rolling(window=20).mean() - 2 * df['Close'].rolling(window=20).std()
@@ -259,7 +261,14 @@ def get_summary_kpi(ticker: str, df_input: pd.DataFrame) -> dict:
 
     return levels
 
-def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
+def get_last_bb_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Calculate volatility
+    From last minimum (swing low) to now, 
+    Calculate the volatility of bullish vs bearish days, 
+    and the price difference in percentage. 
+    """
+
 
     # Recent samples, last 2 years
     df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
@@ -302,3 +311,138 @@ def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
     }
 
     return volatility
+
+
+
+def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Calculate volatility.
+    Meditum range (30 days) volatility, from last minimum (swing low) to now,
+    """
+
+    # Recent samples, last 1 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=365), utc=True)]
+
+    # Identify local minima (swing lows)
+    swing_lows_idx = argrelextrema(df['Low'].values, np.less_equal, order=5)
+    swing_lows = df.index[swing_lows_idx]
+
+    #logger.info("Last swing low: %s", swing_lows[-2:])    
+    last_min_date = swing_lows[-1]
+
+    volatility_1y_max = df['Volatility'].max()
+    volatility_1y_p90 = df['Volatility'].quantile(0.99)
+
+    df_30d = df[-30:]
+    volatility_30s_mean = df_30d['Volatility'].mean()
+    volatility_30s_p90 = df_30d['Volatility'].quantile(0.9)
+
+    df_near = df[df.index >= last_min_date]
+    volatility_near_mean = df_near['Volatility'].mean()
+    volatility_near_p95 = df_near['Volatility'].quantile(0.95)
+    volatility_near_max = df_near['Volatility'].max()
+    ema_200 = df_near['EMA_200'].iloc[-1]
+
+    volatility = {
+        "ticker": ticker,
+        "ema_200": round(ema_200, 2),
+        "volatility_30s_mean": round(volatility_30s_mean, 2),
+        "volatility_30s_p90": round(volatility_30s_p90, 2),
+        "volatility_near_days": len(df_near),
+        "volatility_near_mean": round(volatility_near_mean, 2),
+        "volatility_near_p95": round(volatility_near_p95, 2),
+        "volatility_near_max": round(volatility_near_max, 2),
+        "volatility_1y_max": round(volatility_1y_max, 2),
+        "volatility_1y_p90": round(volatility_1y_p90, 2)
+    }
+    return volatility
+
+
+def get_lateral_rectangle(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Check if the price is in a lateral rectangle (sideways movement)
+    """
+    RECTANGLE_THRESHOLD_PCT = 3
+
+    # Recent samples, last 2 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
+    #df = df[:-1]  # Exclude last day for analysis
+
+
+    current_price = df['Close'].iloc[-1]
+    threshold_price = current_price * (1 + RECTANGLE_THRESHOLD_PCT / 100)
+
+    #Search start date for lateral rectangle, where low price is higher than current price, with a margin of 5%
+
+    #Get dates where low price is higher than current price with a margin of 5%
+    higher_dates = df[df['Close'] > threshold_price].index
+    #logger.info("Threshold %s, Higher dates: %s", threshold_price, higher_dates[-20:])
+
+    # Get the items position in the original dataframe where close price is higher than current price with a margin of 5%
+    higher_items = df.index.get_indexer(higher_dates)
+    #logger.info("Higher items: %s", higher_items[-20:])
+
+    #Search last three consecutive items 
+    start_index = None
+    for i in reversed(range(2,len(higher_items))):
+        if higher_items[i] == higher_items[i-1] + 1 == higher_items[i-2] + 2:
+            start_index = higher_items[i]
+            break
+    
+    if start_index is None:
+        logger.info("Rectacgle start not found for %s", ticker)
+        return
+
+    if len(df) - start_index < 30:
+        logger.info("Rectangle so short for %s, sessions: %d", ticker, len(df) - start_index)
+        return
+
+
+    df_rectangle = df.iloc[start_index:]
+    start_date: pd.Timestamp = df_rectangle.index[0]
+    end_date: pd.Timestamp = df_rectangle.index[-1]
+    max_price = df_rectangle['High'].max()
+    min_price = df_rectangle['Low'].min()
+    price_diff_pct = (max_price - min_price) / min_price * 100
+
+    logger.info("Rectangle size date:%s to %s, sessions:(%d), price:%.02f-%.02f (%d%%)", start_date.date(), end_date.date(), len(df_rectangle), min_price, max_price, price_diff_pct)
+
+
+
+
+    date_start = df[df['Low'] > current_price * 1.05].index.max()
+    if pd.isna(date_start):
+        logger.info("No date found with low price higher than current price for %s", ticker)
+    
+    logger.info("Current price: %s, Date start for lateral box: %s", current_price, date_start)
+
+
+    # Identify local maxima (swing highs)
+    swing_highs_idx = argrelextrema(df['High'].values, np.greater_equal, order=5)
+    swing_highs = df.index[swing_highs_idx]
+
+    #logger.info("Last swing highs: %s", swing_highs)
+    logger.info("Swing highs values: \n%s", df['High'][swing_highs[-10:]])
+
+    # Identify local minima (swing lows)
+    swing_lows_idx = argrelextrema(df['Low'].values, np.less_equal, order=5)
+    swing_lows = df.index[swing_lows_idx]
+    logger.info("Swing lows values: \n%s", df['Low'][swing_lows[-10:]])
+
+
+
+    #logger.info("Last swing low: %s", swing_lows[-2:])    
+    last_min_date = swing_lows[-1]
+
+    df_near = df[df.index >= last_min_date]
+    price_diff = (df_near['Close'].iloc[-1] - df_near['Close'].iloc[0]) / df_near['Close'].iloc[0] * 100
+
+    lateral_box = abs(price_diff) < 5  # Example threshold for lateral box
+
+    result = {
+        "ticker": ticker,
+        "lateral_box": lateral_box,
+        "price_diff_pct": price_diff
+    }
+
+    return result

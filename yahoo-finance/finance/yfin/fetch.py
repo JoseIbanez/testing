@@ -41,14 +41,15 @@ def yahoo_fetch(ticker: str, period: str = "3mo", interval: str = "1d"):
 
     if os.path.exists(cache_file) and (time.time() - os.path.getmtime(cache_file)) < period_cache:
         df = pd.read_csv(cache_file)
-        df['Date'] = pd.to_datetime(df['Date'],utc=True)
-        logger.info("Dataframe: \n%s", df.dtypes)
-        df.set_index('Date', inplace=True)
+        # Normalize to midnight next day to align with Yahoo Finance's convention
+        df['Date'] = pd.to_datetime(df['Date'],utc=True).dt.normalize() + pd.Timedelta(days=1) 
+        logger.debug("Dataframe: \n%s", df.dtypes)
+        df.set_index('Date', inplace=True) 
 
         # Remove empty rows
         df = df[df['Close'].notna()]
 
-        logger.info("Using cached data for %s (%s), rows:%d", ticker, period, len(df))
+        logger.debug("Using cached data for %s (%s), rows:%d", ticker, period, len(df))
         return df
 
 

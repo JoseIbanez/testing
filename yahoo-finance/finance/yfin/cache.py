@@ -79,6 +79,20 @@ class MyDBCache:
         conn.close()
 
 
+    def put_error(self, ticker):
+        """
+        Store an error type for a ticker in the database, to avoid retrying too often.
+        """
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("INSERT OR IGNORE INTO tickers (ticker) VALUES (?)", (ticker,))
+        cursor.execute("UPDATE tickers SET more_info_attempt=CURRENT_TIMESTAMP, hot=-1 WHERE ticker=?", (ticker,))
+        conn.commit()
+        conn.close()
+
+        return
+
 
     def get_more_info(self, ticker):
         """
@@ -92,25 +106,30 @@ class MyDBCache:
         result = cursor.fetchone()
         conn.close()
 
+    
         if not result:
             return None
 
-        info_str = result[0] or "{}"
+        more_info_str = result[0] or "{}"
     
         try:
-            info = json.loads(info_str) 
+            more_info = json.loads(more_info_str) 
         except (json.JSONDecodeError, TypeError):
-            logger.error("Error decoding JSON for ticker %s:%s",ticker,info_str)
+            logger.error("Error decoding JSON for ticker %s:%s",ticker,more_info_str)
             return None
 
-        update_ts = info.get('update_ts',0)
+        update_ts = more_info.get('update_ts',0)
 
         if update_ts < time.time() - MORE_INFO_TTL:
-            logger.debug("Ticker %s has no update_ts in info, treating as stale.", ticker)
+            logger.debug("Ticker %s has no update_ts in more_info, treating as stale.", ticker)
             return None
 
-        return info
-    
+        return more_info
+
+
+
+
+
 
     def put_more_info(self, ticker, info):
 
@@ -138,8 +157,9 @@ class MyDBCache:
                 sector STRING,
                 volume INTEGER,
                 currency STRING,
-                hot INTEGER,
+                hot INTEGER DEFAULT 0,
                 hot_ts INTEGER,
+                manual_state INTEGER DEFAULT 0,
                 fast_info TEXT,
                 fast_info_attempt TIMESTAMP,
                 more_info TEXT,
@@ -180,7 +200,8 @@ class MyDBCache:
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT ticker FROM tickers where json_extract(fast_info, '$.lastPrice')>0 and hot>0 order by hot desc, volume desc;")
+        #cursor.execute("SELECT ticker FROM tickers where json_extract(fast_info, '$.lastPrice')>0 and hot>0 order by hot desc, volume desc;")
+        cursor.execute("SELECT ticker FROM tickers where hot>=0 and manual_state>=0 order by hot desc, volume desc;")
         result = cursor.fetchall()  
         conn.commit()
         conn.close()

@@ -6,7 +6,7 @@ import argparse
 from finance.yfin.cache import MyDBCache
 from finance.yfin.inventory import get_ticker_list
 from finance.yfin.fetch_info import get_fast_info, get_more_info
-
+from finance.yfin.main_kpi import calculate_kpis
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -14,12 +14,36 @@ my_cache = MyDBCache()
 
 class MyLabels(Enum):
     MAX = "MAX"
+    MAX_97 = "MAX_97"
     M_YTD = "M_YTD"
+    M_W52 = "M_W52"
     SMA200 = "SMA200"
     SMA5 = "SMA5"
     SMA10 = "SMA10"
+    SMA50 = "SMA50"
     VLTY5 = "VLTY5"
     VLTY30 = "VLTY30"
+
+class Notes:
+
+    def __init__(self):
+        self.notes = set()
+
+    def add(self, note: MyLabels):
+        self.notes.add(note)
+
+    def discard(self, note: MyLabels):
+        self.notes.discard(note)
+
+    def has(self, note: MyLabels):
+        return note in self.notes
+    
+    def __len__(self):
+        return len(self.notes)
+
+    def __str__(self):
+        return ",".join([note.value for note in self.notes])
+    
 
 
 
@@ -50,7 +74,7 @@ def check_ticker(ticker):
     Check a single ticker
     """    
 
-    fast_info = get_fast_info(ticker)
+    fast_info = get_fast_info(ticker,force=True)
     if not fast_info:
         return
 
@@ -58,8 +82,9 @@ def check_ticker(ticker):
     last_price = fast_info['lastPrice']
     year_high = fast_info['yearHigh']
     d200_avg = fast_info['twoHundredDayAverage']
+    d50_avg = fast_info['fiftyDayAverage']
 
-    notes = set()
+    notes = Notes()
 
     if last_price > year_high * 0.97:
         notes.add(MyLabels.M_YTD)
@@ -67,25 +92,42 @@ def check_ticker(ticker):
     if last_price > d200_avg * 1.05 and last_price < d200_avg * 1.30:
         notes.add(MyLabels.SMA200)
 
+    if last_price > d50_avg and last_price < d50_avg * 1.10 and last_price < d200_avg:
+        notes.add(MyLabels.SMA50)
 
-    print(f"Information for {ticker}:  {last_price:.2f} / {year_high:.2f} / {d200_avg:.2f} {[note.value for note in notes]}")
 
+    print(f"Information for {ticker}:  {last_price:.2f} / {year_high:.2f} / {d200_avg:.2f} {notes}")
     if len(notes) < 2:
         return
 
+    notes.discard(MyLabels.M_YTD)
 
     more_info = get_more_info(ticker)
 
-    allTimeHigh = more_info.get("allTimeHigh", 0)
-    if last_price > allTimeHigh * 0.97 and allTimeHigh > 0:
+    all_high = more_info.get("allTimeHigh", 0)
+    if all_high <= 0:
+        pass
+
+    elif last_price > all_high * 0.99:
         notes.add(MyLabels.MAX)
+
+    elif last_price > all_high * 0.97:
+        notes.add(MyLabels.MAX_97)
+
+
 
     more_info['hot'] = len(notes)
     my_cache.set_ticker_info(ticker, more_info)
 
+    if len(notes) < 2:
+        return
+
+    kpis = calculate_kpis(ticker)
+    if kpis.get("volatility_near_max") < kpis.get("volatility_30s_p90") and kpis.get("volatility_30s_p90") < 3 and kpis.get("volatility_1y_p90") < 10:
+        notes.add(MyLabels.VLTY5)
 
 
-    if len(notes) == 3:
+    if len(notes) >= 2:
         print(f"  --> {ticker} {notes}")
 
 

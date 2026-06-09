@@ -32,17 +32,17 @@ def calculate_kpis(ticker):
 
     df = load_ticker(ticker)
     df = add_indicators(ticker, df)
-    kmeans_levels = kmeans_clustering(ticker, df)
-    levels = get_support_resistance(ticker, df)
-    swing_points = get_swing_points(ticker, df)
+    #kmeans_levels = kmeans_clustering(ticker, df)
+    #levels = get_support_resistance(ticker, df)
+    #swing_points = get_swing_points(ticker, df)
 
-    summary = get_summary_kpi(ticker, df)
+    #summary = get_summary_kpi(ticker, df)
+    #logger.info("Summary: \n%s", json.dumps(summary, indent=4))
 
-    logger.info("Dataframe: \n%s", df.tail())
+    #logger.info("Dataframe: \n%s", df.tail())
     #logger.info("Kmeans Levels: \n%s", kmeans_levels)
-    logger.info("Summary: \n%s", json.dumps(levels, indent=4))
+    #logger.info("Summary: \n%s", json.dumps(levels, indent=4))
     #logger.info("Swing Points: \n%s", swing_points)
-    logger.info("Summary: \n%s", json.dumps(summary, indent=4))
 
 
     last_volatility = get_last_volatility(ticker, df)
