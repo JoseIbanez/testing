@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.cluster import MeanShift, estimate_bandwidth
 from scipy.signal import argrelextrema
 from datetime import datetime, timedelta
 
@@ -86,14 +87,62 @@ def kmeans_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
 
 
 
+def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculate support and resistance levels using Mean Shift Clustering
+    Not predefined number of clusters, but a bandwidth parameter that defines the radius of the clusters.
+    The bandwidth can be estimated using the estimate_bandwidth function from sklearn.
+    """
+
+    # Recent samples, last 5 years
+    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=5*365), utc=True)]
+
+
+    # Find local maxima (peaks) and minima (troughs)
+    # order=3 means it needs 3 lower/higher bars on either side to be a pivot
+    df['min'] = df['Close'].iloc[argrelextrema(df['Close'].values, np.less_equal, order=3)[0]]
+    df['max'] = df['Close'].iloc[argrelextrema(df['Close'].values, np.greater_equal, order=3)[0]]
+
+
+    # Collect the identified price pivots
+    #pivots = df[['min', 'max']].stack().dropna().values
+    pivots = pd.concat([df['min'].dropna(), df['max'].dropna()]).values
+    pivots_reshaped = pivots.reshape(-1, 1)
+
+
+    # Apply Mean Shift Clustering
+    # estimate_bandwidth automatically determines the cluster radius
+    bandwidth = estimate_bandwidth(pivots_reshaped, quantile=0.1, n_samples=500)
+    ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+    ms.fit(pivots_reshaped)
+
+    # Extract the support & resistance levels
+    levels = ms.cluster_centers_.flatten()
+
+    # Visualize
+    plt.figure(figsize=(12, 6))
+    plt.plot(df.index, df['Close'], label=f'{ticker} Close Price', color='black', alpha=0.6)
+
+    # Plot Mean Shift Levels
+    for level in levels:
+        plt.axhline(y=level, color='blue', linestyle='--', alpha=0.8)
+
+    plt.title(f'Mean Shift Support and Resistance Levels for {ticker}')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig(f"./data/{ticker}_meanshift.png")
+
+    return levels
+
+
 def get_swing_points(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate swing points
     """
 
-    # Recent samples, last 2 years
-    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
-
+    # Recent samples, last 5 years
+    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=5*365), utc=True)]
 
     # Identify local maxima (swing highs)
     swing_highs_idx = argrelextrema(df['High'].values, np.greater_equal, order=5)

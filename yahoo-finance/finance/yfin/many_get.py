@@ -74,7 +74,7 @@ def check_ticker(ticker):
     Check a single ticker
     """    
 
-    fast_info = get_fast_info(ticker,force=True)
+    fast_info = get_fast_info(ticker)
     if not fast_info:
         return
 
@@ -100,6 +100,7 @@ def check_ticker(ticker):
     if len(notes) < 2:
         return
 
+
     notes.discard(MyLabels.M_YTD)
 
     more_info = get_more_info(ticker)
@@ -121,6 +122,7 @@ def check_ticker(ticker):
 
     if len(notes) < 2:
         return
+
 
     kpis = calculate_kpis(ticker)
     if kpis.get("volatility_near_max") < kpis.get("volatility_30s_p90") and kpis.get("volatility_30s_p90") < 3 and kpis.get("volatility_1y_p90") < 10:

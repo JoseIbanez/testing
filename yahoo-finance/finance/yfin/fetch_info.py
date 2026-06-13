@@ -18,10 +18,11 @@ def get_fast_info(ticker:str,force=False):
 
     # First try to get from cache
     my_cache = MyDBCache()
-    if not force:
-        fast_info = my_cache.get_fast_info(ticker)
-    else:
+
+    if force:
         fast_info = None
+    else:
+        fast_info = my_cache.get_fast_info(ticker)
         
     if fast_info:
         logger.debug("Cache hit for %s: %s", ticker, fast_info)
@@ -39,6 +40,7 @@ def get_fast_info(ticker:str,force=False):
                 "twoHundredDayAverage": float(yf_ticker.fast_info['twoHundredDayAverage']),
                 "fiftyDayAverage": float(yf_ticker.fast_info['fiftyDayAverage'])
         }
+
 
     except (AttributeError, TypeError, KeyError) as e:
         logger.error("Error fetching data for %s: %s", ticker, str(e))

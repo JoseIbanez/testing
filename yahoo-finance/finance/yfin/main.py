@@ -4,7 +4,8 @@ import json
 import argparse
 
 from finance.yfin.fetch import load_ticker
-from finance.yfin.kpi import add_indicators, kmeans_clustering, get_support_resistance, get_swing_points, get_summary_kpi, get_last_volatility
+from finance.yfin.kpi import add_indicators, get_last_volatility, get_summary_kpi
+from finance.yfin.kpi import get_support_resistance, get_swing_points, kmeans_clustering, meanshift_clustering
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -44,9 +45,14 @@ def calculate_kpis(ticker):
     #logger.info("Summary: \n%s", json.dumps(levels, indent=4))
     #logger.info("Swing Points: \n%s", swing_points)
 
+    meanshift_levels = meanshift_clustering(ticker, df)
+    logger.info("Meanshift Levels: \n%s", meanshift_levels)
+
 
     last_volatility = get_last_volatility(ticker, df)
     logger.info("Last volatility: \n%s", json.dumps(last_volatility, indent=4))
+
+
 
 
 if __name__ == "__main__":

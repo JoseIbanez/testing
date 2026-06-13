@@ -32,10 +32,10 @@ class MyDBCache:
         conn.close()
 
         if not result:
+            logger.warning("No fast_info found in cache for %s", ticker)
             return None
 
         fast_info_str = result[0] or "{}"
-    
         try:
             fast_info = json.loads(fast_info_str) 
         except (json.JSONDecodeError, TypeError):
@@ -49,11 +49,11 @@ class MyDBCache:
 
         update_ts = fast_info.get('update_ts',0)
 
-
-
         if update_ts < time.time() - FAST_INFO_TTL:
-            logger.debug("Ticker %s has no update_ts in fast_info, treating as stale.", ticker)
+            logger.debug("Ticker %s has stale fast_info (updated at %s), treating as stale.", ticker, time.ctime(update_ts))
             return None
+
+        #logger.info("Cache hit for %s: fast_info is fresh (updated at %s)", ticker, time.ctime(update_ts))
 
         return fast_info
 
@@ -63,8 +63,6 @@ class MyDBCache:
 
     def put_fast_info(self, ticker, fast_info):
 
-
-
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("INSERT OR IGNORE INTO tickers (ticker) VALUES (?)", (ticker,))
@@ -73,10 +71,11 @@ class MyDBCache:
         if fast_info:
             fast_info['update_ts'] = time.time()
             cursor.execute("UPDATE tickers SET fast_info=? WHERE ticker=?", (json.dumps(fast_info), ticker))
-
+            logger.debug("Stored fast_info for %s in cache: %s", ticker, fast_info)
 
         conn.commit()
         conn.close()
+
 
 
     def put_error(self, ticker):
@@ -123,6 +122,8 @@ class MyDBCache:
         if update_ts < time.time() - MORE_INFO_TTL:
             logger.debug("Ticker %s has no update_ts in more_info, treating as stale.", ticker)
             return None
+
+        logger.debug("Cache hit for %s: more_info is fresh (updated at %s)", ticker, time.ctime(update_ts))
 
         return more_info
 
