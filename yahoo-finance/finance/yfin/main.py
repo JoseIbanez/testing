@@ -6,6 +6,7 @@ import argparse
 from finance.yfin.fetch import load_ticker
 from finance.yfin.kpi import add_indicators, get_last_volatility, get_summary_kpi
 from finance.yfin.kpi import get_support_resistance, get_swing_points, kmeans_clustering, meanshift_clustering
+from finance.yfin.kpi import eval_resistance
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -48,6 +49,19 @@ def calculate_kpis(ticker):
     meanshift_levels = meanshift_clustering(ticker, df)
     logger.info("Meanshift Levels: \n%s", meanshift_levels)
 
+    close_price = df['Close'].iloc[-1]
+
+    for level in meanshift_levels:
+
+        #Ignore far away levels
+        if abs(close_price - level) / close_price > 0.3:
+            continue
+
+
+        logger.info("Evaluating resistance for level: %s", level)
+        break_dates = eval_resistance(ticker, df, resistance=level)
+        logger.info("Break dates for resistance %s: \n%s", level, break_dates)
+    
 
     last_volatility = get_last_volatility(ticker, df)
     logger.info("Last volatility: \n%s", json.dumps(last_volatility, indent=4))

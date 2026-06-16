@@ -1,5 +1,6 @@
 import json
 import logging
+from numpy.strings import index
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -94,8 +95,8 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     The bandwidth can be estimated using the estimate_bandwidth function from sklearn.
     """
 
-    # Recent samples, last 5 years
-    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=5*365), utc=True)]
+    # Recent samples, last years
+    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
 
 
     # Find local maxima (peaks) and minima (troughs)
@@ -118,6 +119,7 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
 
     # Extract the support & resistance levels
     levels = ms.cluster_centers_.flatten()
+    levels[::-1].sort()
 
     # Visualize
     plt.figure(figsize=(12, 6))
@@ -495,3 +497,52 @@ def get_lateral_rectangle(ticker: str, df_input: pd.DataFrame) -> dict:
     }
 
     return result
+
+
+def eval_resistance(ticker: str, df_input: pd.DataFrame, resistance: float) -> dict:
+    """
+    Look for period resistance is not broken
+    Evaluate how strong the resistance levels is
+    Count how many times the price has touched the resistance level
+    """
+
+    # Recent samples, last 5 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
+    df['SMA_5'] = df['Close'].rolling(window=5).mean()
+
+    # Resistence duration:
+    # Last time the price was above the resistance level for more than 5 consecutive days
+    #breaks = df['Close'] > resistance
+    breaks = df['SMA_5'] > resistance 
+    window_size = 5
+    consecutive_count = breaks.rolling(window=window_size).sum()
+
+    break_dates = df[consecutive_count >= window_size][['Close']]
+    break_dates["break_begin"] = pd.Series(break_dates.index, index=break_dates.index).shift(1)
+    break_dates["break_end"]   = pd.Series(break_dates.index, index=break_dates.index)
+    break_dates["break_duration"] = break_dates["break_end"] - break_dates["break_begin"]
+
+    # get top 5 longest breaks
+    big_breaks = break_dates[break_dates["break_duration"] > pd.Timedelta(days=10)].sort_values(by="break_duration", ascending=False).head(5)
+
+    # Calculate how many days ago the break ended from last date in the dataframe
+    big_breaks["ago_begin"] = pd.Series(df.index[-1], index=big_breaks.index) - big_breaks["break_begin"]
+    big_breaks["ago_end"]   = pd.Series(df.index[-1], index=big_breaks.index) - big_breaks["break_end"]
+
+
+    print(big_breaks)
+
+    breaks_kpi = {
+        "ticker": ticker,
+        "resistance": float(resistance),
+        "price_diff_pct": float((df['Close'].iloc[-1] - resistance) / resistance * 100),
+        "breaks_begin": big_breaks["break_begin"].min().to_pydatetime(),
+        "breaks_end": big_breaks["break_end"].max().to_pydatetime(),
+        "breaks_duration": (big_breaks["break_end"].max() - big_breaks["break_begin"].min()).days, 
+        "ago_begin": big_breaks["ago_begin"].max().days,
+        "ago_end": big_breaks["ago_end"].min().days
+    }
+
+    print(breaks_kpi)
+
+
