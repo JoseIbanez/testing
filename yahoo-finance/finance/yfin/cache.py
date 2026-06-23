@@ -164,7 +164,8 @@ class MyDBCache:
                 fast_info TEXT,
                 fast_info_attempt TIMESTAMP,
                 more_info TEXT,
-                more_info_attempt TIMESTAMP
+                more_info_attempt TIMESTAMP,
+                kpi_info TEXT
             )
         """)
         conn.commit()

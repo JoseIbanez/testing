@@ -50,7 +50,7 @@ def add_indicators(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     #logger.info("Dataframe: %s", df)
 
     #Save to csv
-    df.to_csv(f"./data/{ticker}_indicators.csv")
+    #df.to_csv(f"./data/{ticker}_indicators.csv")
 
     return df
 
@@ -101,14 +101,27 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
 
     # Find local maxima (peaks) and minima (troughs)
     # order=3 means it needs 3 lower/higher bars on either side to be a pivot
-    df['min'] = df['Close'].iloc[argrelextrema(df['Close'].values, np.less_equal, order=3)[0]]
-    df['max'] = df['Close'].iloc[argrelextrema(df['Close'].values, np.greater_equal, order=3)[0]]
+    #df['max'] = df['High'].iloc[argrelextrema(df['High'].values, np.greater_equal, order=5)[0]]
+    #df['min'] = df['Low'].iloc[argrelextrema(df['Low'].values, np.less_equal, order=5)[0]]
+
+    # Identify local maxima (swing highs)
+    swing_highs = df.index[argrelextrema(df['High'].values, np.greater_equal, order=10)]
+    swing_lows  = df.index[argrelextrema(df['Low'].values, np.less_equal, order=10)]
+
 
 
     # Collect the identified price pivots
+
+    pivots = np.concatenate((df['High'][swing_highs], df['Low'][swing_lows]), axis=0)
+
+
     #pivots = df[['min', 'max']].stack().dropna().values
-    pivots = pd.concat([df['min'].dropna(), df['max'].dropna()]).values
+    #pivots = pd.concat([df['max'].dropna(), df['min'].dropna()]).values
+
+
     pivots_reshaped = pivots.reshape(-1, 1)
+
+
 
 
     # Apply Mean Shift Clustering
@@ -124,6 +137,11 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     # Visualize
     plt.figure(figsize=(12, 6))
     plt.plot(df.index, df['Close'], label=f'{ticker} Close Price', color='black', alpha=0.6)
+
+    # Plot swing highs and lows
+    plt.scatter(swing_highs, df['High'][swing_highs], color='r', label='Swing Highs', marker='o')
+    plt.scatter(swing_lows,  df['Low'][swing_lows],   color='g', label='Swing Lows',  marker='o')
+
 
     # Plot Mean Shift Levels
     for level in levels:
@@ -388,6 +406,10 @@ def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
     volatility_30s_mean = df_30d['Volatility'].mean()
     volatility_30s_p90 = df_30d['Volatility'].quantile(0.9)
 
+    df_90d = df[-90:]
+    volatility_90s_mean = df_90d['Volatility'].mean()
+    volatility_90s_p90 = df_90d['Volatility'].quantile(0.9)
+
     df_near = df[df.index >= last_min_date]
     volatility_near_mean = df_near['Volatility'].mean()
     volatility_near_p95 = df_near['Volatility'].quantile(0.95)
@@ -399,6 +421,8 @@ def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
         "ema_200": round(ema_200, 2),
         "volatility_30s_mean": round(volatility_30s_mean, 2),
         "volatility_30s_p90": round(volatility_30s_p90, 2),
+        "volatility_90s_mean": round(volatility_90s_mean, 2),
+        "volatility_90s_p90": round(volatility_90s_p90, 2),
         "volatility_near_days": len(df_near),
         "volatility_near_mean": round(volatility_near_mean, 2),
         "volatility_near_p95": round(volatility_near_p95, 2),
@@ -506,7 +530,7 @@ def eval_resistance(ticker: str, df_input: pd.DataFrame, resistance: float) -> d
     Count how many times the price has touched the resistance level
     """
 
-    # Recent samples, last 5 years
+    # Recent samples, last years
     df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
     df['SMA_5'] = df['Close'].rolling(window=5).mean()
 
@@ -521,14 +545,30 @@ def eval_resistance(ticker: str, df_input: pd.DataFrame, resistance: float) -> d
     break_dates["break_begin"] = pd.Series(break_dates.index, index=break_dates.index).shift(1)
     break_dates["break_end"]   = pd.Series(break_dates.index, index=break_dates.index)
     break_dates["break_duration"] = break_dates["break_end"] - break_dates["break_begin"]
+    break_dates["break_max_price"] = df['Close'][break_dates.index]
+
+    #Remove break if max price is higher than resistance * safeguard pct
+    #print(break_dates)
+    break_dates = break_dates[break_dates["break_max_price"] <= resistance * 1.2]
+    #print(break_dates)
 
     # get top 5 longest breaks
     big_breaks = break_dates[break_dates["break_duration"] > pd.Timedelta(days=10)].sort_values(by="break_duration", ascending=False).head(5)
+    big_breaks = big_breaks.sort_index()
 
     # Calculate how many days ago the break ended from last date in the dataframe
     big_breaks["ago_begin"] = pd.Series(df.index[-1], index=big_breaks.index) - big_breaks["break_begin"]
     big_breaks["ago_end"]   = pd.Series(df.index[-1], index=big_breaks.index) - big_breaks["break_end"]
 
+    # Number of times the price has touched the resistance level
+    touch_count = ((df['Close'] > resistance * 0.99) & (df['Close'] < resistance * 1.01)).sum()
+
+    # Last price
+    last_price = df['Close'].iloc[-1]
+    min_ago_end = big_breaks["ago_end"].min().days if not big_breaks.empty else None
+    if not min_ago_end or min_ago_end > 90:
+        logger.info("Resistance %s for %s is too old, last touch %s days ago", resistance, ticker, min_ago_end)
+        return None
 
     print(big_breaks)
 
@@ -540,9 +580,81 @@ def eval_resistance(ticker: str, df_input: pd.DataFrame, resistance: float) -> d
         "breaks_end": big_breaks["break_end"].max().to_pydatetime(),
         "breaks_duration": (big_breaks["break_end"].max() - big_breaks["break_begin"].min()).days, 
         "ago_begin": big_breaks["ago_begin"].max().days,
-        "ago_end": big_breaks["ago_end"].min().days
+        "ago_end": big_breaks["ago_end"].min().days,
+        "touch_count": int(touch_count)
     }
 
     print(breaks_kpi)
+
+
+def eval_level(ticker: str, df_input: pd.DataFrame, level: float) -> dict:
+
+    # Recent samples, last 5 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
+
+
+    # Number of times the price has touched the resistance level
+    touch = ((df['High'] > level * 0.99) & (df['High'] < level * 1.01)) | ((df['Low'] > level * 0.99) & (df['Low'] < level * 1.01)) & ((df['High'] < level) | (df['Low'] > level))
+    touch_count = touch.sum()
+    ago_begin = (df.index[-1] - df[touch].index.min()).days if touch_count > 0 else None
+    ago_end = (df.index[-1] - df[touch].index.max()).days if touch_count > 0 else None
+
+
+    level_kpi = {
+        "ticker": ticker,
+        "level": float(level),
+        "price_diff_pct": float((level - df['Close'].iloc[-1]) / level * 100),
+        "ago_begin": ago_begin,
+        "ago_end": ago_end,
+        "touch_count": int(touch_count)
+    }
+
+    logger.info("Evaluation for level:%s, ago:%s days, touch:%s", level, level_kpi['ago_end'], level_kpi['touch_count'])
+
+    return level_kpi
+
+
+
+
+def search_level(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Look for period resistance is not broken
+    Evaluate how strong the resistance levels is
+    Count how many times the price has touched the resistance level
+    """
+
+    # Recent samples, last 5 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
+
+    last_price = df['Close'].iloc[-1]
+    level = last_price * 1.10
+    touch_max = 0
+    level_max = last_price * 1.50
+
+
+
+    while True:
+
+        level_kpi = eval_level(ticker, df, level=level)
+
+        next_level = level * 0.95
+
+        if level < last_price * 0.1:
+            break
+
+
+        if level_kpi['touch_count'] < 30 or level_kpi['ago_end'] > 365:
+            level = next_level
+            continue
+
+        touch_count = level_kpi['touch_count']
+        if touch_count > touch_max:
+            level_max = next_level
+            logger.info("New max found level:%s, touch:%s", level_max, touch_count)
+
+
+
+        level = next_level
+
 
 

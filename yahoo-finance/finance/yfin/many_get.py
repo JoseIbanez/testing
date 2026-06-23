@@ -15,7 +15,11 @@ my_cache = MyDBCache()
 class MyLabels(Enum):
     MAX = "MAX"
     MAX_97 = "MAX_97"
+    MAX_95 = "MAX_95"
+    MAX_90 = "MAX_90"
     M_YTD = "M_YTD"
+    M95_YTD = "M95_YTD"
+    M90_YTD = "M90_YTD"
     M_W52 = "M_W52"
     SMA200 = "SMA200"
     SMA5 = "SMA5"
@@ -23,6 +27,7 @@ class MyLabels(Enum):
     SMA50 = "SMA50"
     VLTY5 = "VLTY5"
     VLTY30 = "VLTY30"
+    VLTY90 = "VLTY90"
 
 class Notes:
 
@@ -89,6 +94,9 @@ def check_ticker(ticker):
     if last_price > year_high * 0.97:
         notes.add(MyLabels.M_YTD)
 
+    elif last_price > year_high * 0.95:
+        notes.add(MyLabels.M95_YTD)
+
     if last_price > d200_avg * 1.05 and last_price < d200_avg * 1.30:
         notes.add(MyLabels.SMA200)
 
@@ -115,7 +123,11 @@ def check_ticker(ticker):
     elif last_price > all_high * 0.97:
         notes.add(MyLabels.MAX_97)
 
+    elif last_price > all_high * 0.95:
+        notes.add(MyLabels.MAX_95)
 
+    elif last_price > all_high * 0.90:
+        notes.add(MyLabels.MAX_90)
 
     more_info['hot'] = len(notes)
     my_cache.set_ticker_info(ticker, more_info)
@@ -128,6 +140,8 @@ def check_ticker(ticker):
     if kpis.get("volatility_near_max") < kpis.get("volatility_30s_p90") and kpis.get("volatility_30s_p90") < 3 and kpis.get("volatility_1y_p90") < 10:
         notes.add(MyLabels.VLTY5)
 
+    if kpis.get("volatility_30s_p90") < 3:
+        notes.add(MyLabels.VLTY30)
 
     if len(notes) >= 2:
         print(f"  --> {ticker} {notes}")
