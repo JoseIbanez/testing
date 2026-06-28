@@ -38,12 +38,12 @@ def add_indicators(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     df['RSI'] = 100 - (100 / (1 + rs))
 
     # Volatility (True Range)
-    prev_close = df['Close'].shift(1)
+    prev_close = df['Close'].shift(1).fillna(df['Close'])
     tr1 = df['High'] - df['Low']
     tr2 = (df['High'] - prev_close).abs()
     tr3 = (df['Low'] - prev_close).abs()
     true_range = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    df['Volatility'] = true_range / prev_close.fillna(df['Close']) * 100
+    df['Volatility'] = true_range / prev_close * 100
 
 
     logger.info("Added indicators to dataframe for %s", ticker)
@@ -88,7 +88,7 @@ def kmeans_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
 
 
 
-def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
+def meanshift_clustering(ticker: str, df: pd.DataFrame, period_year: int=5) -> pd.DataFrame:
     """
     Calculate support and resistance levels using Mean Shift Clustering
     Not predefined number of clusters, but a bandwidth parameter that defines the radius of the clusters.
@@ -96,7 +96,7 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     """
 
     # Recent samples, last years
-    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
+    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=period_year*365), utc=True)]
 
 
     # Find local maxima (peaks) and minima (troughs)
@@ -107,13 +107,14 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     # Identify local maxima (swing highs)
     swing_highs = df.index[argrelextrema(df['High'].values, np.greater_equal, order=10)]
     swing_lows  = df.index[argrelextrema(df['Low'].values, np.less_equal, order=10)]
+    swing_close  = df.index[argrelextrema(df['Close'].values, np.less_equal, order=10)]
 
 
 
     # Collect the identified price pivots
 
-    pivots = np.concatenate((df['High'][swing_highs], df['Low'][swing_lows]), axis=0)
-
+    pivots = np.concatenate((df['High'][swing_highs], df['Low'][swing_lows], df['Close'][swing_close]), axis=0)
+    print(pivots)
 
     #pivots = df[['min', 'max']].stack().dropna().values
     #pivots = pd.concat([df['max'].dropna(), df['min'].dropna()]).values
@@ -134,6 +135,10 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     levels = ms.cluster_centers_.flatten()
     levels[::-1].sort()
 
+
+    levels_score = eval_levels(ticker, df, levels, pivots)
+
+
     # Visualize
     plt.figure(figsize=(12, 6))
     plt.plot(df.index, df['Close'], label=f'{ticker} Close Price', color='black', alpha=0.6)
@@ -141,7 +146,6 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     # Plot swing highs and lows
     plt.scatter(swing_highs, df['High'][swing_highs], color='r', label='Swing Highs', marker='o')
     plt.scatter(swing_lows,  df['Low'][swing_lows],   color='g', label='Swing Lows',  marker='o')
-
 
     # Plot Mean Shift Levels
     for level in levels:
@@ -153,7 +157,63 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     plt.legend()
     plt.savefig(f"./data/{ticker}_meanshift.png")
 
-    return levels
+    return levels_score
+
+
+def eval_levels(ticker: str, df:pd.DataFrame, levels: np.ndarray, pivots: np.ndarray) -> dict:
+
+    # Evaluate the number of pivots for each level
+    # Evaluate duration of the level, how many days from first touch to last touch, and from last touch to now
+    levels_score = {}
+    for level in levels:
+
+        touch_pivot_count = ((pivots >= level * 0.98) & (pivots <= level * 1.02)).sum()
+
+
+        touch_high = df[(df['High'] >= level * 0.99) & (df['High'] <= level * 1.01) & (df['Low'] < level * 0.99)]
+        touch_low = df[(df['Low'] >= level * 0.99) & (df['Low'] <= level * 1.01) & (df['High'] > level * 1.01)]
+        touch_points = pd.concat([touch_high, touch_low]).sort_index()
+
+
+        duration = touch_points.index
+        if len(duration) > 0:
+            first_touch = duration[0]
+            last_touch = duration[-1]
+            level_duration = (last_touch - first_touch).days
+            level_ago = (df.index[-1] - last_touch).days
+        else:
+            level_duration = 0
+            level_ago = 5 * 365
+
+        # Score based in duration
+        if level_duration > 365:
+            duration_score = 10
+        elif level_duration > 180:
+            duration_score = 5
+        elif level_duration > 30:
+            duration_score = 3
+        elif level_duration > 10:
+            duration_score = 1
+        else:
+            duration_score = 0
+            level_ago = 5 * 365
+
+        # Score based in how long ago was the last touch
+        if level_ago < 30:
+            ago_score = 5
+        elif level_ago < 90:
+            ago_score = 3
+        elif level_ago < 180:
+            ago_score = 1
+        else:
+            ago_score = 0
+
+        # Level score
+        logger.info("Level: %.2f, Touches: %d, Duration: %d days, Touch Range: %s - %s, Last touch: %d days ago, Score: %d", level, touch_pivot_count, level_duration, first_touch, last_touch, level_ago, int( touch_pivot_count + duration_score + ago_score))
+        levels_score[round(float(level), 2)] = int( touch_pivot_count + duration_score + ago_score)
+
+    return levels_score
+
 
 
 def get_swing_points(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
@@ -392,43 +452,50 @@ def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
     # Recent samples, last 1 years
     df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=365), utc=True)]
 
-    # Identify local minima (swing lows)
+    # Identify last minima (swing lows)
     swing_lows_idx = argrelextrema(df['Low'].values, np.less_equal, order=5)
     swing_lows = df.index[swing_lows_idx]
 
     #logger.info("Last swing low: %s", swing_lows[-2:])    
     last_min_date = swing_lows[-1]
 
-    volatility_1y_max = df['Volatility'].max()
-    volatility_1y_p90 = df['Volatility'].quantile(0.99)
+    df_200d = df[-200:]
+    volatility_200d_max = df_200d['Volatility'].max()
+    volatility_200d_p99 = df_200d['Volatility'].quantile(0.99)
 
-    df_30d = df[-30:]
-    volatility_30s_mean = df_30d['Volatility'].mean()
-    volatility_30s_p90 = df_30d['Volatility'].quantile(0.9)
 
-    df_90d = df[-90:]
-    volatility_90s_mean = df_90d['Volatility'].mean()
-    volatility_90s_p90 = df_90d['Volatility'].quantile(0.9)
+    df_20d = df[-20:]
+    volatility_20d_mean = df_20d['Volatility'].mean()
+    volatility_20d_p90 = df_20d['Volatility'].quantile(0.9)
+
+    df_80d = df[-80:]
+    volatility_80d_mean = df_80d['Volatility'].mean()
+    volatility_80d_p90 = df_80d['Volatility'].quantile(0.9)
 
     df_near = df[df.index >= last_min_date]
     volatility_near_mean = df_near['Volatility'].mean()
     volatility_near_p95 = df_near['Volatility'].quantile(0.95)
     volatility_near_max = df_near['Volatility'].max()
-    ema_200 = df_near['EMA_200'].iloc[-1]
+
+    close_price = float(df['Close'].iloc[-1])
+    ema_200 = float(df_200d['EMA_200'].iloc[-1])
+    rsi_14 = float(df['RSI'].iloc[-1])
 
     volatility = {
         "ticker": ticker,
-        "ema_200": round(ema_200, 2),
-        "volatility_30s_mean": round(volatility_30s_mean, 2),
-        "volatility_30s_p90": round(volatility_30s_p90, 2),
-        "volatility_90s_mean": round(volatility_90s_mean, 2),
-        "volatility_90s_p90": round(volatility_90s_p90, 2),
+        "volatility_200d_max": round(volatility_200d_max, 2),
+        "volatility_200d_p99": round(volatility_200d_p99, 2),
+        "volatility_80d_mean": round(volatility_80d_mean, 2),
+        "volatility_80d_p90": round(volatility_80d_p90, 2),
+        "volatility_20d_mean": round(volatility_20d_mean, 2),
+        "volatility_20d_p90": round(volatility_20d_p90, 2),
         "volatility_near_days": len(df_near),
         "volatility_near_mean": round(volatility_near_mean, 2),
         "volatility_near_p95": round(volatility_near_p95, 2),
         "volatility_near_max": round(volatility_near_max, 2),
-        "volatility_1y_max": round(volatility_1y_max, 2),
-        "volatility_1y_p90": round(volatility_1y_p90, 2)
+        "close_price": round(close_price, 2),
+        "ema_200": round(ema_200, 2),
+        "rsi_14": round(rsi_14, 2)
     }
     return volatility
 
@@ -587,74 +654,78 @@ def eval_resistance(ticker: str, df_input: pd.DataFrame, resistance: float) -> d
     print(breaks_kpi)
 
 
-def eval_level(ticker: str, df_input: pd.DataFrame, level: float) -> dict:
 
-    # Recent samples, last 5 years
-    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
+def adjust_dividents(ticker: str, df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adjust the price for dividends
+    """
+
+    df = df_input
+
+    dividends = df[ df['Dividends'] > 0 ]['Dividends'].to_dict()
+
+    #print("Dividends: ", dividends)
+    #print("Dataframe: without adj ", df)
+
+    # Adjust the price for dividends
+    for date, dividend in dividends.items():
+        df.loc[:date, 'Close'] -= dividend
+        df.loc[:date, 'Open'] -= dividend
+        df.loc[:date, 'High'] -= dividend
+        df.loc[:date, 'Low'] -= dividend
+
+    #print("Dataframe: with adj ", df)
+
+    return df
 
 
-    # Number of times the price has touched the resistance level
-    touch = ((df['High'] > level * 0.99) & (df['High'] < level * 1.01)) | ((df['Low'] > level * 0.99) & (df['Low'] < level * 1.01)) & ((df['High'] < level) | (df['Low'] > level))
-    touch_count = touch.sum()
-    ago_begin = (df.index[-1] - df[touch].index.min()).days if touch_count > 0 else None
-    ago_end = (df.index[-1] - df[touch].index.max()).days if touch_count > 0 else None
+
+def detect_break_retest(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Detect break and retest of a level
+    """
+
+    long_period = 200
+    short_period = 20
+
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=long_period), utc=True)]
+
+    max_l_price = df['High'].max()
+    max_l_date  = df['High'].idxmax()
+    max_l_session_ago = len(df.index) - df.index.get_loc(max_l_date)
+
+    # Recent samples, last days
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=short_period), utc=True)]
+    max_s_price = df['High'].max()
+    max_s_date  = df['High'].idxmax()
+    max_s_session_ago = len(df.index) - df.index.get_loc(max_s_date)
+
+    # Samples after last maximum, last days
+    df = df_input[df_input.index > max_s_date]
+    if len(df) == 0:
+        logger.info("MAX")
+        return {}
+
+    min_s_price = df['Low'].min()
+    min_s_date  = df['Low'].idxmin()
+    min_s_session_ago = len(df.index) - df.index.get_loc(min_s_date)
+
+    labels = []
+    if min_s_price and min_s_price < max_s_price * 0.95:
+        logger.info("Found trick")
+        labels = ["MAX_FALL"]
 
 
-    level_kpi = {
+
+    retest = {
         "ticker": ticker,
-        "level": float(level),
-        "price_diff_pct": float((level - df['Close'].iloc[-1]) / level * 100),
-        "ago_begin": ago_begin,
-        "ago_end": ago_end,
-        "touch_count": int(touch_count)
+        "max_l_session_ago": int(max_l_session_ago),
+        "max_s_session_ago": int(max_s_session_ago),
+        "min_s_session_ago": int(min_s_session_ago),
+        "labels": labels,
+        "fall_pct": float((max_s_price - min_s_price) / max_s_price * 100) if min_s_price else None
     }
 
-    logger.info("Evaluation for level:%s, ago:%s days, touch:%s", level, level_kpi['ago_end'], level_kpi['touch_count'])
+    logger.info(retest)
 
-    return level_kpi
-
-
-
-
-def search_level(ticker: str, df_input: pd.DataFrame) -> dict:
-    """
-    Look for period resistance is not broken
-    Evaluate how strong the resistance levels is
-    Count how many times the price has touched the resistance level
-    """
-
-    # Recent samples, last 5 years
-    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
-
-    last_price = df['Close'].iloc[-1]
-    level = last_price * 1.10
-    touch_max = 0
-    level_max = last_price * 1.50
-
-
-
-    while True:
-
-        level_kpi = eval_level(ticker, df, level=level)
-
-        next_level = level * 0.95
-
-        if level < last_price * 0.1:
-            break
-
-
-        if level_kpi['touch_count'] < 30 or level_kpi['ago_end'] > 365:
-            level = next_level
-            continue
-
-        touch_count = level_kpi['touch_count']
-        if touch_count > touch_max:
-            level_max = next_level
-            logger.info("New max found level:%s, touch:%s", level_max, touch_count)
-
-
-
-        level = next_level
-
-
-
+    return retest

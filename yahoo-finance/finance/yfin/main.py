@@ -4,9 +4,8 @@ import json
 import argparse
 
 from finance.yfin.fetch_serie import load_ticker, load_serie
-from finance.yfin.kpi import add_indicators, get_last_volatility, get_summary_kpi
+from finance.yfin.kpi import add_indicators, get_last_volatility, get_summary_kpi, adjust_dividents
 from finance.yfin.kpi import get_support_resistance, get_swing_points, kmeans_clustering, meanshift_clustering
-from finance.yfin.kpi import eval_resistance, eval_level, search_level
 
 
 logger = logging.getLogger(__name__)
@@ -14,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch and analyze stock data")
-    parser.add_argument("--ticker", type=str, default="AAPL", help="Ticker symbol to analyze")
+    parser.add_argument("--ticker", "-t", type=str, default="AAPL", help="Ticker symbol to analyze")
     return parser.parse_args()
 
 
@@ -35,6 +34,7 @@ def calculate_kpis(ticker):
 
     #df = load_ticker(ticker)
     df = load_serie(ticker)
+    df = adjust_dividents(ticker, df)
     df = add_indicators(ticker, df)
     #kmeans_levels = kmeans_clustering(ticker, df)
     #levels = get_support_resistance(ticker, df)
@@ -59,15 +59,15 @@ def calculate_kpis(ticker):
     #search_level(ticker, df)
 
 
-    for level in meanshift_levels:
+    # for level in meanshift_levels:
 
-        #Ignore far away levels
-        if abs(close_price - level) / close_price > 0.3:
-            continue
+    #     #Ignore far away levels
+    #     if abs(close_price - level) / close_price > 0.3:
+    #         continue
 
-        logger.info("Evaluating resistance for level: %s", level)
-        break_dates = eval_resistance(ticker, df, resistance=level)
-        logger.info("Break dates for resistance %s: \n%s", level, break_dates)
+    #     logger.info("Evaluating resistance for level: %s", level)
+    #     break_dates = eval_resistance(ticker, df, resistance=level)
+    #     logger.info("Break dates for resistance %s: \n%s", level, break_dates)
     
 
     last_volatility = get_last_volatility(ticker, df)

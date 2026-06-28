@@ -28,6 +28,7 @@ class MyLabels(Enum):
     VLTY5 = "VLTY5"
     VLTY30 = "VLTY30"
     VLTY90 = "VLTY90"
+    RETEST = "RETEST"
 
 class Notes:
 
@@ -143,8 +144,12 @@ def check_ticker(ticker):
     if kpis.get("volatility_30s_p90") < 3:
         notes.add(MyLabels.VLTY30)
 
+    if "MAX_FALL" in kpis.get("labels", []):
+        notes.add(MyLabels.RETEST)
+
     if len(notes) >= 2:
-        print(f"  --> {ticker} {notes}")
+        name = more_info.get("shortName", "")
+        print(f"  --> {ticker}, {name}: {notes}")
 
 
 
@@ -153,6 +158,7 @@ def get_args():
     parser.add_argument("--index", "-i", type=str, default="", help="Name of the index file (without .csv) in ./data/index/")
     parser.add_argument("--init", action=argparse.BooleanOptionalAction, help="Initialize the DB cache")
     parser.add_argument("--check", "-c", action=argparse.BooleanOptionalAction, help="Check tickers in the DB")
+    parser.add_argument("--ticker", "-t", type=str, default=None, help="Ticker symbol to check")
     return parser.parse_args()
 
 
@@ -165,6 +171,10 @@ def main():
         logger.info("Cache initialized")
         return
 
+    if args.ticker:
+        logger.info("Checking ticker: %s", args.ticker)
+        check_ticker(args.ticker)
+        return
 
     if args.index:
         logger.info("Importing tickers from index: %s", args.index)
