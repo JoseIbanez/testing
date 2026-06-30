@@ -17,33 +17,56 @@ class ShareLot:
         self.shares = 0
         self.pl = 0.0
 
+        self.stop_loss = None
         self.buy_price = None
         self.buy_date = None
         self.sell_price = None
         self.sell_date = None
 
+    def check_stop_loss(self, price_open: float, price_low:float, date: datetime):
 
-    def buy(self, shares: float, price: float, date: datetime):
+        if self.shares == 0 or self.stop_loss is None:
+            return
+        
+        if price_open <= self.stop_loss:
+            self.close(price_open, date, reason="Stop Loss (Open)")
+            return
+        
+        if price_low <= self.stop_loss:
+            self.close(self.stop_loss, date, reason="Stop Loss (Low)")
+            return
+
+    def update_stop_loss(self, new_stop_loss: float):
+        if self.shares == 0:
+            return
+        
+        logger.info("%s, %s: Updating stop loss from %.2f to %.2f", datetime.now(), self.ticker, self.stop_loss, new_stop_loss)
+        self.stop_loss = new_stop_loss
+
+
+    def buy(self, shares: float, price: float, date: datetime, stop_loss: float = None):
         self.shares += shares
         self.buy_price = price
         self.buy_date = date
-        logger.info("%s, %s +%d at price:%.02f", date, self.ticker, shares, price)
+        self.stop_loss = stop_loss
+        logger.info("%s, %s +%d at price:%.02f, SL: %.02f", date, self.ticker, shares, price, stop_loss)
 
 
-    def close(self, price: float, date: datetime):
+    def close(self, price: float, date: datetime, reason: str = "Close"):
         self.sell_price = price
         self.sell_date = date
 
         if self.shares > 0:
             pl = (self.sell_price - self.buy_price) * self.shares
             self.pl += pl
-            logger.info("%s, %s -%d at price:%.2f // PL:%.02f, ACCU:%.02f", date, self.ticker, self.shares, price, pl, self.pl)
+            logger.info("%s, %s -%d at price:%.02f // PL:%.02f, ACCU:%.02f, Reason: %s", date, self.ticker, self.shares, price, pl, self.pl, reason)
 
         self.shares = 0
         self.buy_price = None
         self.buy_date = None
         self.sell_price = None
         self.sell_date = None
+        self.stop_loss = None
 
 
 
@@ -89,9 +112,12 @@ def apply_sma_strategy(ticker: str, lot: ShareLot, cur_date: datetime, full_df: 
         return
 
 
-    sma_5  = df['Close'].rolling(window= 5).mean().iloc[-1]
-    sma_10 = df['Close'].rolling(window=10).mean().iloc[-1]
-    sma_200 = df['Close'].rolling(window=200).mean().iloc[-1]
+    sma_5  = df['Close'].rolling(window= 5).mean()
+    sma_10 = df['Close'].rolling(window=10).mean()
+    sma_200 = df['Close'].rolling(window=200).mean()
+    ema_200 = df['Close'].ewm(span=200, adjust=False).mean()
+
+
     last_price = df['Close'].iloc[-1]
 
 
@@ -107,23 +133,39 @@ def apply_sma_strategy(ticker: str, lot: ShareLot, cur_date: datetime, full_df: 
     volatility_200d_max = df_200d['Volatility'].max()
     volatility_200d_p99 = df_200d['Volatility'].quantile(0.99)
     volatility_200d_p98 = df_200d['Volatility'].quantile(0.98)
+    volatility_20_max   = df_200d[-20:]['Volatility'].max()
 
-    if volatility_200d_max > 20 or volatility_200d_p99 > 15 or volatility_200d_p98 > 10:
+
+    lot.check_stop_loss(df['Open'].iloc[-1], df['Low'].iloc[-1], cur_date)
+
+
+
+    if (volatility_200d_p99 > 5) and lot.shares == 0:
         logger.info("%s, %s: High volatility detected, skipping strategy. Volatility 200d max: %.2f, p99: %.2f, p98: %.2f", cur_date, ticker, volatility_200d_max, volatility_200d_p99, volatility_200d_p98)
         return
 
+    min_price_3d = df['Close'].iloc[-3:].min()
+    if (min_price_3d < ema_200.iloc[-1]) and lot.shares == 0:
+        logger.info("%s, %s: Price below EMA200, skipping strategy. Last price: %.2f, EMA200: %.2f", cur_date, ticker, min_price_3d, ema_200.iloc[-1])
+        return
 
-    # if sma_5 > sma_10, buy
-    if lot.shares == 0 and sma_5 * .99 > sma_10:
-        logger.info("%s, %s: SMA5: %.2f, SMA10: %.2f", cur_date, ticker, sma_5, sma_10)
+
+
+
+    # if sma_5 > sma_10, 
+   
+    if lot.shares == 0 and sma_5.iloc[-1] * .99 > sma_10.iloc[-1]:
+        logger.info("%s, %s: SMA5: %.2f, SMA10: %.2f", cur_date, ticker, sma_5.iloc[-1], sma_10.iloc[-1])
         price = last_price
+        stop_loss = price - 2 * volatility_20_max / 100 * price  # Stop loss at 2 times the 20-day volatility below the buy price
+
         to_buy = round(1000 / price)
-        lot.buy(to_buy, price, cur_date)
+        lot.buy(to_buy, price, cur_date, stop_loss=stop_loss)
 
 
     # if sma_5 < sma_10, close position
-    if lot.shares > 0 and sma_5 < sma_10:
-        logger.info("%s, %s: SMA5: %.2f, SMA10: %.2f", cur_date, ticker, sma_5, sma_10)
+    if lot.shares > 0 and sma_5.iloc[-1] < sma_10.iloc[-1]:
+        logger.info("%s, %s: SMA5: %.2f, SMA10: %.2f", cur_date, ticker, sma_5.iloc[-1], sma_10.iloc[-1])
         price = df['Close'].iloc[-1]
         lot.close(price, cur_date)
 
@@ -142,7 +184,13 @@ def apply_sma_strategy(ticker: str, lot: ShareLot, cur_date: datetime, full_df: 
 def main():
     
 
-    ticker =  "AIR.PA"
+    ticker = "ALV.DE"
+    #ticker = "CS.PA"
+    #ticker = "FGR.PA"
+    #ticker = "AAPL"
+    #ticker = "CIE.MC"
+    ticker = "PST.MI"
+
     lot = ShareLot(ticker=ticker)
 
     cur_date = datetime(2026, 1, 1, tzinfo=timezone.utc)

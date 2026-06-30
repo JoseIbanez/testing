@@ -26,8 +26,8 @@ class MyLabels(Enum):
     SMA10 = "SMA10"
     SMA50 = "SMA50"
     VLTY5 = "VLTY5"
-    VLTY30 = "VLTY30"
-    VLTY90 = "VLTY90"
+    VLTY20 = "VLTY20"
+    VLTY80 = "VLTY80"
     RETEST = "RETEST"
 
 class Notes:
@@ -138,11 +138,11 @@ def check_ticker(ticker):
 
 
     kpis = calculate_kpis(ticker)
-    if kpis.get("volatility_near_max") < kpis.get("volatility_30s_p90") and kpis.get("volatility_30s_p90") < 3 and kpis.get("volatility_1y_p90") < 10:
+    if kpis.get("volatility_near_max") < kpis.get("volatility_20d_p90") and kpis.get("volatility_20d_p90") < 3 and kpis.get("volatility_200d_p99") < 10:
         notes.add(MyLabels.VLTY5)
 
-    if kpis.get("volatility_30s_p90") < 3:
-        notes.add(MyLabels.VLTY30)
+    if kpis.get("volatility_20d_p90") < 3:
+        notes.add(MyLabels.VLTY20)
 
     if "MAX_FALL" in kpis.get("labels", []):
         notes.add(MyLabels.RETEST)
