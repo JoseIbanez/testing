@@ -3,7 +3,7 @@ import pandas as pd
 import json
 import argparse
 
-from finance.yfin.fetch_serie import load_ticker, load_serie
+from finance.yfin.fetch_serie import load_serie
 from finance.yfin.kpi import add_indicators, get_last_volatility, get_summary_kpi, adjust_dividents
 from finance.yfin.kpi import get_support_resistance, get_swing_points, kmeans_clustering, meanshift_clustering
 

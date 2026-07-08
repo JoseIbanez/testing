@@ -107,7 +107,7 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame, period_year: int=5) -> p
     # Identify local maxima (swing highs)
     swing_highs = df.index[argrelextrema(df['High'].values, np.greater_equal, order=10)]
     swing_lows  = df.index[argrelextrema(df['Low'].values, np.less_equal, order=10)]
-    swing_close  = df.index[argrelextrema(df['Close'].values, np.less_equal, order=10)]
+    swing_close = df.index[argrelextrema(df['Close'].values, np.less_equal, order=10)]
 
 
 
@@ -167,6 +167,10 @@ def eval_levels(ticker: str, df:pd.DataFrame, levels: np.ndarray, pivots: np.nda
     levels_score = {}
     for level in levels:
 
+        level_result = eval_level2(ticker, df, level, pivots)
+        date_groups = group_dates(level_result["touch_dates"], max_gap_days=5)
+
+
         touch_pivot_count = ((pivots >= level * 0.98) & (pivots <= level * 1.02)).sum()
 
 
@@ -214,6 +218,114 @@ def eval_levels(ticker: str, df:pd.DataFrame, levels: np.ndarray, pivots: np.nda
 
     return levels_score
 
+
+def eval_level2(ticker: str, df:pd.DataFrame, level: float, pivots: np.ndarray) -> dict:
+
+
+    logger.info("Ticker:%s, Evaluating level: %.2f", ticker, level)
+
+    TRM = 0.3
+    df['true_range'] = df['High'] - df['Low']
+
+    df["sr"] = None
+    df["srs"] = None
+    df["break"] = None
+    # Crossing the level, with a margin of 10% of the true range
+    df.loc[(df['High'] - df['true_range'] * TRM  >= level) & (df['Low'] + df['true_range'] * TRM <= level), "sr"] = 0
+
+    # Resistance: High is arround level with margin 10% of true range, Low is below the level
+    df.loc[(df['High'] + df['true_range'] * TRM >= level) & (df['High'] - df['true_range'] * TRM <= level) & (df['Low'] < level), "sr"] = -1
+
+    # Support: Low is arround level with margin 10% of true range, High is above the level
+    df.loc[(df['Low'] + df['true_range'] * TRM >= level) & (df['Low'] - df['true_range'] * TRM <= level) & (df['High'] > level), "sr"] = 1
+
+    # When near crossing the level session, and below level, set resistence
+    df.loc[((df['sr'].shift(1) == 0) | (df['sr'].shift(-1) == 0)) & (df['High'] < level), "sr"] = -2
+
+    # When near crossing the level session, and above level, set support
+    df.loc[((df['sr'].shift(1) == 0) | (df['sr'].shift(-1) == 0)) & (df['Low'] > level), "sr"] = 2
+
+    df.loc[((df['sr'] == 0) & (df['sr'].shift(1) < 0) & (df['sr'].shift(-1) < 0)), "srs" ] = -1
+    df.loc[((df['sr'] == 0) & (df['sr'].shift(1) > 0) & (df['sr'].shift(-1) > 0)), "srs" ] =  1
+    
+    df.loc[((df['sr'] == -1) & (df['sr'].shift(1) == -1)), "srs" ] = -1
+    df.loc[((df['sr'] ==  0) & (df['sr'].shift(1) ==  0)), "srs" ] =  0
+    df.loc[((df['sr'] ==  1) & (df['sr'].shift(1) ==  1)), "srs" ] =  1
+
+
+    # Search secuence (-1, 0, 1) or (1, 0, -1), mark this as breaking level
+    breaking_mask = ((df['sr'].shift(1) < 0) & (df['sr'] ==  0) & (df['sr'].shift(-1) > 0)) | \
+                    ((df['sr'].shift(1) > 0) & (df['sr'] ==  0) & (df['sr'].shift(-1) < 0)) | \
+                    ((df['sr'].shift(1) < 0) & (df['sr'] > 0)) | \
+                    ((df['sr'].shift(1) > 0) & (df['sr'] < 0))  
+
+    # Count the number of breaking level
+    df.loc[breaking_mask, "break"] = 1
+    breaking_count = breaking_mask.sum()
+
+    resistance_count = (df['sr'] == -1).sum() + (df['srs'] == -1).sum()
+    support_count =    (df['sr'] ==  1).sum() + (df['srs'] ==  1).sum()
+    stay_count =       (df['srs'] ==  0).sum()
+    score = support_count + resistance_count + stay_count - breaking_count
+
+
+    print("Level",level)
+    print(df[df['sr'].notnull()][['Close', 'High', 'Low', 'true_range', 'sr', 'srs', 'break']])
+
+    touch_dates = df[((df['sr']>=-1) & (df['sr']<=1))].index.to_list()
+
+
+    result = {
+        "ticker": ticker,
+        "level": level,
+        "support_count": support_count,
+        "resistance_count": resistance_count,
+        "stay_count": stay_count,
+        "breaking_count": breaking_count,
+        "score": score,
+        "touch_dates": touch_dates
+        }
+
+    logger.info("Level: %.2f, Support: %d, Resistance: %d, Breaking: %d, Stay:%d, Score: %d", level, support_count, resistance_count, breaking_count, stay_count, score)
+    logger.info("Touch dates for level %.2f: %s", level, touch_dates)
+
+    return result
+
+
+def group_dates(dates: list[datetime], max_gap_days: int = 5) -> list:
+    """
+    Group dates that are close to each other (within max_gap_days)
+    dates is a pandas ordered Series of datetime objects 
+    """
+    if len(dates) == 0:
+        return []
+
+    grouped_dates = []
+    current_group = [dates[0]]
+
+    for i in range(1, len(dates)):
+        if (dates[i] - current_group[-1]).days <= max_gap_days:
+            current_group.append(dates[i])
+        else:
+            grouped_dates.append(current_group)
+            current_group = [dates[i]]
+
+    grouped_dates.append(current_group)
+
+    date_kpi_list = []
+    for group in grouped_dates:
+        kpi = {}
+        kpi['start_date'] = group[0]
+        kpi['end_date'] = group[-1]
+        kpi['touch_count'] = len(group)
+        kpi['duration'] = (group[-1] - group[0]).days + 1
+        date_kpi_list.append(kpi)
+
+
+    logger.info("Grouped dates: %s", date_kpi_list)
+
+
+    return date_kpi_list
 
 
 def get_swing_points(ticker: str, df: pd.DataFrame) -> pd.DataFrame:

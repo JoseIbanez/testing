@@ -15,58 +15,76 @@ class ShareLot:
     def __init__(self, ticker: str):
         self.ticker = ticker
         self.shares = 0
+        self.cost =0.0
         self.pl = 0.0
 
+        self.buy_limit = None
+        self.sell_limit = None
         self.stop_loss = None
-        self.buy_price = None
-        self.buy_date = None
-        self.sell_price = None
-        self.sell_date = None
 
-    def check_stop_loss(self, price_open: float, price_low:float, date: datetime):
+    def check_stop_loss(self, price_open: float, price_low:float, cur_date: datetime):
 
         if self.shares == 0 or self.stop_loss is None:
             return
         
         if price_open <= self.stop_loss:
-            self.close(price_open, date, reason="Stop Loss (Open)")
+            self.close(price_open, cur_date, reason="Stop Loss (Open)")
             return
         
         if price_low <= self.stop_loss:
-            self.close(self.stop_loss, date, reason="Stop Loss (Low)")
+            self.close(self.stop_loss, cur_date, reason="Stop Loss (Low)")
             return
 
-    def update_stop_loss(self, new_stop_loss: float):
+    def check_buy_limit(self, price_open: float, price_low:float, cur_date: datetime):
+
+        if self.buy_limit is None:
+            return        
+        
+        if self.shares > 0:
+            return
+        
+        if price_open <= self.buy_limit:
+            self.shares += self.shares
+            self.buy_price = price_open
+            self.buy_date = cur_date
+            logger.info("%s, %s +%d at price:%.02f, SL: %.02f", cur_date, self.ticker, self.shares, price_open)
+
+
+
+
+
+        self.buy_limit = price
+        logger.info("%s, %s: Setting buy limit at %.2f", cur_date, self.ticker, price)
+
+
+
+    def update_stop_loss(self, new_stop_loss: float, cur_date: datetime):
         if self.shares == 0:
             return
         
-        logger.info("%s, %s: Updating stop loss from %.2f to %.2f", datetime.now(), self.ticker, self.stop_loss, new_stop_loss)
+        logger.info("%s, %s: Updating stop loss from %.2f to %.2f", cur_date, self.ticker, self.stop_loss, new_stop_loss)
         self.stop_loss = new_stop_loss
 
 
-    def buy(self, shares: float, price: float, date: datetime, stop_loss: float = None):
+    def buy(self, shares: float, price: float, cur_date: datetime, stop_loss: float = None):
         self.shares += shares
-        self.buy_price = price
-        self.buy_date = date
+        self.cost += shares * price
         self.stop_loss = stop_loss
-        logger.info("%s, %s +%d at price:%.02f, SL: %.02f", date, self.ticker, shares, price, stop_loss)
+        logger.info("%s, %s +%d at price:%.02f, SL: %.02f", cur_date, self.ticker, shares, price, stop_loss)
 
 
-    def close(self, price: float, date: datetime, reason: str = "Close"):
-        self.sell_price = price
-        self.sell_date = date
+    def close(self, price: float, cur_date: datetime, reason: str = "Close"):
 
         if self.shares > 0:
-            pl = (self.sell_price - self.buy_price) * self.shares
+            pl = (price * self.shares) - self.cost
             self.pl += pl
-            logger.info("%s, %s -%d at price:%.02f // PL:%.02f, ACCU:%.02f, Reason: %s", date, self.ticker, self.shares, price, pl, self.pl, reason)
+            logger.info("%s, %s -%d at price:%.02f // PL:%.02f, ACCU:%.02f, Reason: %s", cur_date, self.ticker, self.shares, price, pl, self.pl, reason)
 
         self.shares = 0
-        self.buy_price = None
-        self.buy_date = None
-        self.sell_price = None
-        self.sell_date = None
+        self.cost = 0.0
         self.stop_loss = None
+
+
 
 
 
@@ -178,29 +196,99 @@ def apply_sma_strategy(ticker: str, lot: ShareLot, cur_date: datetime, full_df: 
 
 
 
+def apply_dennis_strategy(ticker: str, lot: ShareLot, cur_date: datetime, full_df: pd.DataFrame):
+    """ 
+    Dennis strategy: 
+    Buy when price is above 20-day high, 
+    sell when price is below 10-day low. 
+    """
 
+    df = get_serie_up_to_date(ticker, cur_date, full_df)
+    if df.empty:
+        return
+
+    price_20d_max = df['Close'].iloc[-20:].max()
+    price_10d_min = df['Close'].iloc[-10:].min()
+    price_last = df['Close'].iloc[-1]
+
+    #The 20-day exponential moving average of the True Range (now widely known as the Average True Range (ATR)).
+    atr_20d = df['tr'].ewm(span=20, adjust=False).mean().iloc[-1]
+    atr_5d  = df['tr'].ewm(span=5, adjust=False).mean().iloc[-1]
+
+    lot.check_stop_loss(df['Open'].iloc[-1], df['Low'].iloc[-1], cur_date)
+
+    #logger.info("%s, %s: Price: %.2f, MAX20: %.2f, MIN10: %.2f, ATR20: %.2f, ATR5: %.2f", cur_date, ticker, price_last, price_20d_max, price_10d_min, atr_20d, atr_5d)
+
+    if lot.shares == 0 and  price_last >= price_20d_max and atr_20d >= atr_5d:
+        logger.info("%s, %s: Price: %.2f, MAX20: %.2f", cur_date, ticker, price_last, price_20d_max)
+        price_buy = price_last
+
+        # Stop loss at the higher of the 10-day low or 2 times the 20-day ATR below the buy price
+        stop_loss = max(price_10d_min, price_buy - 2 * atr_20d)  
+
+
+        to_buy = round(10 / atr_20d )
+        logger.info("%s, %s: Buying %d shares at %.2f, ATR: %.2f", cur_date, ticker, to_buy, price_buy, atr_20d)
+
+
+        lot.buy(to_buy, price_buy, cur_date, stop_loss=stop_loss)
+
+
+    if lot.shares > 0 and price_last > (lot.cost / lot.shares) + atr_20d / 2 and lot.cost < 1200 and atr_20d >= atr_5d:
+
+        logger.info("%s, %s: Price: %.2f, Bought at: %.2f, Cost: %.2f, Shares: %d", cur_date, ticker, price_last, lot.cost / lot.shares, lot.cost, lot.shares)
+
+        price_buy = price_last
+        stop_loss = max(price_10d_min, price_buy - 2 * atr_20d)  
+
+        to_buy = round(10 / atr_20d )
+        logger.info("%s, %s: Buying %d shares at %.2f, ATR: %.2f", cur_date, ticker, to_buy, price_buy, atr_20d)
+
+
+        lot.buy(to_buy, price_buy, cur_date, stop_loss=stop_loss)
+
+
+
+
+
+    if lot.shares > 0:
+        stop_loss = max(price_10d_min, price_last - 2 * atr_20d)  
+        if stop_loss > lot.stop_loss:
+            lot.update_stop_loss(stop_loss, cur_date)
 
 
 def main():
     
 
-    ticker = "ALV.DE"
+    #ticker = "ALV.DE"
     #ticker = "CS.PA"
     #ticker = "FGR.PA"
     #ticker = "AAPL"
     #ticker = "CIE.MC"
-    ticker = "PST.MI"
+    #ticker = "PST.MI"
+    ticker = "SCYR.MC"
+    #ticker = "WSM"
+    #ticker = "NN.AS"
+    ticker = "INGA.AS"
 
     lot = ShareLot(ticker=ticker)
 
     cur_date = datetime(2026, 1, 1, tzinfo=timezone.utc)
     full_df = load_serie(ticker)
 
+    prev_close = full_df['Close'].shift(1).fillna(full_df['Close'])
+    tr1 = full_df['High'] - full_df['Low']
+    tr2 = (full_df['High'] - prev_close).abs()
+    tr3 = (full_df['Low'] - prev_close).abs()
+    full_df['tr'] = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+
+
     while cur_date < datetime.now(tz=timezone.utc):
         cur_date += pd.Timedelta(days=1)
 
         #apply_dummy_strategy(ticker, lot, cur_date, full_df)
-        apply_sma_strategy(ticker, lot, cur_date, full_df)
+        #apply_sma_strategy(ticker, lot, cur_date, full_df)
+        apply_dennis_strategy(ticker, lot, cur_date, full_df)
 
     last_price = full_df['Close'].iloc[-1]
     lot.close(last_price, cur_date)
