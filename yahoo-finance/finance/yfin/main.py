@@ -5,7 +5,7 @@ import argparse
 
 from finance.yfin.fetch_serie import load_serie
 from finance.yfin.kpi import add_indicators, get_last_volatility, get_summary_kpi, adjust_dividents
-from finance.yfin.kpi import get_support_resistance, get_swing_points, kmeans_clustering, meanshift_clustering
+from finance.yfin.levels import get_support_resistance, kmeans_clustering, meanshift_clustering, get_swing_points, eval_level2
 
 
 logger = logging.getLogger(__name__)
@@ -34,11 +34,12 @@ def calculate_kpis(ticker):
 
     #df = load_ticker(ticker)
     df = load_serie(ticker)
-    df = adjust_dividents(ticker, df)
+    #df = adjust_dividents(ticker, df)
+
     df = add_indicators(ticker, df)
     #kmeans_levels = kmeans_clustering(ticker, df)
     #levels = get_support_resistance(ticker, df)
-    swing_points = get_swing_points(ticker, df)
+    #swing_points = get_swing_points(ticker, df)
 
     #summary = get_summary_kpi(ticker, df)
     #logger.info("Summary: \n%s", json.dumps(summary, indent=4))
@@ -52,9 +53,11 @@ def calculate_kpis(ticker):
     close_price = df['Close'].iloc[-1]
     max_price = df['Close'].max()
 
-    meanshift_levels = meanshift_clustering(ticker, df)
-    logger.info("Meanshift Levels: \n%s", meanshift_levels)
+    levels = meanshift_clustering(ticker, df, visualize=True)
+    logger.info("Meanshift Levels: \n%s", levels)
 
+
+    eval_level2(ticker, df, level=levels[1], pivots=None)
 
     #search_level(ticker, df)
 

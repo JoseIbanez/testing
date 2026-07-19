@@ -7,6 +7,7 @@ import sqlite3
 import json
 import logging
 import time
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -168,6 +169,19 @@ class MyDBCache:
                 kpi_info TEXT
             )
         """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS kpi_cache (
+                ticker STRING,
+                name STRING,
+                last_session DATE,
+                -- other fields as needed
+                value TEXT,
+                PRIMARY KEY (ticker, name, last_session)
+            )
+        """)
+
+
         conn.commit()
         conn.close()
 
@@ -195,7 +209,7 @@ class MyDBCache:
         conn.close()
 
 
-    def query_ticker_list(self):
+    def query_ticker_list(self,hot_level=1):
         """
         Get the list of tickers from the database.
         """
@@ -203,7 +217,7 @@ class MyDBCache:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         #cursor.execute("SELECT ticker FROM tickers where json_extract(fast_info, '$.lastPrice')>0 and hot>0 order by hot desc, volume desc;")
-        cursor.execute("SELECT ticker FROM tickers where hot>=0 and manual_state>=0 order by hot desc, volume desc;")
+        cursor.execute("SELECT ticker FROM tickers where hot>=? and manual_state>=0 order by hot desc, volume desc;", (hot_level,))
         result = cursor.fetchall()  
         conn.commit()
         conn.close()
@@ -212,3 +226,77 @@ class MyDBCache:
         #logger.info("Queried ticker list from database: %s", tickers)  
         return tickers
     
+
+
+
+
+    def get_cache_kpi(self, ticker: str, name: str, last_session:datetime, ttl:int=4*3600) -> dict | None:
+        """
+        Get kpi from cache table
+
+        Parameters:
+        - ticker: the ticker symbol
+        - name: the name of the KPI
+        - last_session: the last session date for the KPI
+        - ttl: time-to-live in seconds (default: 4 hours)
+        Returns:
+        - A dictionary containing the KPI value and update timestamp, or None if not found or stale
+        """
+
+        # Get the date from datetime object
+        last_session = last_session.date() 
+
+
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT value FROM kpi_cache WHERE ticker=? AND name=? AND last_session=?", (ticker, name, last_session))
+        result = cursor.fetchone()
+        conn.close()
+
+    
+        if not result:
+            return None
+
+        value_str = result[0] or "{}"
+    
+        try:
+            value_obj = json.loads(value_str) 
+        except (json.JSONDecodeError, TypeError):
+            logger.error("Error decoding JSON for ticker %s:%s",ticker,value_str)
+            return None
+
+        update_ts = value_obj.get('update_ts',0)
+
+        if update_ts < time.time() - ttl:
+            logger.info("Ticker %s has old calculate date for:%s.", ticker, name)
+            return None
+        
+
+        logger.info("Cache found for ticker:%s, field:%s, last_session:%s, updated at %s)", ticker, name, last_session, datetime.fromtimestamp(update_ts).isoformat())
+
+        return value_obj
+
+
+    def set_cache_kpi(self, ticker:str, name:str, last_session:datetime, value:dict):
+        """
+        Set kpi in cache table
+
+        Parameters:
+        - ticker: the ticker symbol
+        - name: the name of the KPI
+        - last_session: the last session date for the KPI
+        - value: a dictionary containing the KPI value
+        """
+
+        # Get the date from datetime object
+        last_session = last_session.date() 
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("INSERT OR IGNORE INTO kpi_cache (ticker,name,last_session) VALUES (?,?,?)", (ticker, name, last_session))
+        if value:
+            value['update_ts'] = int(time.time())
+            cursor.execute(f"UPDATE kpi_cache SET value=? WHERE ticker=? AND name=? AND last_session=?", (json.dumps(value), ticker, name, last_session))
+        conn.commit()
+        conn.close()

@@ -53,12 +53,12 @@ class Notes:
 
 
 
-def check_ticker_list():
+def check_ticker_list(hot_level:int = 1):
     """
     Check all tickers in the DB cache.
     """
 
-    tickers_list = my_cache.query_ticker_list()
+    tickers_list = my_cache.query_ticker_list(hot_level=hot_level)
 
     for ticker in tickers_list:
         check_ticker(ticker)
@@ -159,6 +159,8 @@ def get_args():
     parser.add_argument("--init", action=argparse.BooleanOptionalAction, help="Initialize the DB cache")
     parser.add_argument("--check", "-c", action=argparse.BooleanOptionalAction, help="Check tickers in the DB")
     parser.add_argument("--ticker", "-t", type=str, default=None, help="Ticker symbol to check")
+    parser.add_argument("--hot", type=int, default=1, help="Filter tickers by hotness level")
+
     return parser.parse_args()
 
 
@@ -184,7 +186,7 @@ def main():
 
     if args.check:
         logger.info("Checking tickers in DB")
-        check_ticker_list()
+        check_ticker_list(hot_level=args.hot)
         return
 
 if __name__ == "__main__":
