@@ -57,20 +57,13 @@ def calculate_kpis(ticker):
     logger.info("Meanshift Levels: \n%s", levels)
 
 
-    eval_level2(ticker, df, level=levels[1], pivots=None)
+    for level in levels:
+        if abs(level - close_price) / close_price > 0.2:
+            continue
 
-    #search_level(ticker, df)
+        eval_level2(ticker, df, level=level, pivots=None)
 
 
-    # for level in meanshift_levels:
-
-    #     #Ignore far away levels
-    #     if abs(close_price - level) / close_price > 0.3:
-    #         continue
-
-    #     logger.info("Evaluating resistance for level: %s", level)
-    #     break_dates = eval_resistance(ticker, df, resistance=level)
-    #     logger.info("Break dates for resistance %s: \n%s", level, break_dates)
     
 
     last_volatility = get_last_volatility(ticker, df)

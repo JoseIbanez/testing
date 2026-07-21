@@ -116,7 +116,7 @@ def meanshift_clustering(ticker: str, df: pd.DataFrame, period_year: int=5, visu
 
 
 
-def eval_levels(ticker: str, df:pd.DataFrame, levels: np.ndarray, pivots: np.ndarray) -> dict:
+def eval_levels__old(ticker: str, df:pd.DataFrame, levels: np.ndarray, pivots: np.ndarray) -> dict:
 
     # Evaluate the number of pivots for each level
     # Evaluate duration of the level, how many days from first touch to last touch, and from last touch to now
@@ -218,54 +218,39 @@ def eval_level2(ticker: str, df:pd.DataFrame, level: float, pivots: np.ndarray) 
     level_analysis = analyze_level_dates(ticker, level, level_dates)
 
     swing_group = group_dates(ticker, level_analysis["swing_sessions"], df, max_gap_days=5)
-
-    return {}
-
-    # Count the number of breaking level
-    df.loc[breaking_mask, "break"] = 1
-    breaking_count = breaking_mask.sum()
-
-    resistance_count = (df['sr']  == -1).sum() + (df['srs'] == -1).sum()
-    support_count =    (df['sr']  ==  1).sum() + (df['srs'] ==  1).sum()
-    stay_count =       (df['srs'] ==  0).sum()
-
-    print("Level",level)
-    print(df[df['sr'].notnull()][['High', 'Low', 'true_range', 'sr', 'srs', 'break']])
-
-    touch_dates = df[((df['sr']>=-1) & (df['sr']<=1))].index.to_list()
-    stay_dates = df[(df['srs']==0)].index.to_list()
-    break_dates = df.loc[breaking_mask].index.to_list()
-
-    swing_dates = get_swing_dates(ticker, touch_dates, stay_dates, break_dates)
-
-    score = support_count + resistance_count + stay_count - breaking_count
-
+    break_group = group_dates(ticker, level_analysis["break_sessions"], df, max_gap_days=5)
 
     result = {
         "ticker": ticker,
         "level": level,
-        "support_count": support_count,
-        "resistance_count": resistance_count,
-        "stay_count": stay_count,
-        "breaking_count": breaking_count,
-        "score": score,
-        "touch_dates": touch_dates,
-        "breaking_dates": break_dates,
-        }
+        "swing_count": len(swing_group),
+        "break_count": len(break_group),
+        "first_session_ago": len(df) - level_analysis["swing_sessions"][0] if len(level_analysis["swing_sessions"]) > 0 else None,
+        "last_session_ago": len(df) - level_analysis["swing_sessions"][-1] if len(level_analysis["swing_sessions"]) > 0 else None,
+        "duration_sessions": level_analysis["swing_sessions"][-1] - level_analysis["swing_sessions"][0] if len(level_analysis["swing_sessions"]) > 0 else None,
+    }
 
-    logger.info("Level: %.2f, Support: %d, Resistance: %d, Break: %d, Stay:%d, Swing:%d, Score: %d", level, 
-                support_count, resistance_count, breaking_count, stay_count, len(stay_dates), score)
-    logger.info("Touch dates for level %.2f: %s", 
-                level, [ date.strftime("%Y-%m-%d") for date in touch_dates ])
-    logger.info("Swing dates for level %.2f: %s",
-                level, [ date.strftime("%Y-%m-%d") for date in swing_dates ])
+    logger.info("Ticker: %s, Level: %.2f, #Swings: %d, #Breaks: %d, First session ago: %s, Last session ago: %s, Duration sessions: %s",
+                ticker, level, 
+                len(swing_group), len(break_group), 
+                result['first_session_ago'], result['last_session_ago'], result['duration_sessions'])
 
     return result
+
 
 
 def analyze_level_dates(ticker: str, level: float, ld: pd.DataFrame) -> list[datetime]:
     """
     Analyze the level dates to find swing dates support or resistance
+
+    Parameters:
+    - ticker: str, the stock ticker symbol
+    - level: float, the support/resistance level being analyzed
+    - ld: pd.DataFrame, a DataFrame containing the level dates with columns ['High', 'Low', 'true_range', 'sr', 'position']
+    
+    Returns:
+      a dictionary with swing sessions and break sessions
+
     """
 
     BLOCK_DAYS = 5

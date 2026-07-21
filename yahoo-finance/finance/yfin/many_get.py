@@ -75,7 +75,7 @@ def import_index(index):
         check_ticker(ticker)
 
 
-def check_ticker(ticker):
+def check_ticker(ticker, force=False):
     """
     Check a single ticker
     """    
@@ -106,7 +106,7 @@ def check_ticker(ticker):
 
 
     print(f"Information for {ticker}:  {last_price:.2f} / {year_high:.2f} / {d200_avg:.2f} {notes}")
-    if len(notes) < 2:
+    if len(notes) < 2 and not force:
         return
 
 
@@ -133,7 +133,7 @@ def check_ticker(ticker):
     more_info['hot'] = len(notes)
     my_cache.set_ticker_info(ticker, more_info)
 
-    if len(notes) < 2:
+    if len(notes) < 2 and not force:
         return
 
 
@@ -175,7 +175,7 @@ def main():
 
     if args.ticker:
         logger.info("Checking ticker: %s", args.ticker)
-        check_ticker(args.ticker)
+        check_ticker(args.ticker, force=True)
         return
 
     if args.index:
