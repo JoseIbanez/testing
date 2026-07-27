@@ -2,10 +2,11 @@ import logging
 import pandas as pd
 import json
 import argparse
+from datetime import datetime, timedelta
 
 from finance.yfin.fetch_serie import load_serie
 from finance.yfin.kpi import add_indicators, get_last_volatility, get_summary_kpi, adjust_dividents
-from finance.yfin.levels import get_support_resistance, kmeans_clustering, meanshift_clustering, get_swing_points, eval_level2
+from finance.yfin.levels import eval_levels
 
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ def main():
     calculate_kpis(ticker)
 
 
-def calculate_kpis(ticker):
+def calculate_kpis(ticker, period_year:int=5):
 
     #df = load_ticker(ticker)
     df = load_serie(ticker)
@@ -50,20 +51,13 @@ def calculate_kpis(ticker):
     #logger.info("Swing Points: \n%s", swing_points)
 
 
-    close_price = df['Close'].iloc[-1]
-    max_price = df['Close'].max()
 
-    levels = meanshift_clustering(ticker, df, visualize=True)
-    logger.info("Meanshift Levels: \n%s", levels)
+    # Recent samples, last years
+    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=period_year*365), utc=True)]
 
 
-    for level in levels:
-        if abs(level - close_price) / close_price > 0.2:
-            continue
-
-        eval_level2(ticker, df, level=level, pivots=None)
-
-
+    levels = eval_levels(ticker, df, visualize=True, force=True)
+    logger.info("Levels: \n%s", json.dumps(levels, indent=4))
     
 
     last_volatility = get_last_volatility(ticker, df)

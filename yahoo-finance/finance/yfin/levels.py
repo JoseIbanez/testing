@@ -9,6 +9,8 @@ from sklearn.cluster import MeanShift, estimate_bandwidth
 from scipy.signal import argrelextrema
 from datetime import datetime, timedelta
 
+from finance.yfin.cache import MyDBCache
+
 logger = logging.getLogger(__name__)
 
 
@@ -45,15 +47,13 @@ def kmeans_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
 
 
 
-def meanshift_clustering(ticker: str, df: pd.DataFrame, period_year: int=5, visualize:bool=False) -> pd.DataFrame:
+def meanshift_clustering(ticker: str, df: pd.DataFrame, visualize:bool=False) -> pd.DataFrame:
     """
     Calculate support and resistance levels using Mean Shift Clustering
     Not predefined number of clusters, but a bandwidth parameter that defines the radius of the clusters.
     The bandwidth can be estimated using the estimate_bandwidth function from sklearn.
     """
 
-    # Recent samples, last years
-    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=period_year*365), utc=True)]
 
 
     # Find local maxima (peaks) and minima (troughs)
@@ -177,7 +177,7 @@ def eval_levels__old(ticker: str, df:pd.DataFrame, levels: np.ndarray, pivots: n
 
 
 
-def eval_level2(ticker: str, df:pd.DataFrame, level: float, pivots: np.ndarray) -> dict:
+def eval_level2(ticker: str, df:pd.DataFrame, level: float) -> dict:
     """
     Evaluate a support/resistance level relevance, 
     by counting the number of touches, and the number of breaks.
@@ -185,7 +185,7 @@ def eval_level2(ticker: str, df:pd.DataFrame, level: float, pivots: np.ndarray) 
     Returns a dictionary
     """
 
-    logger.info("Ticker:%s, Evaluating level: %.2f", ticker, level)
+    logger.debug("Ticker:%s, Evaluating level: %.2f", ticker, level)
 
     TRM = 0.3 # True Range Margin, % of the true range is used to determine if the price is near the level
     df['true_range'] = df['High'] - df['Low']
@@ -220,20 +220,39 @@ def eval_level2(ticker: str, df:pd.DataFrame, level: float, pivots: np.ndarray) 
     swing_group = group_dates(ticker, level_analysis["swing_sessions"], df, max_gap_days=5)
     break_group = group_dates(ticker, level_analysis["break_sessions"], df, max_gap_days=5)
 
+    swing_count = len(swing_group)
+    break_count = len(break_group)
+    first_session_ago = len(df) - int(level_analysis["swing_sessions"][0]) if len(level_analysis["swing_sessions"]) > 0 else None
+    last_session_ago = len(df) - int(level_analysis["swing_sessions"][-1]) if len(level_analysis["swing_sessions"]) > 0 else None
+    duration_sessions = int(level_analysis["swing_sessions"][-1]) - int(level_analysis["swing_sessions"][0]) if len(level_analysis["swing_sessions"]) > 0 else None
+
+    score = duration_sessions / 10 if (duration_sessions and swing_count > 1) else 10
+    if break_count >= 8:
+        score = score / 2
+
+    if last_session_ago is None:
+        pass
+    elif last_session_ago < 20:
+        score = score * 2
+    elif last_session_ago > 80:
+        score = score / 2
+
     result = {
         "ticker": ticker,
         "level": level,
-        "swing_count": len(swing_group),
-        "break_count": len(break_group),
-        "first_session_ago": len(df) - level_analysis["swing_sessions"][0] if len(level_analysis["swing_sessions"]) > 0 else None,
-        "last_session_ago": len(df) - level_analysis["swing_sessions"][-1] if len(level_analysis["swing_sessions"]) > 0 else None,
-        "duration_sessions": level_analysis["swing_sessions"][-1] - level_analysis["swing_sessions"][0] if len(level_analysis["swing_sessions"]) > 0 else None,
+        "swing_count": swing_count,
+        "break_count": break_count,
+        "first_session_ago": len(df) - int(level_analysis["swing_sessions"][0]) if len(level_analysis["swing_sessions"]) > 0 else None,
+        "last_session_ago": len(df) - int(level_analysis["swing_sessions"][-1]) if len(level_analysis["swing_sessions"]) > 0 else None,
+        "duration_sessions": duration_sessions,
+        "score": score,
     }
 
-    logger.info("Ticker: %s, Level: %.2f, #Swings: %d, #Breaks: %d, First session ago: %s, Last session ago: %s, Duration sessions: %s",
-                ticker, level, 
-                len(swing_group), len(break_group), 
-                result['first_session_ago'], result['last_session_ago'], result['duration_sessions'])
+    logger.info("Ticker:%s, Level:%.2f, Score: %.2f, #Swings: %d, #Breaks: %d, First session ago: %s, Last session ago: %s, Duration sessions: %s",
+                ticker, level, score,
+                swing_count, break_count, 
+                first_session_ago, last_session_ago,
+                duration_sessions)
 
     return result
 
@@ -295,7 +314,7 @@ def analyze_level_dates(ticker: str, level: float, ld: pd.DataFrame) -> list[dat
             cross_dates.append(ld.index[i])
             cross_sessions.append(ld['position'].iloc[i])
 
-    logger.info("Break dates for level %.2f: %s", level, [ _date.strftime("%Y-%m-%d") for _date in cross_dates ])
+    logger.debug("Break dates for level %.2f: %s", level, [ _date.strftime("%Y-%m-%d") for _date in cross_dates ])
 
     # Remove swing sessions that are too close to cross/break sessions
     for cross_session in cross_sessions:
@@ -305,7 +324,7 @@ def analyze_level_dates(ticker: str, level: float, ld: pd.DataFrame) -> list[dat
     swing_dates = [swing_date for swing_date in swing_dates if ld['position'].loc[swing_date] in swing_sessions]
 
     #logger.info("Swing sessions for level %.2f: %s", level, swing_sessions)
-    logger.info("Swing dates for level %.2f: %s", level, [ _date.strftime("%Y-%m-%d") for _date in swing_dates ])
+    logger.debug("Swing dates for level %.2f: %s", level, [ _date.strftime("%Y-%m-%d") for _date in swing_dates ])
 
 
     return {"swing_dates": swing_dates, 
@@ -345,12 +364,54 @@ def group_dates(ticker:str, sessions: list[int], df:pd.DataFrame, max_gap_days: 
         date_kpi_list.append(kpi)
 
 
-    logger.info("Grouped dates: %s", date_kpi_list)
+    logger.debug("Grouped dates: %s", date_kpi_list)
 
 
     return date_kpi_list
 
 
+
+def eval_levels(ticker: str, df:pd.DataFrame, force: bool = False, visualize: bool = False) -> dict:
+    """
+    Evaluate the support/resistance levels relevance, 
+    by counting the number of touches, and the number of breaks.
+
+    Returns a dictionary with the level as key and the score as value
+    """
+
+    #Round last date to two weeks period
+    ROUND_DAYS = 14
+    last_date_rnd = df.index[-1]
+    last_date_rnd = last_date_rnd - pd.Timedelta(days=last_date_rnd.timetuple().tm_yday % ROUND_DAYS)
+
+    # Check if the levels are already cached in the database
+    my_cache = MyDBCache()
+
+    cache_result = my_cache.get_cache_kpi(ticker, "levels", last_date_rnd, ttl = ROUND_DAYS * 24*3600)
+    if cache_result is not None and not force:
+        return cache_result
+
+
+    close_price = df['Close'].iloc[-1]
+    levels = meanshift_clustering(ticker, df, visualize=visualize)
+    logger.info("Meanshift Levels: \n%s", levels)
+
+    levels_result = {
+        "ticker": ticker,
+        "levels": []
+    }
+
+
+    for level in levels:
+        if abs(level - close_price) / close_price > 0.3:
+            continue
+
+        level_result = eval_level2(ticker, df, level=round(float(level), 2))
+
+        levels_result["levels"].append(level_result)
+
+    my_cache.set_cache_kpi(ticker, "levels", last_date_rnd, levels_result)
+    return levels_result
 
 
 

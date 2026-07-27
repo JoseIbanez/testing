@@ -138,6 +138,10 @@ def check_ticker(ticker, force=False):
 
 
     kpis = calculate_kpis(ticker)
+    if kpis is None:
+        return
+    
+
     if kpis.get("volatility_near_max") < kpis.get("volatility_20d_p90") and kpis.get("volatility_20d_p90") < 3 and kpis.get("volatility_200d_p99") < 10:
         notes.add(MyLabels.VLTY5)
 
