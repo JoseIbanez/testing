@@ -7,6 +7,7 @@ import sqlite3
 import json
 import logging
 import time
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -32,21 +33,28 @@ class MyDBCache:
         conn.close()
 
         if not result:
+            logger.warning("No fast_info found in cache for %s", ticker)
             return None
 
         fast_info_str = result[0] or "{}"
-    
         try:
             fast_info = json.loads(fast_info_str) 
         except (json.JSONDecodeError, TypeError):
             logger.error("Error decoding JSON for ticker %s:%s",ticker,fast_info_str)
             return None
 
+        if 'lastPrice' not in fast_info or 'yearHigh' not in fast_info or 'twoHundredDayAverage' not in fast_info:
+            logger.warning("Incomplete fast_info for %s: %s", ticker, fast_info)
+            return None
+
+
         update_ts = fast_info.get('update_ts',0)
 
         if update_ts < time.time() - FAST_INFO_TTL:
-            logger.debug("Ticker %s has no update_ts in fast_info, treating as stale.", ticker)
+            logger.debug("Ticker %s has stale fast_info (updated at %s), treating as stale.", ticker, time.ctime(update_ts))
             return None
+
+        #logger.info("Cache hit for %s: fast_info is fresh (updated at %s)", ticker, time.ctime(update_ts))
 
         return fast_info
 
@@ -56,16 +64,34 @@ class MyDBCache:
 
     def put_fast_info(self, ticker, fast_info):
 
-        fast_info['update_ts'] = time.time()
-        fast_info_str = json.dumps(fast_info)
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("INSERT OR IGNORE INTO tickers (ticker) VALUES (?)", (ticker,))
+        cursor.execute("UPDATE tickers SET fast_info_attempt=CURRENT_TIMESTAMP WHERE ticker=?", (ticker,))
+        
+        if fast_info:
+            fast_info['update_ts'] = time.time()
+            cursor.execute("UPDATE tickers SET fast_info=? WHERE ticker=?", (json.dumps(fast_info), ticker))
+            logger.debug("Stored fast_info for %s in cache: %s", ticker, fast_info)
+
+        conn.commit()
+        conn.close()
+
+
+
+    def put_error(self, ticker):
+        """
+        Store an error type for a ticker in the database, to avoid retrying too often.
+        """
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("INSERT OR IGNORE INTO tickers (ticker) VALUES (?)", (ticker,))
-        cursor.execute("UPDATE tickers SET fast_info=? WHERE ticker=?", (fast_info_str, ticker))
+        cursor.execute("UPDATE tickers SET more_info_attempt=CURRENT_TIMESTAMP, hot=-1 WHERE ticker=?", (ticker,))
         conn.commit()
         conn.close()
 
+        return
 
 
     def get_more_info(self, ticker):
@@ -80,35 +106,43 @@ class MyDBCache:
         result = cursor.fetchone()
         conn.close()
 
+    
         if not result:
             return None
 
-        info_str = result[0] or "{}"
+        more_info_str = result[0] or "{}"
     
         try:
-            info = json.loads(info_str) 
+            more_info = json.loads(more_info_str) 
         except (json.JSONDecodeError, TypeError):
-            logger.error("Error decoding JSON for ticker %s:%s",ticker,info_str)
+            logger.error("Error decoding JSON for ticker %s:%s",ticker,more_info_str)
             return None
 
-        update_ts = info.get('update_ts',0)
+        update_ts = more_info.get('update_ts',0)
 
         if update_ts < time.time() - MORE_INFO_TTL:
-            logger.debug("Ticker %s has no update_ts in info, treating as stale.", ticker)
+            logger.debug("Ticker %s has no update_ts in more_info, treating as stale.", ticker)
             return None
 
-        return info
-    
+        logger.debug("Cache hit for %s: more_info is fresh (updated at %s)", ticker, time.ctime(update_ts))
+
+        return more_info
+
+
+
+
+
 
     def put_more_info(self, ticker, info):
 
-        info['update_ts'] = time.time()
-        info_str = json.dumps(info)
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("INSERT OR IGNORE INTO tickers (ticker) VALUES (?)", (ticker,))
-        cursor.execute("UPDATE tickers SET more_info=? WHERE ticker=?", (info_str, ticker))
+        cursor.execute("UPDATE tickers SET more_info_attempt=CURRENT_TIMESTAMP WHERE ticker=?", (ticker,))
+        if info:
+            info['update_ts'] = time.time()
+            cursor.execute("UPDATE tickers SET more_info=? WHERE ticker=?", (json.dumps(info), ticker))
         conn.commit()
         conn.close()
 
@@ -125,11 +159,29 @@ class MyDBCache:
                 sector STRING,
                 volume INTEGER,
                 currency STRING,
-                hot INTEGER,
+                hot INTEGER DEFAULT 0,
+                hot_ts INTEGER,
+                manual_state INTEGER DEFAULT 0,
                 fast_info TEXT,
-                more_info TEXT
+                fast_info_attempt TIMESTAMP,
+                more_info TEXT,
+                more_info_attempt TIMESTAMP,
+                kpi_info TEXT
             )
         """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS kpi_cache (
+                ticker STRING,
+                name STRING,
+                last_session DATE,
+                -- other fields as needed
+                value TEXT,
+                PRIMARY KEY (ticker, name, last_session)
+            )
+        """)
+
+
         conn.commit()
         conn.close()
 
@@ -153,5 +205,98 @@ class MyDBCache:
             info.get("hot", 0),
             ticker
         ))
+        conn.commit()
+        conn.close()
+
+
+    def query_ticker_list(self,hot_level=1):
+        """
+        Get the list of tickers from the database.
+        """
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        #cursor.execute("SELECT ticker FROM tickers where json_extract(fast_info, '$.lastPrice')>0 and hot>0 order by hot desc, volume desc;")
+        cursor.execute("SELECT ticker FROM tickers where hot>=? and manual_state>=0 order by hot desc, volume desc;", (hot_level,))
+        result = cursor.fetchall()  
+        conn.commit()
+        conn.close()
+
+        tickers = [row[0] for row in result]
+        #logger.info("Queried ticker list from database: %s", tickers)  
+        return tickers
+    
+
+
+
+
+    def get_cache_kpi(self, ticker: str, name: str, last_session:datetime, ttl:int=4*3600) -> dict | None:
+        """
+        Get kpi from cache table
+
+        Parameters:
+        - ticker: the ticker symbol
+        - name: the name of the KPI
+        - last_session: the last session date for the KPI
+        - ttl: time-to-live in seconds (default: 4 hours)
+        Returns:
+        - A dictionary containing the KPI value and update timestamp, or None if not found or stale
+        """
+
+        # Get the date from datetime object
+        last_session = last_session.date() 
+
+
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT value FROM kpi_cache WHERE ticker=? AND name=? AND last_session=?", (ticker, name, last_session))
+        result = cursor.fetchone()
+        conn.close()
+
+    
+        if not result:
+            return None
+
+        value_str = result[0] or "{}"
+    
+        try:
+            value_obj = json.loads(value_str) 
+        except (json.JSONDecodeError, TypeError):
+            logger.error("Error decoding JSON for ticker %s:%s",ticker,value_str)
+            return None
+
+        update_ts = value_obj.get('update_ts',0)
+
+        if update_ts < time.time() - ttl:
+            logger.info("Ticker %s has old calculate date for:%s.", ticker, name)
+            return None
+        
+
+        logger.info("Cache found for ticker:%s, field:%s, last_session:%s, updated at %s)", ticker, name, last_session, datetime.fromtimestamp(update_ts).isoformat())
+
+        return value_obj
+
+
+    def set_cache_kpi(self, ticker:str, name:str, last_session:datetime, value:dict):
+        """
+        Set kpi in cache table
+
+        Parameters:
+        - ticker: the ticker symbol
+        - name: the name of the KPI
+        - last_session: the last session date for the KPI
+        - value: a dictionary containing the KPI value
+        """
+
+        # Get the date from datetime object
+        last_session = last_session.date() 
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("INSERT OR IGNORE INTO kpi_cache (ticker,name,last_session) VALUES (?,?,?)", (ticker, name, last_session))
+        if value:
+            value['update_ts'] = int(time.time())
+            cursor.execute(f"UPDATE kpi_cache SET value=? WHERE ticker=? AND name=? AND last_session=?", (json.dumps(value), ticker, name, last_session))
         conn.commit()
         conn.close()

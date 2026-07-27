@@ -1,8 +1,11 @@
+import json
 import logging
+from numpy.strings import index
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.cluster import MeanShift, estimate_bandwidth
 from scipy.signal import argrelextrema
 from datetime import datetime, timedelta
 
@@ -19,8 +22,12 @@ def add_indicators(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     - Bollinger Bands
     """
 
+    logger.info("Adding indicators to dataframe for %s", ticker)
+
+    # Simple Moving Averages
     df['SMA_5'] = df['Close'].rolling(window=5).mean()
     df['SMA_10'] = df['Close'].rolling(window=10).mean()
+    df['EMA_200'] = df['Close'].ewm(span=200, adjust=False).mean()
     df['MACD'] = df['Close'].ewm(span=12, adjust=False).mean() - df['Close'].ewm(span=26, adjust=False).mean()
     df['Bollinger_Bands'] = df['Close'].rolling(window=20).mean() + 2 * df['Close'].rolling(window=20).std()
     df['Bollinger_Bands_Lower'] = df['Close'].rolling(window=20).mean() - 2 * df['Close'].rolling(window=20).std()
@@ -34,176 +41,16 @@ def add_indicators(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
     df['RSI'] = 100 - (100 / (1 + rs))
 
     # Volatility (True Range)
-    prev_close = df['Close'].shift(1)
+    prev_close = df['Close'].shift(1).fillna(df['Close'])
     tr1 = df['High'] - df['Low']
     tr2 = (df['High'] - prev_close).abs()
     tr3 = (df['Low'] - prev_close).abs()
-    true_range = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    df['Volatility'] = true_range / prev_close.fillna(df['Close']) * 100
+    df['TrueRange'] = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+    df['Volatility'] = df['TrueRange'] / df['Close'] * 100
 
-
-    logger.info("Added indicators to dataframe for %s", ticker)
-    #logger.info("Dataframe: %s", df)
-
-    #Save to csv
-    df.to_csv(f"./data/{ticker}_indicators.csv")
 
     return df
 
-
-def kmeans_clustering(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
-    # href: https://archive.ph/wEnbh#selection-2703.0-2719.7
-
-
-    # Preparing data for clustering: Normalize time and price to have similar scales
-    X_time = np.linspace(0, 1, len(df)).reshape(-1, 1)
-    X_price = (df['Close'].values - np.min(df['Close'])) / (np.max(df['Close']) - np.min(df['Close']))
-    X_cluster = np.column_stack((X_time, X_price))
-
-    # Applying KMeans clustering
-    num_clusters = 5
-    kmeans = KMeans(n_clusters=num_clusters)
-    kmeans.fit(X_cluster)
-
-    # Extract cluster centers and rescale back to original price range
-    cluster_centers = kmeans.cluster_centers_[:, 1] * (np.max(df['Close']) - np.min(df['Close'])) + np.min(df['Close'])
-
-    # Plotting
-    plt.figure(figsize=(28,7))
-    plt.plot(df['Close'], label="Close Price")
-    for center in cluster_centers:
-        plt.axhline(y=center, color='r', linestyle='--')
-        plt.annotate(f"{center:.2f}", xy=(df.index[-1], center * 1.01), xytext=(5,0), textcoords="offset points", fontsize=15, ha='left', va='center', color='r')
-
-    plt.title(f'{ticker} Price Data with KMeans Clustering')
-    plt.legend()
-    plt.savefig(f"./data/{ticker}_kmeans.png")
-    logger.info("Saved plot for %s to %s", ticker, f"./data/{ticker}_kmeans.png")
-
-    return cluster_centers
-
-
-
-def get_swing_points(ticker: str, df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Calculate swing points
-    """
-
-    # Recent samples, last 2 years
-    df = df[df.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
-
-
-    # Identify local maxima (swing highs)
-    swing_highs_idx = argrelextrema(df['High'].values, np.greater_equal, order=5)
-    swing_highs = df.index[swing_highs_idx]
-    # Identify local minima (swing lows)
-    swing_lows_idx = argrelextrema(df['Low'].values, np.less_equal, order=5)
-    swing_lows = df.index[swing_lows_idx]
-
-    #logger.info("Swing highs values: \n%s", df['High'][swing_highs])
-    #logger.info("Swing lows values: \n%s", df['Low'][swing_lows])
-
-    # Preparing data for clustering for swing points:
-    sv = np.concatenate((df['High'][swing_highs], df['Low'][swing_lows]), axis=0)
-    #logger.info("Swing points: %s", sv)
-
-    # Normalize time and price to have similar scales
-    X_time = np.linspace(0, 1, len(sv)).reshape(-1, 1)
-    X_price = (sv - np.min(sv)) / (np.max(sv) - np.min(sv))
-    X_cluster = np.column_stack((X_time, X_price))
-
-    # Applying KMeans clustering
-    num_clusters = 8
-    kmeans = KMeans(n_clusters=num_clusters)
-    kmeans.fit(X_cluster)
-
-    # Extract cluster centers and rescale back to original price range
-    cluster_centers = kmeans.cluster_centers_[:, 1] * (np.max(df['High']) - np.min(df['Low'])) + np.min(df['Low'])
-
-
-    # Plotting
-    plt.figure(figsize=(24,8))
-    plt.plot(df['Close'], label="Close Price")
-    plt.scatter(swing_highs, df['High'][swing_highs], color='r', label='Swing Highs', marker='o')
-    plt.scatter(swing_lows, df['Low'][swing_lows], color='g', label='Swing Lows', marker='o')
-
-    for center in cluster_centers:
-        plt.axhline(y=center, color='r', linestyle='--')
-        plt.annotate(f"{center:.2f}", xy=(df.index[-1], center * 1.01), xytext=(5,0), textcoords="offset points", fontsize=15, ha='left', va='center', color='r')
-
-
-
-    plt.title(f'{ticker} with Swing Highs & Lows')
-    plt.legend()
-    plt.savefig(f"./data/{ticker}_swing_points.png")
-    logger.info("Saved plot for %s to %s", ticker, f"./data/{ticker}_swing_points.png")
-
-    return df
-
-def get_support_resistance(ticker: str, df: pd.DataFrame) -> dict:
-    """
-    Calculate support and resistance levels
-    """
- 
-    # Calculate volume profile
-    price_bins = np.linspace(df['Low'].min(), df['High'].max(), 100)
-    volume_profile = []
-
-    for i in range(len(price_bins)-1):
-        bin_mask = (df['Close'] > price_bins[i]) & (df['Close'] <= price_bins[i+1])
-        volume_profile.append(df['Volume'][bin_mask].sum())
-
-    # Estimating support and resistance
-    current_price = df['Close'].iloc[-1]
-    support_idx = np.argmax(volume_profile[:np.digitize(current_price, price_bins)])
-
-
-    logger.info("Volume profile: %s", volume_profile[np.digitize(current_price, price_bins):])
-    logger.info("Price bins: %s", np.digitize(current_price, price_bins))
-    resistance_bins = volume_profile[np.digitize(current_price, price_bins):]
-    if len(resistance_bins) == 0:
-        resistance_idx = len(price_bins) - 2  # Last bin if no bins above current price
-    else:
-        resistance_idx = np.argmax(resistance_bins) + np.digitize(current_price, price_bins)
-
-    support_price = price_bins[support_idx]
-    resistance_price = price_bins[resistance_idx]
-
-    # Plotting
-    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(20, 5), gridspec_kw={'width_ratios': [3, 1]})
-    ax1.plot(df['Close'], label="Close Price")
-    ax1.axhline(y=support_price, color='g', linestyle='--', label='Support')
-    ax1.axhline(y=resistance_price, color='r', linestyle='--', label='Resistance')
-    ax1.legend()
-    ax1.set_title(f'{ticker} Price Data')
-    ax2.barh(price_bins[:-1], volume_profile, height=(price_bins[1] - price_bins[0]), color='blue', edgecolor='none')
-    ax2.set_title('Volume Profile')
-
-    plt.tight_layout()
-    plt.savefig(f"./data/{ticker}_support_resistance.png")
-    logger.info("Saved plot for %s to %s", ticker, f"./data/{ticker}_support_resistance.png")
-
-    print(f"Estimated Support Price: {support_price:.2f}")
-    print(f"Estimated Resistance Price: {resistance_price:.2f}")
-
-    #Global kpi
-    max_price = df['Close'].max()
-    min_price = df['Close'].min()
-    last_price = df['Close'].iloc[-1]
-    
-    max_volatility = df['Volatility'].max()
-    
-
-    levels = {
-        "support": support_price,
-        "resistance": resistance_price,
-        "max_price": max_price,
-        "min_price": min_price,
-        "last_price": last_price,
-        "max_volatility": max_volatility
-    }
-
-    return levels
 
 
 
@@ -259,7 +106,14 @@ def get_summary_kpi(ticker: str, df_input: pd.DataFrame) -> dict:
 
     return levels
 
-def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
+def get_last_bb_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Calculate volatility
+    From last minimum (swing low) to now, 
+    Calculate the volatility of bullish vs bearish days, 
+    and the price difference in percentage. 
+    """
+
 
     # Recent samples, last 2 years
     df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
@@ -302,3 +156,292 @@ def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
     }
 
     return volatility
+
+
+
+def get_last_volatility(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Calculate volatility.
+    Meditum range (30 days) volatility, from last minimum (swing low) to now,
+    """
+
+    # Recent samples, last 1 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=365), utc=True)]
+
+    # Identify last minima (swing lows)
+    swing_lows_idx = argrelextrema(df['Low'].values, np.less_equal, order=5)
+    swing_lows = df.index[swing_lows_idx]
+
+    #logger.info("Last swing low: %s", swing_lows[-2:])    
+    last_min_date = swing_lows[-1]
+
+    df_200d = df[-200:]
+    volatility_200d_max = df_200d['Volatility'].max()
+    volatility_200d_p99 = df_200d['Volatility'].quantile(0.99)
+
+
+    df_20d = df[-20:]
+    volatility_20d_mean = df_20d['Volatility'].mean()
+    volatility_20d_p90 = df_20d['Volatility'].quantile(0.9)
+
+    df_80d = df[-80:]
+    volatility_80d_mean = df_80d['Volatility'].mean()
+    volatility_80d_p90 = df_80d['Volatility'].quantile(0.9)
+
+    df_near = df[df.index >= last_min_date]
+    volatility_near_mean = df_near['Volatility'].mean()
+    volatility_near_p95 = df_near['Volatility'].quantile(0.95)
+    volatility_near_max = df_near['Volatility'].max()
+
+    close_price = float(df['Close'].iloc[-1])
+    ema_200 = float(df_200d['EMA_200'].iloc[-1])
+    rsi_14 = float(df['RSI'].iloc[-1])
+
+    volatility = {
+        "ticker": ticker,
+        "volatility_200d_max": round(volatility_200d_max, 2),
+        "volatility_200d_p99": round(volatility_200d_p99, 2),
+        "volatility_80d_mean": round(volatility_80d_mean, 2),
+        "volatility_80d_p90": round(volatility_80d_p90, 2),
+        "volatility_20d_mean": round(volatility_20d_mean, 2),
+        "volatility_20d_p90": round(volatility_20d_p90, 2),
+        "volatility_near_days": len(df_near),
+        "volatility_near_mean": round(volatility_near_mean, 2),
+        "volatility_near_p95": round(volatility_near_p95, 2),
+        "volatility_near_max": round(volatility_near_max, 2),
+        "close_price": round(close_price, 2),
+        "ema_200": round(ema_200, 2),
+        "rsi_14": round(rsi_14, 2)
+    }
+    return volatility
+
+
+def get_lateral_rectangle(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Check if the price is in a lateral rectangle (sideways movement)
+    """
+    RECTANGLE_THRESHOLD_PCT = 3
+
+    # Recent samples, last 2 years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=2*365), utc=True)]
+    #df = df[:-1]  # Exclude last day for analysis
+
+
+    current_price = df['Close'].iloc[-1]
+    threshold_price = current_price * (1 + RECTANGLE_THRESHOLD_PCT / 100)
+
+    #Search start date for lateral rectangle, where low price is higher than current price, with a margin of 5%
+
+    #Get dates where low price is higher than current price with a margin of 5%
+    higher_dates = df[df['Close'] > threshold_price].index
+    #logger.info("Threshold %s, Higher dates: %s", threshold_price, higher_dates[-20:])
+
+    # Get the items position in the original dataframe where close price is higher than current price with a margin of 5%
+    higher_items = df.index.get_indexer(higher_dates)
+    #logger.info("Higher items: %s", higher_items[-20:])
+
+    #Search last three consecutive items 
+    start_index = None
+    for i in reversed(range(2,len(higher_items))):
+        if higher_items[i] == higher_items[i-1] + 1 == higher_items[i-2] + 2:
+            start_index = higher_items[i]
+            break
+    
+    if start_index is None:
+        logger.info("Rectacgle start not found for %s", ticker)
+        return
+
+    if len(df) - start_index < 30:
+        logger.info("Rectangle so short for %s, sessions: %d", ticker, len(df) - start_index)
+        return
+
+
+    df_rectangle = df.iloc[start_index:]
+    start_date: pd.Timestamp = df_rectangle.index[0]
+    end_date: pd.Timestamp = df_rectangle.index[-1]
+    max_price = df_rectangle['High'].max()
+    min_price = df_rectangle['Low'].min()
+    price_diff_pct = (max_price - min_price) / min_price * 100
+
+    logger.info("Rectangle size date:%s to %s, sessions:(%d), price:%.02f-%.02f (%d%%)", start_date.date(), end_date.date(), len(df_rectangle), min_price, max_price, price_diff_pct)
+
+
+
+
+    date_start = df[df['Low'] > current_price * 1.05].index.max()
+    if pd.isna(date_start):
+        logger.info("No date found with low price higher than current price for %s", ticker)
+    
+    logger.info("Current price: %s, Date start for lateral box: %s", current_price, date_start)
+
+
+    # Identify local maxima (swing highs)
+    swing_highs_idx = argrelextrema(df['High'].values, np.greater_equal, order=5)
+    swing_highs = df.index[swing_highs_idx]
+
+    #logger.info("Last swing highs: %s", swing_highs)
+    logger.info("Swing highs values: \n%s", df['High'][swing_highs[-10:]])
+
+    # Identify local minima (swing lows)
+    swing_lows_idx = argrelextrema(df['Low'].values, np.less_equal, order=5)
+    swing_lows = df.index[swing_lows_idx]
+    logger.info("Swing lows values: \n%s", df['Low'][swing_lows[-10:]])
+
+
+
+    #logger.info("Last swing low: %s", swing_lows[-2:])    
+    last_min_date = swing_lows[-1]
+
+    df_near = df[df.index >= last_min_date]
+    price_diff = (df_near['Close'].iloc[-1] - df_near['Close'].iloc[0]) / df_near['Close'].iloc[0] * 100
+
+    lateral_box = abs(price_diff) < 5  # Example threshold for lateral box
+
+    result = {
+        "ticker": ticker,
+        "lateral_box": lateral_box,
+        "price_diff_pct": price_diff
+    }
+
+    return result
+
+
+def eval_resistance(ticker: str, df_input: pd.DataFrame, resistance: float) -> dict:
+    """
+    Look for period resistance is not broken
+    Evaluate how strong the resistance levels is
+    Count how many times the price has touched the resistance level
+    """
+
+    # Recent samples, last years
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=10*365), utc=True)]
+    df['SMA_5'] = df['Close'].rolling(window=5).mean()
+
+    # Resistence duration:
+    # Last time the price was above the resistance level for more than 5 consecutive days
+    #breaks = df['Close'] > resistance
+    breaks = df['SMA_5'] > resistance 
+    window_size = 5
+    consecutive_count = breaks.rolling(window=window_size).sum()
+
+    break_dates = df[consecutive_count >= window_size][['Close']]
+    break_dates["break_begin"] = pd.Series(break_dates.index, index=break_dates.index).shift(1)
+    break_dates["break_end"]   = pd.Series(break_dates.index, index=break_dates.index)
+    break_dates["break_duration"] = break_dates["break_end"] - break_dates["break_begin"]
+    break_dates["break_max_price"] = df['Close'][break_dates.index]
+
+    #Remove break if max price is higher than resistance * safeguard pct
+    #print(break_dates)
+    break_dates = break_dates[break_dates["break_max_price"] <= resistance * 1.2]
+    #print(break_dates)
+
+    # get top 5 longest breaks
+    big_breaks = break_dates[break_dates["break_duration"] > pd.Timedelta(days=10)].sort_values(by="break_duration", ascending=False).head(5)
+    big_breaks = big_breaks.sort_index()
+
+    # Calculate how many days ago the break ended from last date in the dataframe
+    big_breaks["ago_begin"] = pd.Series(df.index[-1], index=big_breaks.index) - big_breaks["break_begin"]
+    big_breaks["ago_end"]   = pd.Series(df.index[-1], index=big_breaks.index) - big_breaks["break_end"]
+
+    # Number of times the price has touched the resistance level
+    touch_count = ((df['Close'] > resistance * 0.99) & (df['Close'] < resistance * 1.01)).sum()
+
+    # Last price
+    last_price = df['Close'].iloc[-1]
+    min_ago_end = big_breaks["ago_end"].min().days if not big_breaks.empty else None
+    if not min_ago_end or min_ago_end > 90:
+        logger.info("Resistance %s for %s is too old, last touch %s days ago", resistance, ticker, min_ago_end)
+        return None
+
+    print(big_breaks)
+
+    breaks_kpi = {
+        "ticker": ticker,
+        "resistance": float(resistance),
+        "price_diff_pct": float((df['Close'].iloc[-1] - resistance) / resistance * 100),
+        "breaks_begin": big_breaks["break_begin"].min().to_pydatetime(),
+        "breaks_end": big_breaks["break_end"].max().to_pydatetime(),
+        "breaks_duration": (big_breaks["break_end"].max() - big_breaks["break_begin"].min()).days, 
+        "ago_begin": big_breaks["ago_begin"].max().days,
+        "ago_end": big_breaks["ago_end"].min().days,
+        "touch_count": int(touch_count)
+    }
+
+    print(breaks_kpi)
+
+
+
+def adjust_dividents(ticker: str, df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adjust the price for dividends
+    """
+
+    df = df_input
+
+    dividends = df[ df['Dividends'] > 0 ]['Dividends'].to_dict()
+
+    print("Dividends: ", dividends)
+    #print("Dataframe: without adj ", df)
+
+    # Adjust the price for dividends
+    for date, dividend in dividends.items():
+        df.loc[:date, 'Close'] -= dividend
+        df.loc[:date, 'Open'] -= dividend
+        df.loc[:date, 'High'] -= dividend
+        df.loc[:date, 'Low'] -= dividend
+
+    #print("Dataframe: with adj ", df)
+
+    return df
+
+
+
+def detect_break_retest(ticker: str, df_input: pd.DataFrame) -> dict:
+    """
+    Detect break and retest of a level
+    """
+
+    long_period = 200
+    short_period = 20
+
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=long_period), utc=True)]
+
+    max_l_price = df['High'].max()
+    max_l_date  = df['High'].idxmax()
+    max_l_session_ago = len(df.index) - df.index.get_loc(max_l_date)
+
+    # Recent samples, last days
+    df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=short_period), utc=True)]
+    max_s_price = df['High'].max()
+    max_s_date  = df['High'].idxmax()
+    max_s_session_ago = len(df.index) - df.index.get_loc(max_s_date)
+
+    # Samples after last maximum, last days
+    df = df_input[df_input.index > max_s_date]
+    if len(df) == 0:
+        logger.info("MAX")
+        return {}
+
+    min_s_price = df['Low'].min()
+    min_s_date  = df['Low'].idxmin()
+    min_s_session_ago = len(df.index) - df.index.get_loc(min_s_date)
+
+    labels = []
+    if min_s_price and min_s_price < max_s_price * 0.95:
+        logger.info("Found trick")
+        labels = ["MAX_FALL"]
+
+
+
+    retest = {
+        "ticker": ticker,
+        "max_l_session_ago": int(max_l_session_ago),
+        "max_s_session_ago": int(max_s_session_ago),
+        "min_s_session_ago": int(min_s_session_ago),
+        "labels": labels,
+        "fall_pct": float((max_s_price - min_s_price) / max_s_price * 100) if min_s_price else None
+    }
+
+    logger.info(retest)
+
+    return retest

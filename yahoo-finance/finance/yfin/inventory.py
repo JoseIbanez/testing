@@ -2,9 +2,6 @@
 import pandas as pd
 import yfinance as yf
 import logging
-import sqlite3
-
-DB_PATH = "data/inventory.db"
 
 
 INDEX_SUFIX_PER_COUNTRY = {
@@ -21,101 +18,34 @@ INDEX_SUFIX_PER_COUNTRY = {
     }
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 
 
-def parse_index(index_name:str):
+def get_ticker_list(file_name="STOXX_600"):
     """
-    Parse the index csv file
-    Update ticket name to yahoo finance ticket name if necessary
-    Query yahoo finance for sector and industry information
-    Insert update information into the sqlite database
+    Read tickers from a CSV file (tab or comma separated, with header "ticker").
+    :param: file_name: Name of the CSV file (without .csv extension) located in ./data/index/
+    :return: List of tickers
     """
 
-    #Read the csv index file in pandas
-    path = f"data/index/{index_name}.csv"
-    df = pd.read_csv(path)
-    df.set_index("Ticker", inplace=True)
+    tickers_list = []
+    index_file = f"./data/index/{file_name}.csv"
 
-    conn = sqlite3.connect(DB_PATH)
+    with open(index_file, "r") as f:
+        next(f)  # skip header
+        for line in f:
+            ticker = line.strip().split("\t")[0].split(",")[0]
 
+            if not ticker:
+                continue
 
-    # Update ticket name to yahoo finance ticket name if necessary
-    counter = 0
-    for row in df.itertuples():
-        ticker = row.Index
-        print(ticker)
-
-        # Test only first 10 rows
-        counter += 1
-        if counter > 50:
-            break
-            #pass
-
-        if "." not in ticker:
-
-            if  "STOXX" in index_name:
-                country = row.Country
-                if country in INDEX_SUFIX_PER_COUNTRY:
-                    ticker += INDEX_SUFIX_PER_COUNTRY[country]
-                    logger.info(f"Updated ticket: {ticker}")
-                else:
-                    logger.warning(f"Country {country} not found in INDEX_SUFIX_PER_COUNTRY, skipping ticket {ticker}")
-
-            elif index_name == "FTSE_100":
-                ticker += ".L"
-                logger.info(f"Updated ticket: {ticker}")
+            # Replace market-specific suffixes with Yahoo Finance format
+            #ticker = re.sub(r'\.S$', '.SW', ticker)  # Swiss stocks
+            #ticker = re.sub(r'\.CO$', '.VI', ticker)  # Vienna stocks
+            tickers_list.append(ticker)
 
 
-        # Query yahoo finance for sector and industry information
-        stock = yf.Ticker(ticker)
-        info = stock.info
-        # logger.info("Queried yahoo finance for ticker: %s", info)
-        sector = info.get("sectorKey", "N/A")
-        industry = info.get("industryKey", "N/A")
-        shortName = info.get("shortName", "N/A")
-        logger.info("Ticker: %s, Sector: %s, Name: %s, Industry: %s", ticker, sector, shortName, industry)
-
-
-        #Insert update information into the sqlite database
-        c = conn.cursor()
-        c.execute('''INSERT OR REPLACE INTO stocks
-                    (ticker, name, sector, industry) VALUES (?, ?, ?, ?)''', 
-                    (ticker, shortName, sector, industry))
-
-        conn.commit()
-
-
-    conn.close()
+    logger.info("Loaded %d tickers from file", len(tickers_list))
+    return tickers_list
 
 
 
-def create_db():
-    """
-    Create the sqlite database if it doesn't exist
-    """
-
-
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS stocks (
-              ticker text primary key, 
-              name text, 
-              sector text, 
-              industry text
-              )''')
-    conn.commit()
-    conn.close()
-
-
-
-def main():
-
-    create_db()
-
-    parse_index("STOXX_Europe_600")
-    parse_index("IBEX_35")
-
-
-if __name__ == "__main__":    
-    main()

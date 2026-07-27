@@ -25,3 +25,5 @@ exclude = ["finance.tests.*"]
 requires = ["setuptools >= 77.0"]
 build-backend = "setuptools.build_meta"
 
+[project.scripts]
+ticker_rev = "finance.yfin.many_get:main"
