@@ -35,7 +35,7 @@ def calculate_kpis(ticker, period_year:int=5):
 
     #df = load_ticker(ticker)
     df = load_serie(ticker)
-    #df = adjust_dividents(ticker, df)
+    df = adjust_dividents(ticker, df)
 
     df = add_indicators(ticker, df)
     #kmeans_levels = kmeans_clustering(ticker, df)

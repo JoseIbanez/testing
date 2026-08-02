@@ -11,7 +11,7 @@ from finance.yfin.cache import MyDBCache
 logger = logging.getLogger(__name__)
 my_cache = MyDBCache()
 
-def calculate_kpis(ticker):
+def calculate_kpis(ticker,force=False):
 
     df = load_serie(ticker)
  
@@ -19,12 +19,15 @@ def calculate_kpis(ticker):
         return None
     
     last_session:datetime = df.index[-1].to_pydatetime()  
-    cache_field = None # my_cache.get_cache_kpi(ticker, "kpi_basic", last_session, ttl= 4 * 24 * 3600)
-    if cache_field is not None:
-        return cache_field
+
+    force = True
+    if not force:
+        cache_field = my_cache.get_cache_kpi(ticker, "kpi_basic", last_session, ttl= 4 * 24 * 3600)
+        if cache_field is not None:
+           return cache_field
 
 
-    #df = adjust_dividents(ticker, df)
+    df = adjust_dividents(ticker, df)
     df = add_indicators(ticker, df)
 
     kpis = get_last_volatility(ticker, df)

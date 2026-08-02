@@ -384,11 +384,11 @@ def adjust_dividents(ticker: str, df_input: pd.DataFrame) -> pd.DataFrame:
     #print("Dataframe: without adj ", df)
 
     # Adjust the price for dividends
-    for date, dividend in dividends.items():
-        df.loc[:date, 'Close'] -= dividend
-        df.loc[:date, 'Open'] -= dividend
-        df.loc[:date, 'High'] -= dividend
-        df.loc[:date, 'Low'] -= dividend
+    for div_date, dividend in dividends.items():
+        df.loc[:div_date, 'Close'] -= dividend
+        df.loc[:div_date, 'Open'] -= dividend
+        df.loc[:div_date, 'High'] -= dividend
+        df.loc[:div_date, 'Low'] -= dividend
 
     #print("Dataframe: with adj ", df)
 
@@ -410,17 +410,28 @@ def detect_break_retest(ticker: str, df_input: pd.DataFrame) -> dict:
     max_l_date  = df['High'].idxmax()
     max_l_session_ago = len(df.index) - df.index.get_loc(max_l_date)
 
+    # Check if this level was already reached before 60 days
+    df_begin = df_input[df_input.index < pd.to_datetime(datetime.now() - timedelta(days=60), utc=True)]
+    if len(df_begin) > 0:
+        max_begin_price = df_begin['High'].max()
+    else:
+        max_begin_price = None
+
+
+
     # Recent samples, last days
     df = df_input[df_input.index >= pd.to_datetime(datetime.now() - timedelta(days=short_period), utc=True)]
     max_s_price = df['High'].max()
     max_s_date  = df['High'].idxmax()
     max_s_session_ago = len(df.index) - df.index.get_loc(max_s_date)
 
+
+
     # Samples after last maximum, last days
-    df = df_input[df_input.index > max_s_date]
+    df = df_input[df_input.index >= max_s_date]
     if len(df) == 0:
         logger.info("MAX")
-        return {}
+        #return {}
 
     min_s_price = df['Low'].min()
     min_s_date  = df['Low'].idxmin()
@@ -429,8 +440,11 @@ def detect_break_retest(ticker: str, df_input: pd.DataFrame) -> dict:
     labels = []
     if min_s_price and min_s_price < max_s_price * 0.95:
         logger.info("Found trick")
-        labels = ["MAX_FALL"]
+        labels = ["RETEST"]
 
+    if max_begin_price and max_begin_price > max_s_price * 0.95:
+        logger.info("Max begin price:%s, max_s_price:%s, max_l_price:%s", max_begin_price, max_s_price, max_l_price)
+        labels.append("BREAKOUT")
 
 
     retest = {

@@ -29,6 +29,7 @@ class MyLabels(Enum):
     VLTY20 = "VLTY20"
     VLTY80 = "VLTY80"
     RETEST = "RETEST"
+    BREAKOUT = "BREAKOUT"
 
 class Notes:
 
@@ -148,8 +149,13 @@ def check_ticker(ticker, force=False):
     if kpis.get("volatility_20d_p90") < 3:
         notes.add(MyLabels.VLTY20)
 
-    if "MAX_FALL" in kpis.get("labels", []):
+    if "RETEST" in kpis.get("labels", []):
         notes.add(MyLabels.RETEST)
+
+    if "BREAKOUT" in kpis.get("labels", []):
+        notes.add(MyLabels.BREAKOUT)
+
+    
 
     if len(notes) >= 2:
         name = more_info.get("shortName", "")
