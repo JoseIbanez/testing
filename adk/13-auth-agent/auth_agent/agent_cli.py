@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService, DatabaseSessionService
+from google.adk.sessions.base_session_service import ListSessionsResponse, Session
 from google.genai import types
 
 from helpers import is_pending_auth_event, get_function_call_id, get_function_call_auth_config, get_user_input
@@ -31,13 +32,8 @@ async def async_main():
     #session_service = InMemorySessionService()
     artifacts_service = InMemoryArtifactService()
 
-    # Create a new user session to maintain conversation state.
-    logger.info("Creating new session...")
-    session = session_service.create_session(
-        state={},  # Optional state dictionary for session-specific data
-        app_name='my_app', # Application identifier
-        user_id='user' # User identifier
-    )
+    session = get_session(session_service, app_name='my_app', state={})
+
 
     # --- Step 2: Initial User Query ---
     # Define the user's initial request.
@@ -59,7 +55,7 @@ async def async_main():
     print("\nRunning agent with initial query...")
     events_async = runner.run_async(
         session_id=session.id, 
-        user_id='user', 
+        user_id=session.user_id, 
         new_message=content
     )
 
@@ -154,7 +150,7 @@ async def async_main():
     # a valid access token embedded.
     events_async = runner.run_async(
         session_id=session.id,
-        user_id='user',
+        user_id=session.user_id,
         new_message=auth_content, # Provide the prepared auth response
     )
 
@@ -163,6 +159,30 @@ async def async_main():
     print("\n--- Agent Response after Authentication ---")
     async for event in events_async:
         print(event.content)
+
+
+
+def get_session(session_service:DatabaseSessionService, app_name:str, state:dict={}) -> Session:
+    """Retrieve the session using the provided session service."""
+
+    # Create a new user session to maintain conversation state.
+    logger.info("Creating new session...")
+
+    existing_sessions:ListSessionsResponse = session_service.list_sessions(app_name=app_name, user_id="user")
+    if existing_sessions and len(existing_sessions.sessions) > 0:
+        logger.info("Found existing session, reusing it: %s", existing_sessions.sessions[0].id)
+        session = existing_sessions.sessions[0]
+        return session
+    
+    new_session = session_service.create_session(
+        app_name=app_name,
+        user_id="user",
+        state=state,
+    )
+    logger.info("No existing session found, creating a new one: %s", new_session.id)
+    return new_session
+
+
 
 
 if __name__ == '__main__':
