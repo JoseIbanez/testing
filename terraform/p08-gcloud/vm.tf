@@ -4,14 +4,14 @@ resource "google_service_account" "openwebui" {
 }
 
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-12"
   project = "debian-cloud"
 }
 
 
 resource "google_compute_instance" "openwebui" {
   name         = "openwebui"
-  machine_type = "n2-standard-4"
+  machine_type = "e2-medium" # "n2-standard-4"
   zone         = "europe-west1-b"
 
   tags = ["ssh"]
