@@ -380,8 +380,7 @@ def adjust_dividents(ticker: str, df_input: pd.DataFrame) -> pd.DataFrame:
 
     dividends = df[ df['Dividends'] > 0 ]['Dividends'].to_dict()
 
-    print("Dividends: ", dividends)
-    #print("Dataframe: without adj ", df)
+    logger.debug("Dividends: %s", dividends)
 
     # Adjust the price for dividends
     for div_date, dividend in dividends.items():
@@ -389,8 +388,6 @@ def adjust_dividents(ticker: str, df_input: pd.DataFrame) -> pd.DataFrame:
         df.loc[:div_date, 'Open'] -= dividend
         df.loc[:div_date, 'High'] -= dividend
         df.loc[:div_date, 'Low'] -= dividend
-
-    #print("Dataframe: with adj ", df)
 
     return df
 

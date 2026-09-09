@@ -9,7 +9,7 @@ from finance.yfin.fetch_info import get_fast_info, get_more_info
 from finance.yfin.main_kpi import calculate_kpis
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 my_cache = MyDBCache()
 
 class MyLabels(Enum):
@@ -170,6 +170,7 @@ def get_args():
     parser.add_argument("--check", "-c", action=argparse.BooleanOptionalAction, help="Check tickers in the DB")
     parser.add_argument("--ticker", "-t", type=str, default=None, help="Ticker symbol to check")
     parser.add_argument("--hot", type=int, default=1, help="Filter tickers by hotness level")
+    parser.add_argument("--verbose", "-v", action=argparse.BooleanOptionalAction, help="Enable verbose logging")
 
     return parser.parse_args()
 
@@ -177,6 +178,10 @@ def get_args():
 def main():
 
     args = get_args()
+
+    if args.verbose:
+        logger.setLevel(logging.INFO)
+        logger.debug("Verbose logging enabled")
 
     if args.init:
         my_cache.create_table()

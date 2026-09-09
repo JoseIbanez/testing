@@ -43,6 +43,10 @@ def load_serie(ticker: str):
         logger.debug("Ticker:%s, Cache file is fresh (last modified: %s), using existing data.", ticker, time.ctime(os.path.getmtime(cache_file)))
         return df_existing
 
+    # Check last_date type 
+    if last_date and not isinstance(last_date, pd.Timestamp):
+        last_date = None
+
     # We are updated
     if last_date and last_date >= datetime.today().replace(tzinfo=timezone.utc):
         logger.debug("Ticker:%s, Data is already up to date (last date: %s)", ticker, last_date)
