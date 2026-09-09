@@ -9,13 +9,13 @@ resource "google_service_account" "openwebui" {
 }
 
 data "google_compute_image" "debian" {
-  family  = var.gpu_enabled ? var.machine.gpu.family : var.machine.cpu.family
-  project = var.gpu_enabled ? var.machine.gpu.project : var.machine.cpu.project
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance" "openwebui" {
   name         = "openwebui"
-  machine_type = var.gpu_enabled ? var.machine.gpu.type : var.machine.cpu.type
+  machine_type = "e2-medium" # "n2-standard-4"
   zone         = "europe-west1-b"
 
   tags = ["ssh","http"]

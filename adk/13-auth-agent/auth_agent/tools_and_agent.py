@@ -3,6 +3,7 @@ import json
 from logging import getLogger
 import asyncio
 import nest_asyncio
+from datetime import datetime, timezone
 
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
@@ -98,11 +99,8 @@ def validate_creds(tool_context: ToolContext) -> Credentials | None:
         try:
             logger.info("EXEC 3: Found cached creds (token_info)")
             creds = Credentials.from_authorized_user_info(cached_token_info)
-            logger.info("Loaded cached creds from state: %s", json.dumps(creds))
-            if not creds.valid and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-                tool_context.state[TOKEN_CACHE_KEY] = json.loads(creds.to_json()) # Update cache
-            elif not creds.valid:
+            logger.info("Loaded cached creds from state: %s", creds.to_json)
+            if not creds.valid:
                 creds = None # Invalid, needs re-auth
                 tool_context.state[TOKEN_CACHE_KEY] = None
         except Exception as e:
@@ -139,7 +137,8 @@ def validate_creds(tool_context: ToolContext) -> Credentials | None:
 
             creds = Credentials(
                   token=access_token,
-                  refresh_token=refresh_token,
+                  refresh_token=refresh_token or access_token,
+                  expiry=datetime.fromtimestamp(access.expires_at),
                   #token_uri=auth_scheme.flows.authorizationCode.tokenUrl,
                   client_id=auth_credential.oauth2.client_id,
                   client_secret=auth_credential.oauth2.client_secret,
@@ -161,7 +160,6 @@ def validate_creds(tool_context: ToolContext) -> Credentials | None:
                       raw_auth_credential=auth_credential,
         ))
         return None
-
 
 
     logger.info("Using credentials: %s", creds.to_json())
