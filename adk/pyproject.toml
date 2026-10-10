@@ -13,6 +13,6 @@ dependencies = [
     "pip>=25.2",
     "psutil==5.9.5",
     "pyjwt>=2.10.1",
-    "python-dotenv==1.1.0",
+    "python-dotenv==1.2.2",
     "yfinance==0.2.56",
 ]
