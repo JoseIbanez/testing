@@ -21,5 +21,5 @@ docker run -d --rm  \
     --name "acelink.$PORT" \
     -p $PORT:6878 $PEERPORT \
     --cap-add=NET_ADMIN \
-    acelink-ffmpeg-2
+    acelink-ffmpeg:3.2.11
 
