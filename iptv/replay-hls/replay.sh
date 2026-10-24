@@ -6,6 +6,10 @@ MEDIA_URL=$2
 mkdir -p "/opt/hls/$CHANNEL_ID"
 cd "/opt/hls/$CHANNEL_ID"
 
+
+#     -map 0:v:0 -map 0:a:0 \
+
+
 while true; do
 
    rm *.ts *.m3u8
@@ -15,7 +19,6 @@ while true; do
    ffmpeg \
      -reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -re  \
      -i $MEDIA_URL \
-     -map 0:v:0 -map 0:a:0 \
      -c:v copy \
      -c:a ac3 \
      -f hls \
