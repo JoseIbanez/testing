@@ -1,5 +1,9 @@
 #!/bin/bash
 
+useradd -u 1000 acelink
+
 /usr/bin/supervisord
 
-/acelink/internal-hls.sh
+runuser -u acelink /acelink/internal-hls.sh
+
+
